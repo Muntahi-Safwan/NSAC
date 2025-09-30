@@ -1,0 +1,18 @@
+# GEOS-CF Air Quality Data Pipeline Dependencies
+# PostgreSQL + PostGIS + TimescaleDB + Prisma
+
+# HTTP requests
+requests>=2.31.0
+
+# NetCDF file processing
+netCDF4>=1.6.0
+numpy>=1.24.0
+
+# Database ORM
+prisma>=0.11.0
+
+# Environment variables
+python-dotenv>=1.0.0
+
+# Optional: Data validation
+pydantic>=2.0.0
