@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/auth.routes');
+const airQualityRoutes = require('./routes/airQuality.routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -30,6 +31,10 @@ app.get('/', (req, res) => {
 console.log('=== Mounting auth routes at /api/auth ===');
 app.use('/api/auth', authRoutes);
 console.log('=== Auth routes mounted successfully ===');
+
+console.log('=== Mounting air quality routes at /api/air-quality ===');
+app.use('/api/air-quality', airQualityRoutes);
+console.log('=== Air quality routes mounted successfully ===');
 
 // 404 handler
 app.use((req, res) => {

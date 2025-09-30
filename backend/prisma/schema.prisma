@@ -26,3 +26,39 @@ model User {
 
   @@map("users")
 }
+
+model AirQualityForecast {
+  id               Int      @id @default(autoincrement())
+  timestamp        DateTime // Forecast valid time
+  forecastInitTime DateTime // When the forecast was initialized (00z or 12z)
+
+  // Location (filtered to TEMPO coverage: North America)
+  latitude         Float    // Range: ~15°N to ~60°N
+  longitude        Float    // Range: ~-130°W to ~-60°W
+  level            Float    // Atmospheric level (surface = 0)
+
+  // Pollutant concentrations (μg/m³ unless noted)
+  // All available from GEOS-CF
+  pm25             Float?   // PM2.5 - Particulate Matter < 2.5μm
+  no2              Float?   // NO2 - Nitrogen Dioxide
+  o3               Float?   // O3 - Ozone
+  so2              Float?   // SO2 - Sulfur Dioxide
+  co               Float?   // CO - Carbon Monoxide (ppbv)
+  hcho             Float?   // HCHO - Formaldehyde
+
+  // Calculated AQI
+  aqi              Float?   // Overall Air Quality Index (0-500)
+
+  // Metadata
+  source           String   @default("GEOS-CF")
+  createdAt        DateTime @default(now())
+
+  // Composite indexes for efficient geospatial + time queries
+  // PostGIS will use these for nearest-neighbor searches
+  @@index([latitude, longitude])
+  @@index([timestamp])
+  @@index([forecastInitTime])
+  @@index([timestamp, latitude, longitude])
+  @@index([source])
+  @@map("air_quality_forecasts")
+}
