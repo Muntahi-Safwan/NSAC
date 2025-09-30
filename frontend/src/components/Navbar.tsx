@@ -1,8 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { User, LogIn, MapPin, LogOut, UserCircle, ChevronDown, Bell, X, CheckCheck } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { useNotifications } from '../contexts/NotificationContext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout, isAuthenticated } = useAuth();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, clearNotification } = useNotifications();
+  const notificationRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -13,53 +24,252 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Close notification dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+        setNotificationDropdownOpen(false);
+      }
+    };
+
+    if (notificationDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [notificationDropdownOpen]);
+
+  const handleLogout = () => {
+    logout();
+    setProfileDropdownOpen(false);
+    navigate('/');
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'warning':
+        return '⚠️';
+      case 'success':
+        return '✅';
+      case 'error':
+        return '❌';
+      default:
+        return 'ℹ️';
+    }
+  };
+
+  const getTimeAgo = (date: Date) => {
+    const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
+    if (seconds < 60) return 'Just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    return `${Math.floor(seconds / 86400)}d ago`;
+  };
+
   const navItems = [
-    { name: 'Planets', href: '#planets' },
-    { name: 'Trailer', href: '#trailer' },
-    { name: 'Tickets', href: '#tickets' },
-    { name: 'Blog', href: '#blog' },
-    { name: 'Contact', href: '#contact' },
+    { name: 'Home', href: '/' },
+    { name: 'Map', href: '/map' },
+    { name: 'About', href: '/about' },
+    { name: 'Learning', href: '/learning' },
+    { name: 'Contact', href: '/contact' },
   ];
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-      scrolled 
-        ? 'bg-black/10 backdrop-blur-2xl border-b border-white/5 shadow-2xl shadow-black/20' 
-        : 'bg-transparent backdrop-blur-md'
-    }`}>
+    <>
+      {/* Regional Banner - Above Navbar */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-600/20 to-cyan-600/20 backdrop-blur-xl border-b border-blue-400/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+          <div className="flex items-center justify-center space-x-2 text-xs sm:text-sm">
+            <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400 flex-shrink-0" />
+            <p className="text-white/80 text-center">
+              <span className="font-semibold text-blue-300">Prototype Notice:</span>{' '}
+              <span className="text-white/70">Currently displaying North America regional data only</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Navbar - Below Banner */}
+      <nav className={`fixed top-10 left-0 right-0 z-40 transition-all duration-500 ${
+        scrolled
+          ? 'bg-black/10 backdrop-blur-2xl border-b border-white/5 shadow-2xl shadow-black/20'
+          : 'bg-transparent backdrop-blur-md'
+      }`}>
       <div className="max-w-8xl mx-auto px-6 sm:px-8 lg:px-12">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <div className="flex items-center space-x-3">
-            
+          <Link to="/" className="flex items-center space-x-3">
             <span className="font-grotesk font-bold text-2xl text-white tracking-tight">
-              AeroWatch
+              AirWatch
             </span>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-10">
             <div className="flex items-center space-x-8">
               {navItems.map((item) => (
-                <a
+                <Link
                   key={item.name}
-                  href={item.href}
-                  className="flex items-center space-x-1.5 text-gray-300 hover:text-white transition-all duration-300 font-grotesk font-medium text-[15px] tracking-wide hover:scale-105 relative group"
+                  to={item.href}
+                  className={`flex items-center space-x-1.5 transition-all duration-300 font-grotesk font-medium text-[15px] tracking-wide hover:scale-105 relative group ${
+                    location.pathname === item.href
+                      ? 'text-white'
+                      : 'text-gray-300 hover:text-white'
+                  }`}
                 >
-                  {/* {item.name === 'Planets' && <span>🌍</span>}
-                  {item.name === 'Trailer' && <span>🎬</span>}
-                  {item.name === 'Tickets' && <span>📊</span>}
-                  {item.name === 'Blog' && <span>📝</span>}
-                  {item.name === 'Contact' && <span>📧</span>} */}
                   <span>{item.name}</span>
-                  <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-cyan-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 rounded-full"></div>
-                </a>
+                  <div className={`absolute -bottom-2 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-cyan-400 transition-transform duration-300 rounded-full ${
+                    location.pathname === item.href
+                      ? 'scale-x-100'
+                      : 'scale-x-0 group-hover:scale-x-100'
+                  }`}></div>
+                </Link>
               ))}
             </div>
-            
-            <button className="bg-gradient-to-r from-white to-gray-100 hover:from-gray-100 hover:to-white text-gray-900 font-grotesk font-semibold px-8 py-3 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-white/20 border border-white/20">
-              Get Started
-            </button>
+
+            <div className="flex items-center space-x-4">
+              {isAuthenticated ? (
+                <>
+                  {/* Notification Icon */}
+                  <div className="relative" ref={notificationRef}>
+                    <button
+                      onClick={() => setNotificationDropdownOpen(!notificationDropdownOpen)}
+                      className="relative p-2.5 text-gray-300 hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
+                    >
+                      <Bell className="w-5 h-5" />
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse shadow-lg">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      )}
+                    </button>
+
+                    {/* Notification Dropdown */}
+                    {notificationDropdownOpen && (
+                      <div className="absolute right-0 mt-2 w-80 max-h-[32rem] bg-black/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50">
+                        {/* Header */}
+                        <div className="sticky top-0 bg-black/95 border-b border-white/10 px-4 py-3">
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-grotesk font-semibold text-white text-lg">
+                              Notifications
+                            </h3>
+                            {notifications.length > 0 && (
+                              <button
+                                onClick={markAllAsRead}
+                                className="text-xs text-blue-400 hover:text-blue-300 transition-colors flex items-center space-x-1"
+                              >
+                                <CheckCheck className="w-3 h-3" />
+                                <span>Mark all read</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Notifications List */}
+                        <div className="overflow-y-auto max-h-96">
+                          {notifications.length === 0 ? (
+                            <div className="px-4 py-8 text-center text-gray-400">
+                              <Bell className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                              <p className="font-grotesk">No notifications yet</p>
+                            </div>
+                          ) : (
+                            notifications.map((notification) => (
+                              <div
+                                key={notification.id}
+                                className={`px-4 py-3 border-b border-white/5 hover:bg-white/5 transition-all duration-300 cursor-pointer ${
+                                  !notification.read ? 'bg-blue-500/5' : ''
+                                }`}
+                                onClick={() => markAsRead(notification.id)}
+                              >
+                                <div className="flex items-start justify-between space-x-3">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center space-x-2 mb-1">
+                                      <span className="text-lg">{getNotificationIcon(notification.type)}</span>
+                                      <h4 className="font-grotesk font-medium text-white text-sm truncate">
+                                        {notification.title}
+                                      </h4>
+                                      {!notification.read && (
+                                        <span className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full"></span>
+                                      )}
+                                    </div>
+                                    <p className="text-xs text-gray-400 line-clamp-2 mb-1">
+                                      {notification.message}
+                                    </p>
+                                    <span className="text-xs text-gray-500">
+                                      {getTimeAgo(notification.timestamp)}
+                                    </span>
+                                  </div>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      clearNotification(notification.id);
+                                    }}
+                                    className="flex-shrink-0 text-gray-400 hover:text-red-400 transition-colors"
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Profile Dropdown */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                      className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-2.5 rounded-full transition-all duration-300 font-grotesk font-medium text-white"
+                    >
+                      <UserCircle className="w-5 h-5" />
+                      <span>{user?.firstName || user?.email?.split('@')[0]}</span>
+                      <ChevronDown className={`w-4 h-4 transition-transform ${profileDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {profileDropdownOpen && (
+                      <div className="absolute right-0 mt-2 w-48 bg-black/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50">
+                        <Link
+                          to="/profile"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="flex items-center space-x-3 px-4 py-3 hover:bg-white/10 transition-all duration-300 text-white"
+                        >
+                          <User className="w-4 h-4" />
+                          <span>Profile</span>
+                        </Link>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-red-500/10 transition-all duration-300 text-red-400"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span>Logout</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/auth/login"
+                    className="flex items-center space-x-2 text-gray-300 hover:text-white transition-all duration-300 font-grotesk font-medium text-[15px] tracking-wide hover:scale-105"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    <span>Login</span>
+                  </Link>
+                  <Link
+                    to="/auth/signup"
+                    className="bg-gradient-to-r from-white to-gray-100 hover:from-gray-100 hover:to-white text-gray-900 font-grotesk font-semibold px-6 py-2.5 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-white/20 border border-white/20 flex items-center space-x-2"
+                  >
+                    <User className="w-4 h-4" />
+                    <span>Sign Up</span>
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Mobile menu button */}
@@ -90,33 +300,130 @@ const Navbar = () => {
         <div className="lg:hidden bg-black/95 backdrop-blur-2xl border-b border-white/10 shadow-2xl">
           <div className="px-6 py-6 space-y-1">
             {navItems.map((item) => (
-              <a
+              <Link
                 key={item.name}
-                href={item.href}
+                to={item.href}
                 onClick={() => setIsOpen(false)}
-                className="flex items-center space-x-3 px-6 py-4 text-gray-300 hover:text-white hover:bg-white/10 rounded-2xl transition-all duration-300 font-grotesk font-medium text-[16px] tracking-wide"
+                className={`flex items-center space-x-3 px-6 py-4 hover:bg-white/10 rounded-2xl transition-all duration-300 font-grotesk font-medium text-[16px] tracking-wide ${
+                  location.pathname === item.href
+                    ? 'text-white bg-white/5'
+                    : 'text-gray-300 hover:text-white'
+                }`}
               >
-                {/* {item.name === 'Planets' && <span>🌍</span>}
-                {item.name === 'Trailer' && <span>🎬</span>}
-                {item.name === 'Tickets' && <span>📊</span>}
-                {item.name === 'Blog' && <span>📝</span>}
-                {item.name === 'Contact' && <span>📧</span>} */}
                 <span>{item.name}</span>
-              </a>
+              </Link>
             ))}
             
-            <div className="pt-6">
-              <button 
-                onClick={() => setIsOpen(false)}
-                className="w-full bg-gradient-to-r from-white to-gray-100 hover:from-gray-100 hover:to-white text-gray-900 font-grotesk font-semibold px-8 py-4 rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-xl"
-              >
-                Get Started
-              </button>
+            <div className="pt-6 space-y-3">
+              {isAuthenticated ? (
+                <>
+                  {/* Mobile Notifications */}
+                  <div className="w-full bg-white/5 border border-white/10 rounded-2xl p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-2">
+                        <Bell className="w-5 h-5 text-white" />
+                        <h4 className="font-grotesk font-semibold text-white">Notifications</h4>
+                        {unreadCount > 0 && (
+                          <span className="bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                            {unreadCount > 9 ? '9+' : unreadCount}
+                          </span>
+                        )}
+                      </div>
+                      {notifications.length > 0 && (
+                        <button
+                          onClick={markAllAsRead}
+                          className="text-xs text-blue-400 hover:text-blue-300 transition-colors flex items-center space-x-1"
+                        >
+                          <CheckCheck className="w-3 h-3" />
+                          <span>Mark all read</span>
+                        </button>
+                      )}
+                    </div>
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <p className="text-center text-gray-400 text-sm py-4">No notifications</p>
+                      ) : (
+                        notifications.slice(0, 5).map((notification) => (
+                          <div
+                            key={notification.id}
+                            className={`p-3 rounded-xl hover:bg-white/5 transition-all cursor-pointer ${
+                              !notification.read ? 'bg-blue-500/10' : 'bg-white/5'
+                            }`}
+                            onClick={() => markAsRead(notification.id)}
+                          >
+                            <div className="flex items-start space-x-2">
+                              <span className="text-sm">{getNotificationIcon(notification.type)}</span>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center space-x-2">
+                                  <h5 className="text-xs font-medium text-white truncate">{notification.title}</h5>
+                                  {!notification.read && (
+                                    <span className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full"></span>
+                                  )}
+                                </div>
+                                <p className="text-xs text-gray-400 line-clamp-2">{notification.message}</p>
+                                <span className="text-xs text-gray-500">{getTimeAgo(notification.timestamp)}</span>
+                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  clearNotification(notification.id);
+                                }}
+                                className="text-gray-400 hover:text-red-400"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  <Link
+                    to="/profile"
+                    onClick={() => setIsOpen(false)}
+                    className="w-full flex items-center justify-center space-x-2 text-white border border-white/20 bg-white/10 px-8 py-4 rounded-2xl transition-all duration-300"
+                  >
+                    <UserCircle className="w-5 h-5" />
+                    <span>{user?.firstName || user?.email?.split('@')[0]}</span>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setIsOpen(false);
+                    }}
+                    className="w-full flex items-center justify-center space-x-2 text-red-400 border border-red-400/20 hover:bg-red-500/10 px-8 py-4 rounded-2xl transition-all duration-300"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Logout</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/auth/login"
+                    onClick={() => setIsOpen(false)}
+                    className="w-full flex items-center justify-center space-x-2 text-gray-300 hover:text-white border border-white/20 hover:bg-white/10 px-8 py-4 rounded-2xl transition-all duration-300"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    <span>Login</span>
+                  </Link>
+                  <Link
+                    to="/auth/signup"
+                    onClick={() => setIsOpen(false)}
+                    className="w-full bg-gradient-to-r from-white to-gray-100 hover:from-gray-100 hover:to-white text-gray-900 font-grotesk font-semibold px-8 py-4 rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-xl flex items-center justify-center space-x-2"
+                  >
+                    <User className="w-4 h-4" />
+                    <span>Sign Up</span>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
       )}
-    </nav>
+      </nav>
+    </>
   );
 };
 

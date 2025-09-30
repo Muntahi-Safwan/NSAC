@@ -1,40 +1,40 @@
-import { TrendingUp, Users, Globe, Zap } from 'lucide-react';
+// import { TrendingUp, Users, Globe, Zap } from 'lucide-react';
 
 const StatsSection = () => {
-  const stats = [
-    {
-      icon: Globe,
-      number: '195',
-      label: 'Countries Monitored',
-      description: 'Global coverage across all continents',
-      gradient: 'from-blue-500 to-cyan-600',
-      shadowColor: 'blue-500/30'
-    },
-    {
-      icon: TrendingUp,
-      number: '2.5M+',
-      label: 'Data Points Daily',
-      description: 'Real-time atmospheric measurements',
-      gradient: 'from-green-500 to-teal-600',
-      shadowColor: 'green-500/30'
-    },
-    {
-      icon: Users,
-      number: '50K+',
-      label: 'Communities Protected',
-      description: 'Early warning system coverage',
-      gradient: 'from-orange-500 to-red-600',
-      shadowColor: 'orange-500/30'
-    },
-    {
-      icon: Zap,
-      number: '99.9%',
-      label: 'System Uptime',
-      description: '24/7 continuous monitoring',
-      gradient: 'from-purple-500 to-indigo-600',
-      shadowColor: 'purple-500/30'
-    }
-  ];
+  // const stats = [
+  //   {
+  //     icon: Globe,
+  //     number: '195',
+  //     label: 'Countries Monitored',
+  //     description: 'Global coverage across all continents',
+  //     gradient: 'from-blue-500 to-cyan-600',
+  //     shadowColor: 'blue-500/30'
+  //   },
+  //   {
+  //     icon: TrendingUp,
+  //     number: '2.5M+',
+  //     label: 'Data Points Daily',
+  //     description: 'Real-time atmospheric measurements',
+  //     gradient: 'from-green-500 to-teal-600',
+  //     shadowColor: 'green-500/30'
+  //   },
+  //   {
+  //     icon: Users,
+  //     number: '50K+',
+  //     label: 'Communities Protected',
+  //     description: 'Early warning system coverage',
+  //     gradient: 'from-orange-500 to-red-600',
+  //     shadowColor: 'orange-500/30'
+  //   },
+  //   {
+  //     icon: Zap,
+  //     number: '99.9%',
+  //     label: 'System Uptime',
+  //     description: '24/7 continuous monitoring',
+  //     gradient: 'from-purple-500 to-indigo-600',
+  //     shadowColor: 'purple-500/30'
+  //   }
+  // ];
 
   return (
     <section className="relative py-20 lg:py-32 bg-gradient-to-br from-blue-950 via-slate-900 to-slate-950 overflow-hidden">

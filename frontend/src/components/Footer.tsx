@@ -22,106 +22,60 @@ const Footer = () => {
 
   const footerSections = [
     {
-      title: 'Platform',
+      title: 'Project',
       links: [
-        { name: 'Air Quality Monitor', href: '/air-quality', icon: BarChart3 },
-        { name: 'Disaster Tracker', href: '/disasters', icon: Shield },
-        { name: 'Earth Data Insights', href: '/insights', icon: Database },
-        { name: 'API Access', href: '/api', icon: ExternalLink },
-      ]
-    },
-    {
-      title: 'Resources',
-      links: [
-        { name: 'Documentation', href: '/docs', icon: BookOpen },
-        { name: 'Research Papers', href: '/research', icon: FileText },
-        { name: 'Data Sources', href: '/sources', icon: Database },
-        { name: 'Community', href: '/community', icon: Users },
-      ]
-    },
-    {
-      title: 'Company',
-      links: [
+        { name: 'Air Quality Map', href: '/map', icon: BarChart3 },
+        { name: 'Learning Hub', href: '/learning', icon: BookOpen },
         { name: 'About Us', href: '/about', icon: Heart },
-        { name: 'Our Mission', href: '/mission', icon: Target },
-        { name: 'Team', href: '/team', icon: Users },
-        { name: 'Careers', href: '/careers', icon: Users },
+        { name: 'Contact', href: '/contact', icon: Mail },
       ]
     }
   ] as const;
 
   const socialLinks = [
-    { name: 'GitHub', icon: Github, href: 'https://github.com/aerowatch' },
-    { name: 'Twitter', icon: Twitter, href: 'https://twitter.com/aerowatch' },
-    { name: 'LinkedIn', icon: Linkedin, href: 'https://linkedin.com/company/aerowatch' },
-    { name: 'Email', icon: Mail, href: 'mailto:contact@aerowatch.com' },
+    { name: 'GitHub', icon: Github, href: 'https://github.com/nasa-space-apps-airwatch' },
+    { name: 'Contact', icon: Mail, href: '/contact' },
   ];
 
   return (
-    <footer className="relative bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 border-t border-white/10 overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0">
-        {/* Animated Grid */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.05)_1px,transparent_1px)] bg-[size:50px_50px] opacity-30" />
-        
-        {/* Gradient Orbs */}
-        <div className="absolute top-20 left-20 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl" />
-        
-        {/* Stars */}
-        {[...Array(30)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute bg-white rounded-full opacity-30"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              width: `${1 + Math.random() * 2}px`,
-              height: `${1 + Math.random() * 2}px`,
-            }}
-          />
-        ))}
-      </div>
+    <footer className="relative overflow-hidden">
+      
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Footer Content */}
-        <div className="py-16 lg:py-20">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12">
+        <div className="py-12 sm:py-14 md:py-16 lg:py-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
             {/* Brand Section */}
-            <div className="lg:col-span-5">
-              <Link to="/" className="flex items-center space-x-3 group mb-8">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-500/30">
-                  <Satellite className="w-7 h-7 text-white" />
+            <div className="lg:col-span-2">
+              <Link to="/" className="flex items-center space-x-2 sm:space-x-3 group mb-6 sm:mb-8">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl sm:rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-500/30">
+                  <Satellite className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </div>
-                <span className="font-grotesk font-bold text-3xl text-white">
-                  AeroWatch
+                <span className="font-grotesk font-bold text-2xl sm:text-3xl text-white">
+                  AirWatch
                 </span>
               </Link>
-              
-              <p className="text-gray-300 font-inter leading-relaxed mb-8 max-w-md text-lg">
-                Leveraging NASA's Earth observation data and cloud computing to predict cleaner, safer skies. 
-                Monitoring air pollution and disaster hazards worldwide through advanced analytics.
+
+              <p className="text-gray-300 font-inter leading-relaxed mb-6 sm:mb-8 max-w-md text-base sm:text-lg">
+                Leveraging NASA's Earth observation data to monitor air quality across North America.
+                Real-time pollution tracking for cleaner, safer skies.
               </p>
 
               <div className="space-y-4">
                 <div className="flex items-center space-x-3 text-gray-300">
                   <Globe className="w-5 h-5 text-blue-400" />
-                  <span className="font-inter">Real-time Global Coverage</span>
+                  <span className="font-inter">NASA Space Apps Challenge 2024</span>
                 </div>
                 <div className="flex items-center space-x-3 text-gray-300">
                   <Shield className="w-5 h-5 text-blue-400" />
-                  <span className="font-inter">24/7 Environmental Monitoring</span>
-                </div>
-                <div className="flex items-center space-x-3 text-gray-300">
-                  <Mail className="w-5 h-5 text-blue-400" />
-                  <span className="font-inter">contact@aerowatch.com</span>
+                  <span className="font-inter">Real-time Air Quality Monitoring</span>
                 </div>
               </div>
             </div>
 
             {/* Footer Links */}
             {footerSections.map((section) => (
-              <div key={section.title} className="lg:col-span-2">
+              <div key={section.title} className="lg:col-span-1">
                 <h3 className="font-grotesk font-bold text-white text-lg mb-6">
                   {section.title}
                 </h3>
@@ -167,32 +121,47 @@ const Footer = () => {
         </div>
 
         {/* Bottom Section */}
-        <div className="py-8 border-t border-white/10">
-          <div className="flex flex-col lg:flex-row justify-between items-center space-y-6 lg:space-y-0">
+        <div className="py-6 sm:py-8 border-t border-white/10">
+          <div className="flex flex-col lg:flex-row justify-between items-center space-y-4 sm:space-y-6 lg:space-y-0">
             {/* Copyright */}
             <div className="text-gray-400 font-inter text-center lg:text-left">
-              <p className="text-base mb-1">© {currentYear} AeroWatch. All rights reserved.</p>
-              <p className="text-sm opacity-80">
-                Built for NASA Space Apps Challenge - Predicting Cleaner, Safer Skies
+              <p className="text-sm sm:text-base mb-1">© {currentYear} AirWatch. All rights reserved.</p>
+              <p className="text-xs sm:text-sm opacity-80">
+                NASA Space Apps Challenge 2024 - Air Quality Intelligence for North America
               </p>
             </div>
 
-            {/* Social Links */}
-            <div className="flex items-center space-x-4">
+            {/* Project Links */}
+            <div className="flex items-center space-x-3 sm:space-x-4">
               {socialLinks.map((social) => {
                 const Icon = social.icon;
-                return (
-                  <a
-                    key={social.name}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-12 h-12 bg-white/10 hover:bg-blue-500 text-gray-400 hover:text-white rounded-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 backdrop-blur-sm border border-white/10 hover:border-blue-500/50"
-                    aria-label={social.name}
-                  >
-                    <Icon className="w-5 h-5" />
-                  </a>
-                );
+                const isExternal = social.href.startsWith('http');
+
+                if (isExternal) {
+                  return (
+                    <a
+                      key={social.name}
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-12 h-12 bg-white/10 hover:bg-blue-500 text-gray-400 hover:text-white rounded-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 backdrop-blur-sm border border-white/10 hover:border-blue-500/50"
+                      aria-label={social.name}
+                    >
+                      <Icon className="w-5 h-5" />
+                    </a>
+                  );
+                } else {
+                  return (
+                    <Link
+                      key={social.name}
+                      to={social.href}
+                      className="w-12 h-12 bg-white/10 hover:bg-blue-500 text-gray-400 hover:text-white rounded-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 backdrop-blur-sm border border-white/10 hover:border-blue-500/50"
+                      aria-label={social.name}
+                    >
+                      <Icon className="w-5 h-5" />
+                    </Link>
+                  );
+                }
               })}
             </div>
           </div>

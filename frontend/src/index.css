@@ -210,3 +210,53 @@
 .bg-gradient-radial {
   background: radial-gradient(circle, var(--tw-gradient-stops));
 }
+
+/* Leaflet Map Custom Styles */
+.leaflet-container {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-radius: 1rem;
+}
+
+.leaflet-popup-content-wrapper {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.leaflet-popup-content {
+  margin: 0;
+}
+
+.leaflet-popup-tip {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+/* Chart container enhancements */
+.recharts-surface {
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+.recharts-legend-wrapper {
+  padding-top: 10px;
+}
+
+/* Custom scrollbar for better space theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #3b82f6, #06d6a0);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #2563eb, #059669);
+}

@@ -1,4 +1,4 @@
-import { BarChart3, Shield, Satellite, Globe, Zap, Database, Eye, AlertTriangle } from 'lucide-react';
+import { BarChart3, Satellite, Globe, Zap, Database, Eye, AlertTriangle } from 'lucide-react';
 
 const FeaturesSection = () => {
   const features = [

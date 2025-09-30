@@ -1,166 +1,368 @@
-import { ArrowDown, Satellite, BarChart3, Shield, ChevronRight } from 'lucide-react';
-import FeaturesSection from '../../components/sections/FeaturesSection';
-import StatsSection from '../../components/sections/StatsSection';
-import TechnologySection from '../../components/sections/TechnologySection';
+import { ArrowDown, Satellite, BarChart3, Shield, ChevronRight, MapPin, Map, Zap, Globe, Users, Brain, TrendingUp, CheckCircle, Star, Award, Target } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import AQISpeedometer from '../../components/AQISpeedometer';
+import PollutantDetails from '../../components/PollutantDetails';
+import { PastTrendChart, FutureTrendChart } from '../../components/TrendCharts';
+import { mockAQIData, mockPollutants, northAmericaLocation } from '../../data/mockData';
 
 const Home = () => {
   return (
     <>
-      <div className="relative min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 overflow-hidden">
-      {/* Enhanced Background Effects */}
-      <div className="absolute inset-0">
-        {/* Animated Grid */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.1)_1px,transparent_1px)] bg-[size:50px_50px] animate-pulse opacity-20" />
-        
-        {/* Multiple Star Layers */}
-        <div className="absolute inset-0 opacity-40">
-          {[...Array(100)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute bg-white rounded-full animate-twinkle"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                width: `${1 + Math.random() * 3}px`,
-                height: `${1 + Math.random() * 3}px`,
-                animationDelay: `${Math.random() * 5}s`,
-                animationDuration: `${3 + Math.random() * 4}s`,
-              }}
-            />
-          ))}
-        </div>
-        
-        {/* Large Gradient Orbs with Animation */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse opacity-60" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse opacity-60" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-blue-400/15 rounded-full blur-2xl animate-pulse opacity-40" style={{ animationDelay: '4s' }} />
-        
-        {/* Floating Planets */}
-        <div className="absolute top-20 left-16 w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-full opacity-60 animate-float" style={{ animationDelay: '1s' }}>
-          <div className="absolute inset-2 bg-gradient-to-br from-orange-300/30 to-transparent rounded-full" />
-        </div>
-        <div className="absolute top-32 right-20 w-16 h-16 bg-gradient-to-br from-red-400 to-red-600 rounded-full opacity-50 animate-float" style={{ animationDelay: '3s' }}>
-          <div className="absolute inset-2 bg-gradient-to-br from-red-300/30 to-transparent rounded-full" />
+
+      {/* Air Quality Intelligence Dashboard - Responsive Height */}
+      <div className="relative min-h-[60vh] md:h-[70vh] lg:h-[80vh] flex flex-col">
+
+        {/* Content Container - Flex Layout */}
+        <div className="relative z-10 flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-4">
+
+          {/* Main Flex Container */}
+          <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 h-full max-h-[calc(80vh-4rem)]">
+
+            {/* Left Section - Header + AQI Speedometer */}
+            <div className="flex-1 flex flex-col space-y-3 sm:space-y-4">
+
+              {/* Header Section - Compact */}
+              <div className="flex items-start justify-between">
+                <div>
+                  <h1 className="font-display font-black text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white leading-tight">
+                    AIR QUALITY
+                    <span className="block bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
+                      INTELLIGENCE
+                    </span>
+                  </h1>
+                  <div className="mt-2 text-white/70">
+                    <p className="text-xs sm:text-sm font-medium">Real-time air quality monitoring powered by NASA satellites</p>
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs mt-1">
+                      <span>• 5 Key Pollutants</span>
+                      <span>• 19 Regions</span>
+                      <span className="hidden sm:inline">• AI Predictions</span>
+                    </div>
+                  </div>
+                </div>
+
+
+              </div>
+
+              {/* AQI Speedometer */}
+              <div className="flex-1 min-h-[280px] sm:min-h-[320px]">
+                <AQISpeedometer data={mockAQIData} location={northAmericaLocation} />
+              </div>
+
+            </div>
+
+            {/* Right Section - Pollutant Details */}
+            <div className="flex-1 min-h-[280px] sm:min-h-[320px]">
+              <PollutantDetails pollutants={mockPollutants} />
+            </div>
+
+          </div>
+
+          {/* Peek Indicator - Compact */}
+          {/* <div className="flex items-center justify-center pt-3 pb-1">
+            <div className="flex flex-col items-center space-y-1 text-white/40 group cursor-pointer hover:text-white/60 transition-all duration-300">
+              <div className="w-6 h-0.5 bg-gradient-to-r from-transparent via-white/40 to-transparent rounded-full group-hover:via-white/60 transition-all duration-300"></div>
+              <span className="text-xs font-medium tracking-wider">MORE INSIGHTS</span>
+              <ArrowDown className="w-3 h-3 animate-bounce" />
+            </div>
+          </div> */}
+
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 lg:pt-22">
-        <div className="text-center space-y-8 lg:space-y-12">
-          {/* Enhanced Badge */}
-          <div className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full px-6 py-3 text-sm font-body text-white/90 shadow-lg shadow-blue-500/20 hover:bg-white/15 transition-all duration-300">
-            <Satellite className="w-4 h-4 text-blue-400" />
-            <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent font-medium">NASA Space Apps Challenge 2025</span>
-          </div>
 
-          {/* Enhanced Main Heading */}
-          <div className="space-y-4">
-            <h1 className="font-display font-bold text-5xl sm:text-6xl lg:text-8xl text-white leading-tight tracking-wider">
-              OUR
-            </h1>
-            <h2 className="font-display font-bold text-6xl sm:text-7xl lg:text-9xl bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent leading-none tracking-widest animate-pulse">
-              EARTH
+      {/* Predictive Analytics Section - Peeks from bottom */}
+      <div className="relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 sm:pb-12 pt-4">
+          <div className="text-center mb-6 sm:mb-8 md:mb-12">
+            <h2 className="font-display font-black text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white mb-3 sm:mb-4">
+              PREDICTIVE AIR QUALITY
+              <br className="hidden sm:block" />
+              <span className="sm:inline"> </span>
+              <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                ANALYTICS
+              </span>
             </h2>
-          </div>
-
-          {/* Enhanced Description */}
-          <div className="max-w-4xl mx-auto space-y-6">
-            <p className="font-body text-xl lg:text-2xl text-white leading-relaxed">
-              Discover the power of <span className="text-cyan-400 font-semibold">real-time Earth observation data.</span> Monitor air pollution, 
-              track disaster hazards, and predict cleaner, safer skies with cutting-edge 
-              cloud computing technology.
-            </p>
-            <p className="font-body text-lg lg:text-xl text-white/70 leading-relaxed">
-              Comprehensive environmental monitoring starts today. Advanced analytics 
-              provide actionable insights - <span className="text-blue-400">don't miss critical environmental changes!</span>
+            <p className="text-white/70 text-sm sm:text-base md:text-lg max-w-3xl mx-auto leading-relaxed px-4">
+              Advanced machine learning models provide 24-hour air quality forecasting based on NASA Earth observation data
             </p>
           </div>
 
-          {/* Enhanced CTA Button */}
-          <div className="pt-8">
-            <button className="group relative bg-[#e7ebf7] text-black font-display font-bold text-lg px-12 py-5 rounded-full transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/50 flex items-center space-x-3 mx-auto overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-              <span className="relative z-10">GET STARTED</span>
-              <ChevronRight className="relative z-10 w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
-            </button>
-          </div>
-
-          {/* Enhanced Stats Cards */}
-          <div className="pt-20 grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10 max-w-5xl mx-auto">
-            <div className="group relative bg-white/5 backdrop-blur-xl border border-white/20 rounded-3xl p-8 lg:p-10 text-center hover:bg-white/10 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/30">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative z-10">
-                <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-lg shadow-blue-500/30">
-                  <BarChart3 className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="font-display font-bold text-white text-2xl mb-4">Air Quality</h3>
-                <p className="font-body text-white/80 text-base leading-relaxed">Real-time monitoring of atmospheric conditions and pollution levels worldwide</p>
+          {/* Enhanced Chart Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 mb-12 sm:mb-16">
+            <div className="group">
+              <div className="h-[350px] sm:h-[400px] md:h-[450px] lg:h-[500px] rounded-2xl sm:rounded-3xl overflow-hidden border border-white/[0.1] hover:border-white/[0.2] transition-all duration-500 hover:scale-[1.01] sm:hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/10">
+                <PastTrendChart />
               </div>
             </div>
-
-            <div className="group relative bg-white/5 backdrop-blur-xl border border-white/20 rounded-3xl p-8 lg:p-10 text-center hover:bg-white/10 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/30">
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative z-10">
-                <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-lg shadow-orange-500/30">
-                  <Shield className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="font-display font-bold text-white text-2xl mb-4">Disaster Prevention</h3>
-                <p className="font-body text-white/80 text-base leading-relaxed">Advanced early warning systems for natural disasters and hazards</p>
-              </div>
-            </div>
-
-            <div className="group relative bg-white/5 backdrop-blur-xl border border-white/20 rounded-3xl p-8 lg:p-10 text-center hover:bg-white/10 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-green-500/30">
-              <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-teal-500/10 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative z-10">
-                <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-lg shadow-green-500/30">
-                  <Satellite className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="font-display font-bold text-white text-2xl mb-4">Earth Data</h3>
-                <p className="font-body text-white/80 text-base leading-relaxed">NASA satellite data and cloud computing for environmental insights</p>
+            <div className="group">
+              <div className="h-[350px] sm:h-[400px] md:h-[450px] lg:h-[500px] rounded-2xl sm:rounded-3xl overflow-hidden border border-white/[0.1] hover:border-white/[0.2] transition-all duration-500 hover:scale-[1.01] sm:hover:scale-[1.02] hover:shadow-2xl hover:shadow-emerald-500/10">
+                <FutureTrendChart />
               </div>
             </div>
           </div>
 
-          {/* Scroll Indicator */}
-          <div className="pt-20 pb-8">
-            <div className="flex flex-col items-center space-y-2 text-white/60">
-              <span className="font-body text-sm">Explore Our Solutions</span>
-              <ArrowDown className="w-6 h-6 animate-bounce" />
+          {/* Bottom CTA Section */}
+          <div className="text-center px-4">
+            <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.08] backdrop-blur-2xl border border-white/[0.1] rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 lg:p-12 max-w-4xl mx-auto">
+              <h3 className="font-display font-bold text-xl sm:text-2xl md:text-3xl text-white mb-3 sm:mb-4">
+                Stay Ahead of Air Quality Changes
+              </h3>
+              <p className="text-white/70 text-sm sm:text-base md:text-lg mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed">
+                Get real-time alerts and personalized recommendations based on your location and health profile
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+                <Link
+                  to="/map"
+                  className="group relative w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-display font-bold text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-cyan-500/30 flex items-center justify-center space-x-2"
+                >
+                  <Map className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span>Explore Interactive Map</span>
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                </Link>
+                <button className="text-white/80 hover:text-white font-semibold text-sm sm:text-base underline decoration-cyan-400/50 hover:decoration-cyan-400 transition-all duration-300">
+                  View API Documentation
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Enhanced Earth Visualization */}
-      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-96 h-96 lg:w-[600px] lg:h-[600px]">
-        <div className="relative w-full h-full">
-          {/* Earth Base with Enhanced Effects */}
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-400 via-blue-500 to-blue-700 rounded-full shadow-2xl shadow-blue-500/40 animate-pulse">
-            {/* Multiple Cloud Layers */}
-            <div className="absolute inset-6 bg-gradient-to-br from-white/30 via-white/10 to-transparent rounded-full animate-spin opacity-60" style={{ animationDuration: '120s' }} />
-            <div className="absolute inset-12 bg-gradient-to-tl from-white/20 via-transparent to-white/15 rounded-full animate-spin opacity-50" style={{ animationDuration: '80s', animationDirection: 'reverse' }} />
-            
-            {/* Continents */}
-            <div className="absolute inset-8 bg-gradient-to-br from-green-400/40 via-green-500/30 to-emerald-600/40 rounded-full opacity-70" />
-            <div className="absolute inset-16 bg-gradient-to-tl from-amber-300/20 via-transparent to-green-300/30 rounded-full" />
-            
-            {/* Enhanced Atmospheric Glow */}
-            <div className="absolute -inset-8 bg-gradient-radial from-blue-300/30 via-cyan-400/20 to-transparent rounded-full blur-3xl animate-pulse" />
-            <div className="absolute -inset-12 bg-gradient-radial from-blue-200/20 via-blue-300/10 to-transparent rounded-full blur-2xl" />
-            
-            {/* Orbital Ring Effect */}
-            <div className="absolute -inset-4 border-2 border-cyan-400/30 rounded-full animate-spin opacity-60" style={{ animationDuration: '30s' }}>
-              <div className="absolute top-0 left-1/2 w-3 h-3 bg-cyan-400 rounded-full transform -translate-x-1/2 -translate-y-1/2 shadow-lg shadow-cyan-400/50" />
+      {/* How It Works Section */}
+      <section className="relative py-12 sm:py-16 md:py-20 lg:py-32 overflow-hidden">
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10 sm:mb-12 md:mb-16">
+            <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-500/10 backdrop-blur-xl border border-blue-400/20 rounded-full mb-4 sm:mb-6">
+              <Zap className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400 mr-1.5 sm:mr-2" />
+              <span className="text-blue-300 font-semibold text-xs sm:text-sm">System Overview</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-black text-white mb-4 sm:mb-6 px-4">
+              How Our
+              <span className="block bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent">
+                System Works
+              </span>
+            </h2>
+            <p className="text-base sm:text-lg md:text-xl text-white/80 max-w-3xl mx-auto leading-relaxed px-4">
+              Our advanced system combines NASA satellite data, machine learning, and real-time monitoring
+              to provide the most accurate air quality insights available.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-12 sm:mb-16">
+            {[
+              {
+                step: "01",
+                icon: Satellite,
+                title: "Satellite Data Collection",
+                description: "NASA's Earth Observing System continuously monitors atmospheric conditions across Bangladesh, collecting data on pollutants, weather patterns, and environmental factors.",
+                gradient: "from-blue-500 to-cyan-600",
+                delay: "0s"
+              },
+              {
+                step: "02",
+                icon: Brain,
+                title: "AI Processing & Analysis",
+                description: "Advanced machine learning algorithms process massive datasets, identifying patterns and correlations to generate accurate air quality assessments and predictions.",
+                gradient: "from-indigo-500 to-purple-600",
+                delay: "0.2s"
+              },
+              {
+                step: "03",
+                icon: TrendingUp,
+                title: "Real-time Insights",
+                description: "Our platform delivers instant air quality updates, 24-hour forecasts, and personalized health recommendations to keep communities informed and protected.",
+                gradient: "from-teal-500 to-green-600",
+                delay: "0.4s"
+              }
+            ].map((step, index) => (
+              <div
+                key={index}
+                className="group relative animate-fade-in-up"
+                style={{ animationDelay: step.delay }}
+              >
+                <div className="relative bg-white/[0.03] hover:bg-white/[0.06] backdrop-blur-3xl border border-white/[0.08] hover:border-white/[0.15] rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 h-full transition-all duration-500 hover:scale-[1.02] sm:hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/10">
+                  {/* Step Number */}
+                  <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <span className="text-white font-display font-black text-lg">{step.step}</span>
+                  </div>
+
+                  {/* Icon */}
+                  <div className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-br ${step.gradient} rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-5 md:mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                    <step.icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
+                  </div>
+
+                  {/* Content */}
+                  <h3 className="text-base sm:text-lg md:text-xl font-display font-bold text-white mb-3 sm:mb-4 group-hover:text-cyan-300 transition-colors">
+                    {step.title}
+                  </h3>
+                  <p className="text-sm sm:text-base text-white/70 leading-relaxed">
+                    {step.description}
+                  </p>
+
+                  {/* Arrow Connector */}
+                  {index < 2 && (
+                    <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2">
+                      <ChevronRight className="w-6 h-6 text-white/20" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Technical Specs */}
+          <div className="bg-white/[0.02] backdrop-blur-3xl border border-white/[0.08] rounded-3xl p-8 lg:p-12">
+            <div className="grid lg:grid-cols-4 gap-8">
+              {[
+                { icon: Globe, number: "195", label: "Countries", sublabel: "Global Coverage" },
+                { icon: BarChart3, number: "2.5M+", label: "Data Points", sublabel: "Daily Processing" },
+                { icon: Users, number: "50K+", label: "Communities", sublabel: "Protected" },
+                { icon: Zap, number: "99.9%", label: "Uptime", sublabel: "System Reliability" }
+              ].map((stat, index) => (
+                <div key={index} className="text-center group">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <stat.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-3xl font-display font-black text-white mb-2 group-hover:text-cyan-300 transition-colors">
+                    {stat.number}
+                  </div>
+                  <div className="text-white/80 font-semibold mb-1">{stat.label}</div>
+                  <div className="text-white/50 text-sm">{stat.sublabel}</div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* New Sections */}
-      <FeaturesSection />
-      <TechnologySection />
-      {/* <StatsSection /> */}
-    </div>
+      {/* Why It's Better Section */}
+      <section className="relative py-20 lg:py-32 overflow-hidden">
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center px-4 py-2 bg-blue-500/10 backdrop-blur-xl border border-blue-400/20 rounded-full mb-6">
+              <Award className="w-4 h-4 text-blue-400 mr-2" />
+              <span className="text-blue-300 font-semibold text-sm">Competitive Advantage</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-black text-white mb-6">
+              Why Choose Our
+              <span className="block bg-gradient-to-r from-blue-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent">
+                Platform
+              </span>
+            </h2>
+            <p className="text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
+              Experience the next generation of air quality monitoring with unmatched accuracy,
+              comprehensive coverage, and intelligent insights.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
+            {/* Left Side - Comparison */}
+            <div className="space-y-6">
+              <h3 className="text-2xl font-display font-bold text-white mb-8">
+                Traditional vs Our Modern Solution
+              </h3>
+
+              {[
+                {
+                  traditional: "Limited ground stations",
+                  atmoqal: "NASA satellite coverage",
+                  icon: Satellite
+                },
+                {
+                  traditional: "Basic pollutant tracking",
+                  atmoqal: "5 key pollutants + trends",
+                  icon: BarChart3
+                },
+                {
+                  traditional: "Historical data only",
+                  atmoqal: "24-hour AI predictions",
+                  icon: Brain
+                },
+                {
+                  traditional: "Manual reporting delays",
+                  atmoqal: "Real-time updates",
+                  icon: Zap
+                }
+              ].map((comparison, index) => (
+                <div key={index} className="group bg-white/[0.02] hover:bg-white/[0.04] backdrop-blur-xl border border-white/[0.05] hover:border-white/[0.1] rounded-2xl p-6 transition-all duration-300">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <comparison.icon className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <span className="text-red-400 line-through text-sm">{comparison.traditional}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="w-4 h-4 text-blue-400" />
+                        <span className="text-blue-300 font-semibold">{comparison.atmoqal}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Right Side - Benefits */}
+            <div className="bg-white/[0.03] backdrop-blur-3xl border border-white/[0.08] rounded-3xl p-8">
+              <h3 className="text-xl font-display font-bold text-white mb-6 text-center">
+                Key Benefits
+              </h3>
+
+              <div className="space-y-4">
+                {[
+                  { icon: Target, title: "95% Accuracy", description: "Industry-leading prediction accuracy" },
+                  { icon: Globe, title: "Complete Coverage", description: "All 19 Bangladesh regions monitored" },
+                  { icon: Shield, title: "Health Protection", description: "Early warning system for communities" },
+                  { icon: Star, title: "NASA Partnership", description: "Backed by world-class space technology" }
+                ].map((benefit, index) => (
+                  <div key={index} className="flex items-start space-x-3 group">
+                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                      <benefit.icon className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-white group-hover:text-blue-300 transition-colors">
+                        {benefit.title}
+                      </div>
+                      <div className="text-white/60 text-sm">
+                        {benefit.description}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Call to Action */}
+          <div className="text-center">
+            <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.08] backdrop-blur-2xl border border-white/[0.1] rounded-3xl p-8 sm:p-12 max-w-4xl mx-auto">
+              <h3 className="font-display font-bold text-2xl sm:text-3xl text-white mb-4">
+                Experience the Future of Air Quality Monitoring
+              </h3>
+              <p className="text-white/70 text-base sm:text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
+                Join thousands of communities already protected by our intelligent platform.
+                Get started with our comprehensive air quality monitoring system today.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  to="/map"
+                  className="group relative bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-400 hover:to-cyan-500 text-white font-display font-bold text-base px-8 py-4 rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/30 flex items-center space-x-2"
+                >
+                  <Map className="w-5 h-5" />
+                  <span>Start Monitoring Now</span>
+                  <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                </Link>
+                <button className="text-white/80 hover:text-white font-semibold text-base underline decoration-emerald-400/50 hover:decoration-emerald-400 transition-all duration-300">
+                  Learn More About Our Technology
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </>
   );
 };
