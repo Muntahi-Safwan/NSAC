@@ -125,8 +125,9 @@ NSAC/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- **Node.js** (v18 or higher)
-- **npm** or **yarn** package manager
+- **Docker Desktop** (for database)
+- **Python 3.8+** (for data pipeline)
+- **Node.js 18+** (for frontend/backend)
 - **Git** for version control
 
 ### Installation
@@ -137,13 +138,33 @@ NSAC/
    cd NSAC
    ```
 
-2. **Install Frontend Dependencies**
+2. **Setup Database with Docker**
    ```bash
-   cd frontend
+   cd database
+   copy .env.template .env  # Windows
+   # or: cp .env.template .env  # Linux/Mac
+   docker-compose up -d postgres
+   ```
+   
+   📚 See `database/QUICKSTART.md` for detailed setup
+
+3. **Setup Data Pipeline**
+   ```bash
+   cd ../data-processing
+   pip install -r requirements.txt
+   prisma generate
+   prisma db push
+   ```
+   
+   📚 See `data-processing/FINAL_SETUP_SUMMARY.md` for details
+
+4. **Install Frontend Dependencies**
+   ```bash
+   cd ../frontend
    npm install
    ```
 
-3. **Install Backend Dependencies**
+5. **Install Backend Dependencies**
    ```bash
    cd ../backend
    npm install
@@ -151,19 +172,31 @@ NSAC/
 
 ### Development
 
-1. **Start the Frontend Development Server**
+1. **Start the Database** (if not running)
    ```bash
-   cd frontend
-   npm run dev
+   cd database
+   docker-compose up -d postgres
    ```
-   The application will be available at `http://localhost:5173`
 
-2. **Start the Backend Server**
+2. **Run Data Pipeline** (collect air quality data)
+   ```bash
+   cd data-processing
+   python main_pipeline.py
+   ```
+
+3. **Start the Backend Server**
    ```bash
    cd backend
    npm start
    ```
    The API will be available at `http://localhost:3000`
+
+4. **Start the Frontend Development Server**
+   ```bash
+   cd frontend
+   npm run dev
+   ```
+   The application will be available at `http://localhost:5173`
 
 ### Build for Production
 
