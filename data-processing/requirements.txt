@@ -7,6 +7,10 @@ requests>=2.31.0
 # NetCDF file processing
 netCDF4>=1.6.0
 numpy>=1.24.0
+xarray>=2023.1.0
+
+# NASA Earthdata access
+earthaccess>=0.10.0
 
 # Database ORM
 prisma>=0.11.0

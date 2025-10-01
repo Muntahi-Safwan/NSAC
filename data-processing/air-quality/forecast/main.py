@@ -12,8 +12,8 @@ from datetime import datetime
 from typing import Optional
 import argparse
 
-# Add parent directory to path for imports
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add current directory to path for imports
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from smart_downloader import SmartForecastDownloader
 from data_processor import NetCDFProcessor, AirQualityDataPoint
@@ -26,8 +26,8 @@ class AirQualityPipeline:
     Coordinates downloading, processing, and storing data
     """
     
-    def __init__(self, download_dir: str = "./downloads", 
-                 sample_rate: int = 10,
+    def __init__(self, download_dir: str = "forecast/downloads", 
+                 sample_rate: int = 5,
                  batch_size: int = 1000):
         """
         Initialize the pipeline
@@ -99,7 +99,7 @@ class AirQualityPipeline:
             # Extract data (multiple pollutants, TEMPO coverage area only)
             data_points = processor.extract_air_quality_data(
                 sample_rate=self.sample_rate,
-                tempo_coverage_only=True  # Filter to North America/TEMPO coverage
+                tempo_coverage_only=True  # North America/TEMPO coverage
             )
         
         print(f"\n✅ Extracted {len(data_points):,} data points")
@@ -226,12 +226,12 @@ Examples:
         """
     )
     
-    parser.add_argument('--sample-rate', type=int, default=10,
-                        help='Sample every Nth data point (default: 10, use 1 for all data)')
+    parser.add_argument('--sample-rate', type=int, default=5,
+                        help='Sample every Nth data point (default: 5, use 1 for all data)')
     parser.add_argument('--batch-size', type=int, default=1000,
                         help='Database insertion batch size (default: 1000)')
-    parser.add_argument('--download-dir', type=str, default='./downloads',
-                        help='Directory for downloaded files (default: ./downloads)')
+    parser.add_argument('--download-dir', type=str, default='downloads',
+                        help='Directory for downloaded files (default: downloads)')
     parser.add_argument('--skip-download', action='store_true',
                         help='Skip download and use most recent file')
     parser.add_argument('--file', type=str,
