@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import AQISpeedometer from '../../components/AQISpeedometer';
 import PollutantDetails from '../../components/PollutantDetails';
 import { PastTrendChart, FutureTrendChart } from '../../components/TrendCharts';
+import AIChatbot from '../../components/AIChatbot';
 import { mockAQIData, mockPollutants, northAmericaLocation } from '../../data/mockData';
 
 const Home = () => {
@@ -363,6 +364,14 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* AI Chatbot */}
+      <AIChatbot
+        airQualityContext={{
+          location: northAmericaLocation.name,
+          aqi: mockAQIData.aqi
+        }}
+      />
     </>
   );
 };

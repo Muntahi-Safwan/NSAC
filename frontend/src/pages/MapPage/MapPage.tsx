@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AirQualityMap from '../../components/AirQualityMap';
+import AIChatbot from '../../components/AIChatbot';
 import { mockMapZones, getAQIColor, mockPollutants } from '../../data/mockData';
 
 const MapPage = () => {
@@ -432,6 +433,15 @@ const MapPage = () => {
           )}
         </div>
       </div>
+
+      {/* AI Chatbot */}
+      <AIChatbot
+        airQualityContext={{
+          location: selectedRegion?.name,
+          aqi: selectedRegion?.aqi || stats.avgAQI,
+          conditions: selectedRegion?.level || 'moderate'
+        }}
+      />
     </div>
   );
 };

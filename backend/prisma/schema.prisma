@@ -14,17 +14,98 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
-  password      String
-  firstName     String?
-  lastName      String?
-  phoneNumbers  String[] @default([])
+  id              String            @id @default(uuid())
+  email           String            @unique
+  password        String
+  firstName       String?
+  lastName        String?
+  phoneNumbers    String[]          @default([])
   socialUsernames Json?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  lastLocation    Json?             // {city, region, country, lat, lng}
+  isSafe          Boolean           @default(true)
+  safetyUpdatedAt DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  notifications   Notification[]
+  quizAttempts    QuizAttempt[]
 
   @@map("users")
+}
+
+model NGO {
+  id              String         @id @default(uuid())
+  email           String         @unique
+  password        String
+  name            String
+  description     String?
+  region          String         // City/Region they operate in
+  country         String         @default("Bangladesh")
+  coordinates     Json?          // {lat, lng}
+  contactPhone    String?
+  verified        Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  notifications   Notification[]
+
+  @@map("ngos")
+}
+
+model Notification {
+  id          String    @id @default(uuid())
+  ngoId       String
+  ngo         NGO       @relation(fields: [ngoId], references: [id], onDelete: Cascade)
+
+  title       String
+  message     String
+  severity    String    // info, warning, danger, critical
+  region      String    // Target region
+  isAlert     Boolean   @default(false) // Is this a disaster alert?
+
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime?
+
+  recipients  User[]
+
+  @@index([ngoId])
+  @@index([region])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model Quiz {
+  id          String        @id @default(uuid())
+  title       String
+  description String?
+  difficulty  String        // beginner, intermediate, advanced
+  category    String        // air_quality, health, environment
+  questions   Json          // Array of question objects
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  attempts    QuizAttempt[]
+
+  @@map("quizzes")
+}
+
+model QuizAttempt {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quizId      String
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  score       Int
+  totalQuestions Int
+  answers     Json     // Array of user answers with correctness
+  difficulty  String
+
+  completedAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([quizId])
+  @@map("quiz_attempts")
 }
 
 model AirQualityForecast {

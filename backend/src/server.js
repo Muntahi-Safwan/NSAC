@@ -3,6 +3,11 @@ const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/auth.routes');
 const airQualityRoutes = require('./routes/airQuality.routes');
+const chatbotRoutes = require('./routes/chatbot.routes');
+const quizRoutes = require('./routes/quiz.routes');
+const ngoRoutes = require('./routes/ngo.routes');
+const notificationRoutes = require('./routes/notification.routes');
+const userRoutes = require('./routes/user.routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -35,6 +40,26 @@ console.log('=== Auth routes mounted successfully ===');
 console.log('=== Mounting air quality routes at /api/air-quality ===');
 app.use('/api/air-quality', airQualityRoutes);
 console.log('=== Air quality routes mounted successfully ===');
+
+console.log('=== Mounting chatbot routes at /api/chatbot ===');
+app.use('/api/chatbot', chatbotRoutes);
+console.log('=== Chatbot routes mounted successfully ===');
+
+console.log('=== Mounting quiz routes at /api/quiz ===');
+app.use('/api/quiz', quizRoutes);
+console.log('=== Quiz routes mounted successfully ===');
+
+console.log('=== Mounting NGO routes at /api/ngo ===');
+app.use('/api/ngo', ngoRoutes);
+console.log('=== NGO routes mounted successfully ===');
+
+console.log('=== Mounting notification routes at /api/notifications ===');
+app.use('/api/notifications', notificationRoutes);
+console.log('=== Notification routes mounted successfully ===');
+
+console.log('=== Mounting user routes at /api/users ===');
+app.use('/api/users', userRoutes);
+console.log('=== User routes mounted successfully ===');
 
 // 404 handler
 app.use((req, res) => {
