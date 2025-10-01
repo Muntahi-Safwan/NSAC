@@ -47,7 +47,7 @@ class AirQualityDataPoint:
             'so2': self.so2,
             'co': self.co,
             'hcho': self.hcho,
-            'source': 'GEOS-CF'
+            'source': 'GEOS-CF-FORECAST'
         }
     
     def __repr__(self):
@@ -139,16 +139,16 @@ class NetCDFProcessor:
             'lon': len(self.dataset.dimensions['lon'])
         }
     
-    def extract_air_quality_data(self, sample_rate: int = 10, 
+    def extract_air_quality_data(self, sample_rate: int = 5, 
                                   tempo_coverage_only: bool = True) -> List[AirQualityDataPoint]:
         """
         Extract multiple pollutants from the NetCDF file
-        Filters to TEMPO coverage area (North America) by default
+        Can filter to TEMPO coverage area (North America) if requested
         
         Args:
             sample_rate: Sample every Nth point to reduce data size (default: 10)
                         1 = all points (~1M records), 10 = ~100K records, 20 = ~50K records
-            tempo_coverage_only: Only extract data for TEMPO coverage area (default: True)
+            tempo_coverage_only: Only extract data for TEMPO coverage area (default: False for global data)
         
         Returns:
             List of AirQualityDataPoint objects
@@ -158,8 +158,8 @@ class NetCDFProcessor:
         
         # TEMPO coverage area (North America)
         # Latitude: ~15°N to ~60°N, Longitude: ~-130°W to ~-60°W
-        TEMPO_LAT_MIN, TEMPO_LAT_MAX = 15.0, 60.0
-        TEMPO_LON_MIN, TEMPO_LON_MAX = -130.0, -60.0
+        TEMPO_LAT_MIN, TEMPO_LAT_MAX = 25.0, 50.0  # More restrictive latitude bounds
+        TEMPO_LON_MIN, TEMPO_LON_MAX = -125.0, -65.0  # More restrictive longitude bounds
         
         print(f"\n🔬 Extracting air quality data from NetCDF...")
         if tempo_coverage_only:
@@ -246,81 +246,77 @@ class NetCDFProcessor:
         print(f"   📊 Available pollutants: {', '.join(available_pollutants)}")
         print(f"   🔄 Will convert gas-phase pollutants from mol/mol to μg/m³")
         
-        # Extract data points
+        # Extract data points (EXACTLY like realtime processor)
         data_points = []
-        total_points = dims['lev'] * dims['lat'] * dims['lon']
-        sampled_points = 0
-        filtered_out = 0
+        total_points = 0
+        valid_points = 0
         
-        print(f"\n   Processing {total_points:,} total points...")
+        print(f"\n   Processing data with sample rate {sample_rate}...")
         
-        for lev_idx in range(0, dims['lev'], sample_rate):
-            for lat_idx in range(0, dims['lat'], sample_rate):
-                latitude = float(lat[lat_idx])
+        # Use surface level only (level 0) and 2D sampling like realtime processor
+        lev_idx = 0  # Surface level only
+        for i in range(0, len(lat), sample_rate):
+            for j in range(0, len(lon), sample_rate):
+                total_points += 1
                 
-                # Filter by TEMPO latitude range
-                if tempo_coverage_only and (latitude < TEMPO_LAT_MIN or latitude > TEMPO_LAT_MAX):
-                    filtered_out += 1
+                latitude = float(lat[i])
+                longitude = float(lon[j])
+                
+                # Filter to North America if requested (like realtime processor)
+                if tempo_coverage_only and not (TEMPO_LAT_MIN <= latitude <= TEMPO_LAT_MAX and TEMPO_LON_MIN <= longitude <= TEMPO_LON_MAX):
+                    continue
+                    
+                # Extract pollutant values and apply unit conversions
+                pollutants = {}
+                has_valid_data = False
+                
+                for pollutant, info in pollutant_data.items():
+                    raw_value = float(info['data'][0, lev_idx, i, j])
+                    
+                    if np.isnan(raw_value):
+                        pollutants[pollutant] = None
+                        continue
+                    
+                    # Convert mol/mol to μg/m³ for gas-phase pollutants
+                    if info['needs_conversion']:
+                        # C(μg/m³) = VMR(mol/mol) × MW(g/mol) × 42,273
+                        converted_value = raw_value * info['mw'] * CONVERSION_FACTOR
+                        pollutants[pollutant] = converted_value
+                    else:
+                        # PM2.5 is already in μg/m³
+                        pollutants[pollutant] = raw_value
+                    
+                    has_valid_data = True
+                
+                # Skip if all values are NaN
+                if not has_valid_data:
                     continue
                 
-                for lon_idx in range(0, dims['lon'], sample_rate):
-                    longitude = float(lon[lon_idx])
-                    
-                    # Filter by TEMPO longitude range
-                    if tempo_coverage_only and (longitude < TEMPO_LON_MIN or longitude > TEMPO_LON_MAX):
-                        filtered_out += 1
-                        continue
-                    
-                    # Extract pollutant values and apply unit conversions
-                    pollutants = {}
-                    has_valid_data = False
-                    
-                    for pollutant, info in pollutant_data.items():
-                        raw_value = float(info['data'][0, lev_idx, lat_idx, lon_idx])
-                        
-                        if np.isnan(raw_value):
-                            pollutants[pollutant] = None
-                            continue
-                        
-                        # Convert mol/mol to μg/m³ for gas-phase pollutants
-                        if info['needs_conversion']:
-                            # C(μg/m³) = VMR(mol/mol) × MW(g/mol) × 42,273
-                            converted_value = raw_value * info['mw'] * CONVERSION_FACTOR
-                            pollutants[pollutant] = converted_value
-                        else:
-                            # PM2.5 is already in μg/m³
-                            pollutants[pollutant] = raw_value
-                        
-                        has_valid_data = True
-                    
-                    # Skip if all values are NaN
-                    if not has_valid_data:
-                        continue
-                    
-                    data_point = AirQualityDataPoint(
-                        timestamp=self.data_timestamp,
-                        forecast_init_time=self.forecast_init_time,
-                        latitude=latitude,
-                        longitude=longitude,
-                        level=float(lev[lev_idx]),
-                        **pollutants
-                    )
-                    
-                    data_points.append(data_point)
-                    sampled_points += 1
-                    
-                    # Progress indicator
-                    if sampled_points % 10000 == 0:
-                        print(f"\r   Processed: {sampled_points:,} points...", end='')
+                data_point = AirQualityDataPoint(
+                    timestamp=self.data_timestamp,
+                    forecast_init_time=self.forecast_init_time,
+                    latitude=latitude,
+                    longitude=longitude,
+                    level=float(lev[lev_idx]),
+                    **pollutants
+                )
+                
+                data_points.append(data_point)
+                valid_points += 1
+                
+                # Progress indicator
+                if valid_points % 10000 == 0:
+                    print(f"\r   Processed: {valid_points:,} points...", end='')
         
         print(f"\r   ✅ Extracted {len(data_points):,} valid data points")
-        if tempo_coverage_only:
-            print(f"   📊 Filtered out {filtered_out:,} points outside TEMPO coverage")
+        print(f"   📊 Total points checked: {total_points:,}")
+        print(f"   📊 Valid data points: {valid_points:,}")
+        print(f"   📊 Sample rate: 1/{sample_rate}")
         
         return data_points
     
     # Keep old method name for backward compatibility
-    def extract_pm25_data(self, sample_rate: int = 10) -> List[AirQualityDataPoint]:
+    def extract_pm25_data(self, sample_rate: int = 5) -> List[AirQualityDataPoint]:
         """Legacy method - calls extract_air_quality_data without filtering"""
         return self.extract_air_quality_data(sample_rate, tempo_coverage_only=False)
     
@@ -374,7 +370,7 @@ class NetCDFProcessor:
         return stats
 
 
-def process_file(file_path: str, sample_rate: int = 10) -> List[AirQualityDataPoint]:
+def process_file(file_path: str, sample_rate: int = 5) -> List[AirQualityDataPoint]:
     """
     Convenience function to process a NetCDF file
     

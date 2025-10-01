@@ -1,117 +1,190 @@
-# 🌍 NSAC Data Processing Pipeline
+# 🌍 Air Quality Data Collection System
 
-Modular data processing system for collecting and analyzing environmental data.
+A comprehensive system for collecting, processing, and storing air quality data from NASA's GEOS-CF model for North America.
 
-## 📁 Directory Structure
+## 📁 Project Structure
 
 ```
 data-processing/
-├── aqi/                    # Air Quality Index data processing
-│   ├── main.py            # AQI data collection pipeline
-│   ├── smart_downloader.py # GEOS-CF file downloader
-│   ├── data_processor.py  # NetCDF data processor
-│   ├── inspect_netcdf.py  # NetCDF file inspector
-│   ├── calculator.py      # AQI calculator
-│   ├── breakpoints.py     # EPA AQI breakpoints
-│   └── README.md          # AQI-specific documentation
-├── docs/                  # Documentation
-│   ├── ARCHITECTURE.md
-│   ├── DATA_COLLECTION_STRATEGY.md
-│   └── ... (other docs)
-├── downloads/             # Downloaded data files
-├── database.py           # Global database connection
-├── schema.prisma         # Global database schema
-├── requirements.txt      # Global dependencies
-├── Dockerfile           # Container setup
-├── docker-compose.yml   # Container orchestration
-└── env.example          # Environment template
+├── air-quality/              # Main air quality system
+│   ├── main.py              # System orchestrator
+│   ├── forecast/            # Forecast data collection
+│   │   ├── data_processor.py
+│   │   ├── database.py
+│   │   ├── smart_downloader.py
+│   │   └── downloads/       # Forecast data files
+│   ├── realtime/            # Real-time data collection
+│   │   ├── data_processor.py
+│   │   ├── database.py
+│   │   ├── smart_downloader.py
+│   │   ├── downloads/       # Analysis data files
+│   │   └── tempo/           # TEMPO system (future)
+│   └── shared/              # Shared components
+│       ├── breakpoints.py   # AQI breakpoints
+│       └── calculator.py    # AQI calculator
+├── scripts/                 # Management scripts
+│   ├── run_hourly_collection.py  # Hourly scheduler
+│   └── manage_services.py        # Service management
+├── docs/                    # Documentation
+│   └── atmospheric_levels_explanation.md
+├── logs/                    # Log files (created automatically)
+├── docker-compose.yml       # Docker services configuration
+├── Dockerfile              # Docker image definition
+├── schema.prisma           # Database schema
+├── requirements.txt        # Python dependencies
+└── .env                    # Environment configuration
 ```
 
 ## 🚀 Quick Start
 
-### 1. Setup Environment
+### 1. Start the Database
 
 ```bash
-# Copy environment template
-copy env.example .env
-# Edit .env with your database credentials
+docker-compose up -d postgres
 ```
 
-### 2. Run with Docker (Recommended)
+### 2. Start the Scheduler (Automatic Hourly Collection)
 
 ```bash
-# Build and run AQI data collection
-docker-compose run --rm data-pipeline
+python scripts/manage_services.py start-scheduler
 ```
 
-### 3. Run Locally
+### 3. Access Prisma Studio (Optional)
 
 ```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Run AQI pipeline
-cd aqi
-python main.py
+python scripts/manage_services.py start-studio
+# Access at: http://localhost:5555
 ```
 
-## 📊 Available Data Processing Units
+## 📊 Data Collection
 
-### 🌬️ AQI (Air Quality Index)
+### **Real-Time Data (Analysis)**
 
-- **Location**: `aqi/`
-- **Data Source**: GEOS-CF forecast data
-- **Coverage**: North America (TEMPO satellite coverage)
-- **Parameters**: PM2.5, NO2, O3, SO2, CO, HCHO
-- **Output**: Air Quality Index calculations
+- **Source**: GEOS-CF Analysis Data (NASA)
+- **Frequency**: Every hour
+- **Coverage**: North America (15°N to 60°N, 130°W to 60°W)
+- **Pollutants**: PM2.5, NO2, O3, SO2, CO, HCHO
 
-### 🔥 Wildfire (Planned)
+### **Forecast Data**
 
-- **Location**: `wildfire/` (future)
-- **Data Source**: TBD
-- **Coverage**: TBD
+- **Source**: GEOS-CF Forecast Data (NASA)
+- **Frequency**: Daily (00Z and 12Z runs)
+- **Coverage**: Same as real-time
+- **Pollutants**: Same as real-time
 
-### 🌡️ Heatwave (Planned)
+## 🗄️ Database Schema
 
-- **Location**: `heatwave/` (future)
-- **Data Source**: TBD
-- **Coverage**: TBD
+### **Real-Time Table** (`air_quality_realtime`)
+
+- Surface level (level=0) air quality measurements
+- Source: `GEOS-CF-ANALYSIS`
+- Hourly updates
+
+### **Forecast Table** (`air_quality_forecast`)
+
+- Forecast air quality predictions
+- Source: `GEOS-CF-FORECAST`
+- Daily updates
+
+## 🔧 Service Management
+
+### **Available Commands**
+
+```bash
+# Start services
+python scripts/manage_services.py start-scheduler    # Start hourly collection
+python scripts/manage_services.py start-studio       # Start Prisma Studio
+python scripts/manage_services.py start-all          # Start both
+
+# Stop services
+python scripts/manage_services.py stop-scheduler     # Stop collection
+python scripts/manage_services.py stop-studio        # Stop Prisma Studio
+python scripts/manage_services.py stop-all           # Stop both
+
+# Monitor services
+python scripts/manage_services.py status             # Show service status
+python scripts/manage_services.py logs               # Show recent logs
+```
+
+### **Manual Data Collection**
+
+```bash
+# Run real-time collection once
+docker-compose run --rm --no-deps data-pipeline python air-quality/main.py realtime
+
+# Run forecast collection once
+docker-compose run --rm --no-deps data-pipeline python air-quality/main.py forecast
+
+# Run both (daily collection)
+docker-compose run --rm --no-deps data-pipeline python air-quality/main.py daily
+```
+
+## 📈 Monitoring
+
+### **Logs**
+
+- Scheduler logs: `logs/air_quality_scheduler_YYYYMMDD.log`
+- System logs: `logs/air_quality_main.log`
+
+### **Database Access**
+
+- **Prisma Studio**: http://localhost:5555
+- **Direct PostgreSQL**: localhost:5432
+- **Database**: airquality
+
+### **Service Status**
+
+```bash
+python scripts/manage_services.py status
+```
+
+## 🎯 Key Features
+
+- ✅ **Automated Collection**: Runs every hour without intervention
+- ✅ **Smart Scheduling**: Aligns with hour boundaries
+- ✅ **Error Handling**: Comprehensive logging and recovery
+- ✅ **Data Validation**: Quality checks and duplicate prevention
+- ✅ **Geographic Coverage**: Full North American coverage
+- ✅ **Multiple Pollutants**: PM2.5, NO2, O3, SO2, CO, HCHO
+- ✅ **AQI Calculation**: Standardized air quality index
+- ✅ **Docker-Based**: Containerized for easy deployment
+- ✅ **Database Management**: Modern PostgreSQL with TimescaleDB
+
+## 🔮 Future Enhancements
+
+- **TEMPO Integration**: Real-time satellite data from TEMPO
+- **Multi-Level Data**: Atmospheric levels beyond surface
+- **API Endpoints**: REST API for data access
+- **Web Dashboard**: Real-time visualization
+- **Alert System**: Air quality alerts and notifications
 
 ## 🛠️ Development
 
-### Adding New Data Processing Units
+### **Adding New Pollutants**
 
-1. Create new subfolder (e.g., `wildfire/`)
-2. Implement required files:
-   - `main.py` - Main pipeline
-   - `downloader.py` - Data downloader
-   - `processor.py` - Data processor
-   - `README.md` - Unit documentation
-3. Update global `schema.prisma` if new database tables needed
-4. Add to `docker-compose.yml` if containerization needed
+1. Update `schema.prisma` with new pollutant field
+2. Update data processors to extract new data
+3. Run `docker-compose run --rm --no-deps data-pipeline python -m prisma db push`
 
-### Global Files
+### **Modifying Collection Frequency**
 
-- **`database.py`** - Shared database connection and utilities
-- **`schema.prisma`** - Database schema (shared across all units)
-- **`requirements.txt`** - Python dependencies
-- **`Dockerfile`** - Container configuration
-- **`docker-compose.yml`** - Container orchestration
+1. Edit `scripts/run_hourly_collection.py`
+2. Adjust the sleep interval in `scheduler_loop()`
 
-## 📚 Documentation
+### **Adding New Data Sources**
 
-See `docs/` folder for detailed documentation:
+1. Create new downloader in appropriate folder
+2. Update main system to include new source
+3. Add database schema if needed
 
-- `ARCHITECTURE.md` - System architecture
-- `DATA_COLLECTION_STRATEGY.md` - Data collection strategy
-- `DOCKER_README.md` - Docker setup guide
+## 📞 Support
 
-## 🔧 Configuration
+For issues or questions:
 
-Environment variables (see `env.example`):
+1. Check logs in `logs/` directory
+2. Verify service status with `python scripts/manage_services.py status`
+3. Review Docker container logs: `docker-compose logs <service-name>`
 
-- Database connection settings
-- API keys and credentials
-- Processing parameters
+---
 
-
+**🌍 Monitoring North American Air Quality with NASA GEOS-CF Data**

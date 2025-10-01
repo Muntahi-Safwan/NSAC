@@ -6,7 +6,10 @@ and determines overall AQI based on EPA methodology.
 """
 
 from typing import Optional, Dict, Tuple
-from breakpoints import AQI_BREAKPOINTS, AQI_CATEGORIES
+try:
+    from .breakpoints import AQI_BREAKPOINTS, AQI_CATEGORIES
+except ImportError:
+    from breakpoints import AQI_BREAKPOINTS, AQI_CATEGORIES
 
 
 class AQICalculator:

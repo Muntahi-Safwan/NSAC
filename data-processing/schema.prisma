@@ -35,7 +35,7 @@ model AirQualityForecast {
   aqi              Float?   // Overall Air Quality Index (0-500)
   
   // Metadata
-  source           String   @default("GEOS-CF")
+  source           String   @default("GEOS-CF-FORECAST")
   createdAt        DateTime @default(now())
   
   // Composite indexes for efficient geospatial + time queries
@@ -46,5 +46,41 @@ model AirQualityForecast {
   @@index([timestamp, latitude, longitude])
   @@index([source])
   @@map("air_quality_forecasts")
+}
+
+model AirQualityRealtime {
+  id               Int      @id @default(autoincrement())
+  timestamp        DateTime // Observation time (when measurement was taken)
+  
+  // Location (North America coverage)
+  latitude         Float    // Range: ~15°N to ~60°N
+  longitude        Float    // Range: ~-130°W to ~-60°W
+  level            Float    @default(0) // Atmospheric level (surface = 0)
+  
+  // Real-time pollutants (μg/m³ unless noted)
+  // GEOS-CF analysis data + AirNOW ground data
+  pm25             Float?   // PM2.5 - Particulate Matter (GEOS-CF analysis)
+  no2              Float?   // NO2 - Nitrogen Dioxide (GEOS-CF analysis)
+  o3               Float?   // O3 - Ozone (GEOS-CF analysis)
+  so2              Float?   // SO2 - Sulfur Dioxide (GEOS-CF analysis)
+  co               Float?   // CO - Carbon Monoxide (GEOS-CF analysis)
+  hcho             Float?   // HCHO - Formaldehyde (GEOS-CF analysis)
+  
+  // Calculated AQI (same method as forecast)
+  aqi              Float?   // Overall Air Quality Index (0-500)
+  
+  // Metadata
+  source           String   @default("GEOS-CF-ANALYSIS")
+  createdAt        DateTime @default(now())
+  
+  // Unique constraint to prevent duplicate data
+  @@unique([timestamp, latitude, longitude, source])
+  
+  // Composite indexes for efficient geospatial + time queries
+  @@index([latitude, longitude])
+  @@index([timestamp])
+  @@index([timestamp, latitude, longitude])
+  @@index([source])
+  @@map("air_quality_realtime")
 }
 

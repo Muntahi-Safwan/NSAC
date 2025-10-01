@@ -16,7 +16,7 @@ class SmartForecastDownloader:
     
     BASE_URL = "https://portal.nccs.nasa.gov/datashare/gmao/geos-cf/v1/forecast"
     
-    def __init__(self, save_dir: str = "./downloads", max_days_back: int = 5):
+    def __init__(self, save_dir: str = "forecast/downloads", max_days_back: int = 5):
         """
         Initialize the smart downloader
         

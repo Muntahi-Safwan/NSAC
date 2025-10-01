@@ -56,4 +56,9 @@ docker-compose.override.yml
 *.temp
 .cache/
 
+# Data files
+*.nc4
+*.nc
+
+
 
