@@ -275,6 +275,29 @@ class GeosCfAnalysisDatabase:
         except Exception as e:
             self.logger.error(f"Error checking data existence: {e}")
             return False
+    
+    async def check_analysis_exists(self, timestamp: datetime) -> bool:
+        """
+        Check if analysis data already exists for a specific timestamp
+        
+        Args:
+            timestamp: Analysis timestamp
+        
+        Returns:
+            True if data exists, False otherwise
+        """
+        try:
+            existing = await self.prisma.airqualityrealtime.find_first(
+                where={
+                    'timestamp': timestamp,
+                    'source': 'GEOS-CF-ANALYSIS'
+                }
+            )
+            return existing is not None
+            
+        except Exception as e:
+            self.logger.error(f"Error checking analysis existence: {e}")
+            return False
 
 
 async def main():
