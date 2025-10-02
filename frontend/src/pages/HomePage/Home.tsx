@@ -1,9 +1,11 @@
-import { ArrowDown, Satellite, BarChart3, Shield, ChevronRight, MapPin, Map, Zap, Globe, Users, Brain, TrendingUp, CheckCircle, Star, Award, Target } from 'lucide-react';
+import { ArrowDown, Satellite, BarChart3, Shield, ChevronRight, MapPin, Map, Zap, Globe, Users, Brain, TrendingUp, CheckCircle, Star, Award, Target, Building2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AQISpeedometer from '../../components/AQISpeedometer';
 import PollutantDetails from '../../components/PollutantDetails';
 import { PastTrendChart, FutureTrendChart } from '../../components/TrendCharts';
 import AIChatbot from '../../components/AIChatbot';
+import AITipOfTheDay from '../../components/AITipOfTheDay';
+import AILocationInsights from '../../components/AILocationInsights';
 import { mockAQIData, mockPollutants, northAmericaLocation } from '../../data/mockData';
 
 const Home = () => {
@@ -70,6 +72,21 @@ const Home = () => {
         </div>
       </div>
 
+      {/* AI Insights Section */}
+      <div className="relative py-8 md:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+            <AITipOfTheDay />
+            <AILocationInsights
+              location={northAmericaLocation.name}
+              aqi={mockAQIData.aqi}
+              pm25={mockPollutants.find(p => p.name === 'PM2.5')?.value}
+              no2={mockPollutants.find(p => p.name === 'NO₂')?.value}
+              o3={mockPollutants.find(p => p.name === 'O₃')?.value}
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Predictive Analytics Section - Peeks from bottom */}
       <div className="relative">
@@ -360,6 +377,188 @@ const Home = () => {
                   Learn More About Our Technology
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* NGO Partnership Section */}
+      <section className="relative py-20 lg:py-32 overflow-hidden">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left Side - Content */}
+            <div>
+              <div className="inline-flex items-center px-4 py-2 bg-green-500/10 backdrop-blur-xl border border-green-400/20 rounded-full mb-6">
+                <Shield className="w-4 h-4 text-green-400 mr-2" />
+                <span className="text-green-300 font-semibold text-sm">Community Protection</span>
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-black text-white mb-6">
+                Protecting Communities
+                <span className="block bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent">
+                  Together
+                </span>
+              </h2>
+
+              <p className="text-lg text-white/80 mb-8 leading-relaxed">
+                Join our network of NGOs and non-profit organizations dedicated to protecting communities
+                from environmental hazards. Get the tools you need to save lives during disasters and air quality emergencies.
+              </p>
+
+              <div className="space-y-4 mb-8">
+                {[
+                  { icon: Users, text: "Instant regional alerts to thousands of users" },
+                  { icon: Shield, text: "Real-time safety status tracking" },
+                  { icon: MapPin, text: "Location-based emergency notifications" },
+                  { icon: BarChart3, text: "Dashboard for community management" }
+                ].map((feature, index) => (
+                  <div key={index} className="flex items-start space-x-3 group">
+                    <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                      <feature.icon className="w-5 h-5 text-white" />
+                    </div>
+                    <p className="text-white/90 text-base pt-2 group-hover:text-green-300 transition-colors">
+                      {feature.text}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link
+                  to="/ngo/register"
+                  className="group relative bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-400 hover:to-teal-500 text-white font-display font-bold text-base px-8 py-4 rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-green-500/30 flex items-center justify-center space-x-2"
+                >
+                  <Building2 className="w-5 h-5" />
+                  <span>Register Your NGO</span>
+                  <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                </Link>
+                <Link
+                  to="/ngo/login"
+                  className="text-white/80 hover:text-white font-semibold text-base px-8 py-4 border border-white/[0.1] hover:border-green-400/50 rounded-2xl transition-all duration-300 flex items-center justify-center"
+                >
+                  Already registered? Sign in
+                </Link>
+              </div>
+            </div>
+
+            {/* Right Side - Image Grid */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <div className="group relative h-48 rounded-2xl overflow-hidden">
+                  <img
+                    src="https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=600&q=80"
+                    alt="NGO volunteers helping community"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                </div>
+                <div className="group relative h-64 rounded-2xl overflow-hidden">
+                  <img
+                    src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=600&q=80"
+                    alt="Disaster response team"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                </div>
+              </div>
+              <div className="space-y-4 pt-8">
+                <div className="group relative h-64 rounded-2xl overflow-hidden">
+                  <img
+                    src="https://images.unsplash.com/photo-1593113598332-cd288d649433?w=600&q=80"
+                    alt="Community support"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                </div>
+                <div className="group relative h-48 rounded-2xl overflow-hidden">
+                  <img
+                    src="https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=600&q=80"
+                    alt="Environmental protection"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="relative py-20 lg:py-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-black text-white mb-6">
+              Trusted by Communities
+              <span className="block bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                Worldwide
+              </span>
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80",
+                name: "Dr. Sarah Chen",
+                role: "Environmental Scientist",
+                quote: "This platform has revolutionized how we monitor air quality in our region."
+              },
+              {
+                img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80",
+                name: "Michael Rodriguez",
+                role: "City Health Official",
+                quote: "The real-time alerts have helped us make critical decisions for public safety."
+              },
+              {
+                img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+                name: "Dr. Amina Patel",
+                role: "Public Health Director",
+                quote: "AI-powered insights make complex data accessible to everyone in our community."
+              }
+            ].map((testimonial, index) => (
+              <div key={index} className="bg-white/[0.05] backdrop-blur-xl border border-white/[0.1] rounded-3xl p-6">
+                <div className="flex items-center space-x-4 mb-4">
+                  <img
+                    src={testimonial.img}
+                    alt={testimonial.name}
+                    className="w-16 h-16 rounded-full object-cover"
+                  />
+                  <div>
+                    <h4 className="text-white font-semibold">{testimonial.name}</h4>
+                    <p className="text-blue-300 text-sm">{testimonial.role}</p>
+                  </div>
+                </div>
+                <p className="text-blue-200 italic">"{testimonial.quote}"</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="relative py-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 backdrop-blur-xl border border-cyan-400/30 rounded-3xl p-12">
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">
+              Start Protecting Your Community Today
+            </h2>
+            <p className="text-blue-200 text-lg mb-8">
+              Join thousands using AI-powered air quality monitoring
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                to="/auth/signup"
+                className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-semibold rounded-xl transition-all shadow-lg"
+              >
+                Get Started Free
+              </Link>
+              <Link
+                to="/map"
+                className="px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold rounded-xl transition-all"
+              >
+                Explore Data
+              </Link>
             </div>
           </div>
         </div>

@@ -14,6 +14,8 @@ import {
   Plus,
   Trash2
 } from 'lucide-react';
+import { useNGOAuth } from '../../contexts/NGOAuthContext';
+import Background from '../../components/Background';
 
 interface NGOData {
   id: string;
@@ -48,7 +50,6 @@ interface Notification {
 }
 
 const NGODashboard: React.FC = () => {
-  const [ngoData, setNgoData] = useState<NGOData | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -60,22 +61,21 @@ const NGODashboard: React.FC = () => {
     isAlert: false
   });
   const navigate = useNavigate();
+  const { ngo, isNGOAuthenticated, logoutNGO } = useNGOAuth();
 
   useEffect(() => {
-    const storedNGOData = localStorage.getItem('ngoData');
-    if (!storedNGOData) {
+    if (!isNGOAuthenticated) {
       navigate('/ngo/login');
       return;
     }
 
-    const ngo = JSON.parse(storedNGOData);
-    setNgoData(ngo);
-
-    // Fetch dashboard data
-    fetchStats(ngo.id);
-    fetchUsers(ngo.id);
-    fetchNotifications(ngo.id);
-  }, [navigate]);
+    if (ngo) {
+      // Fetch dashboard data
+      fetchStats(ngo.id);
+      fetchUsers(ngo.id);
+      fetchNotifications(ngo.id);
+    }
+  }, [ngo, isNGOAuthenticated, navigate]);
 
   const fetchStats = async (ngoId: string) => {
     try {
@@ -112,11 +112,11 @@ const NGODashboard: React.FC = () => {
 
   const handleSendNotification = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!ngoData) return;
+    if (!ngo) return;
 
     try {
       const response = await axios.post('http://localhost:3000/api/notifications/create', {
-        ngoId: ngoData.id,
+        ngoId: ngo.id,
         ...notificationForm
       });
 
@@ -128,8 +128,8 @@ const NGODashboard: React.FC = () => {
           severity: 'info',
           isAlert: false
         });
-        fetchNotifications(ngoData.id);
-        fetchStats(ngoData.id);
+        fetchNotifications(ngo.id);
+        fetchStats(ngo.id);
       }
     } catch (error) {
       console.error('Error sending notification:', error);
@@ -138,8 +138,7 @@ const NGODashboard: React.FC = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('ngoToken');
-    localStorage.removeItem('ngoData');
+    logoutNGO();
     navigate('/ngo/login');
   };
 
@@ -156,16 +155,19 @@ const NGODashboard: React.FC = () => {
     }
   };
 
-  if (!ngoData || !stats) {
+  if (!ngo || !stats) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
+      <Background>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-white text-xl">Loading...</div>
+        </div>
+      </Background>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 p-4 md:p-8">
+    <Background>
+      <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
@@ -175,9 +177,9 @@ const NGODashboard: React.FC = () => {
             </div>
             <div>
               <h1 className="text-2xl md:text-3xl font-display font-bold text-white">
-                {ngoData.name}
+                {ngo.name}
               </h1>
-              <p className="text-blue-200">{ngoData.region}</p>
+              <p className="text-blue-200">{ngo.region}</p>
             </div>
           </div>
           <div className="flex space-x-3">
@@ -406,7 +408,8 @@ const NGODashboard: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </Background>
   );
 };
 

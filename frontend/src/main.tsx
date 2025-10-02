@@ -5,17 +5,20 @@ import './index.css'
 import { RouterProvider } from 'react-router'
 import { router } from './routes/Routes.tsx'
 import { AuthProvider } from './contexts/AuthContext.tsx'
+import { NGOAuthProvider } from './contexts/NGOAuthContext.tsx'
 import { NotificationProvider } from './contexts/NotificationContext.tsx'
 import { AirQualityProvider } from './contexts/AirQualityContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AuthProvider>
-      <NotificationProvider>
-        <AirQualityProvider autoRefreshInterval={5 * 60 * 1000}>
-          <RouterProvider router={router} />
-        </AirQualityProvider>
-      </NotificationProvider>
+      <NGOAuthProvider>
+        <NotificationProvider>
+          <AirQualityProvider autoRefreshInterval={5 * 60 * 1000}>
+            <RouterProvider router={router} />
+          </AirQualityProvider>
+        </NotificationProvider>
+      </NGOAuthProvider>
     </AuthProvider>
   </StrictMode>,
 )

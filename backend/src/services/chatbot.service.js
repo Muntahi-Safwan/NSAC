@@ -262,7 +262,6 @@ Never:
       throw new Error('Failed to explain air quality metric');
     }
   }
-}
 
   /**
    * Generate daily AI tip

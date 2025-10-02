@@ -11,6 +11,10 @@ import Login from "../pages/AuthPage/Login";
 import Signup from "../pages/AuthPage/Signup";
 import ErrorBoundary from "../components/ErrorBoundary";
 import ProtectedRoute from "../components/ProtectedRoute";
+import NGOLogin from "../pages/NGO/NGOLogin";
+import NGORegister from "../pages/NGO/NGORegister";
+import NGODashboard from "../pages/NGO/NGODashboard";
+import QuizPage from "../pages/QuizPage/QuizPage";
 
 export const router = createBrowserRouter([
     {
@@ -43,6 +47,10 @@ export const router = createBrowserRouter([
                 element: <ArticlePage />
             },
             {
+                path: "/quiz",
+                element: <QuizPage />
+            },
+            {
                 path: "/profile",
                 element: (
                     <ProtectedRoute>
@@ -67,5 +75,17 @@ export const router = createBrowserRouter([
     {
         path: "/signup",
         element: <Signup />
+    },
+    {
+        path: "/ngo/login",
+        element: <NGOLogin />
+    },
+    {
+        path: "/ngo/register",
+        element: <NGORegister />
+    },
+    {
+        path: "/ngo/dashboard",
+        element: <NGODashboard />
     }
 ]);

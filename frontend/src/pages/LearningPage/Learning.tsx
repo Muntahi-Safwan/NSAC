@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Search, Filter, Calendar, Clock, User, ChevronRight, BookOpen, Shield, TrendingUp, AlertTriangle, Brain, Sparkles, Zap, Target, Lightbulb, MessageCircle } from 'lucide-react';
 import { blogPosts, articles, categories, articleTypes } from '../../data/blogData';
 import type { BlogPost, Article } from '../../data/blogData';
 import AIChatbot from '../../components/AIChatbot';
+import QuizCard from '../../components/Quiz/QuizCard';
 
 const Learning = () => {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedType, setSelectedType] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -278,6 +280,49 @@ const Learning = () => {
                 </Link>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Quiz Section */}
+      <section className="relative py-16 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-indigo-500/5 to-cyan-500/5" />
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-cyan-500/20 backdrop-blur-xl border border-blue-400/30 rounded-full mb-6">
+              <Lightbulb className="w-4 h-4 text-blue-400 mr-2" />
+              <span className="text-blue-300 font-semibold text-sm">Test Your Knowledge</span>
+            </div>
+
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-black text-white mb-4">
+              Challenge Yourself with
+              <span className="block bg-gradient-to-r from-blue-400 via-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+                AI-Powered Quizzes
+              </span>
+            </h2>
+
+            <p className="text-lg text-white/80 max-w-3xl mx-auto">
+              Take adaptive quizzes that adjust to your knowledge level and help you master air quality concepts
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <QuizCard
+              category="air_quality"
+              difficulty="beginner"
+              onStart={() => navigate('/quiz')}
+            />
+            <QuizCard
+              category="health"
+              difficulty="intermediate"
+              onStart={() => navigate('/quiz')}
+            />
+            <QuizCard
+              category="environment"
+              difficulty="advanced"
+              onStart={() => navigate('/quiz')}
+            />
           </div>
         </div>
       </section>

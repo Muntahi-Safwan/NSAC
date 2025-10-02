@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { User, LogIn, MapPin, LogOut, UserCircle, ChevronDown, Bell, X, CheckCheck } from 'lucide-react';
+import { User, LogIn, MapPin, LogOut, UserCircle, ChevronDown, Bell, X, CheckCheck, Building2, Shield } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useNGOAuth } from '../contexts/NGOAuthContext';
 import { useNotifications } from '../contexts/NotificationContext';
 
 const Navbar = () => {
@@ -11,7 +12,8 @@ const Navbar = () => {
   const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout: userLogout, isAuthenticated: isUserAuthenticated } = useAuth();
+  const { ngo, logoutNGO, isNGOAuthenticated } = useNGOAuth();
   const { notifications, unreadCount, markAsRead, markAllAsRead, clearNotification } = useNotifications();
   const notificationRef = useRef<HTMLDivElement>(null);
 
@@ -42,9 +44,14 @@ const Navbar = () => {
   }, [notificationDropdownOpen]);
 
   const handleLogout = () => {
-    logout();
+    if (isNGOAuthenticated) {
+      logoutNGO();
+      navigate('/ngo/login');
+    } else {
+      userLogout();
+      navigate('/');
+    }
     setProfileDropdownOpen(false);
-    navigate('/');
   };
 
   const getNotificationIcon = (type: string) => {
@@ -75,6 +82,11 @@ const Navbar = () => {
     { name: 'Learning', href: '/learning' },
     { name: 'Contact', href: '/contact' },
   ];
+
+  const isAuthenticated = isUserAuthenticated || isNGOAuthenticated;
+  const displayName = isNGOAuthenticated
+    ? ngo?.name
+    : (user?.firstName || user?.email?.split('@')[0]);
 
   return (
     <>
@@ -132,114 +144,140 @@ const Navbar = () => {
             <div className="flex items-center space-x-4">
               {isAuthenticated ? (
                 <>
-                  {/* Notification Icon */}
-                  <div className="relative" ref={notificationRef}>
-                    <button
-                      onClick={() => setNotificationDropdownOpen(!notificationDropdownOpen)}
-                      className="relative p-2.5 text-gray-300 hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
-                    >
-                      <Bell className="w-5 h-5" />
-                      {unreadCount > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse shadow-lg">
-                          {unreadCount > 9 ? '9+' : unreadCount}
-                        </span>
-                      )}
-                    </button>
+                  {/* Notification Icon - Only for Users */}
+                  {isUserAuthenticated && (
+                    <div className="relative" ref={notificationRef}>
+                      <button
+                        onClick={() => setNotificationDropdownOpen(!notificationDropdownOpen)}
+                        className="relative p-2.5 text-gray-300 hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
+                      >
+                        <Bell className="w-5 h-5" />
+                        {unreadCount > 0 && (
+                          <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse shadow-lg">
+                            {unreadCount > 9 ? '9+' : unreadCount}
+                          </span>
+                        )}
+                      </button>
 
-                    {/* Notification Dropdown */}
-                    {notificationDropdownOpen && (
-                      <div className="absolute right-0 mt-2 w-80 max-h-[32rem] bg-black/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50">
-                        {/* Header */}
-                        <div className="sticky top-0 bg-black/95 border-b border-white/10 px-4 py-3">
-                          <div className="flex items-center justify-between">
-                            <h3 className="font-grotesk font-semibold text-white text-lg">
-                              Notifications
-                            </h3>
-                            {notifications.length > 0 && (
-                              <button
-                                onClick={markAllAsRead}
-                                className="text-xs text-blue-400 hover:text-blue-300 transition-colors flex items-center space-x-1"
-                              >
-                                <CheckCheck className="w-3 h-3" />
-                                <span>Mark all read</span>
-                              </button>
+                      {/* Notification Dropdown */}
+                      {notificationDropdownOpen && (
+                        <div className="absolute right-0 mt-2 w-80 max-h-[32rem] bg-black/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50">
+                          <div className="sticky top-0 bg-black/95 border-b border-white/10 px-4 py-3">
+                            <div className="flex items-center justify-between">
+                              <h3 className="font-grotesk font-semibold text-white text-lg">
+                                Notifications
+                              </h3>
+                              {notifications.length > 0 && (
+                                <button
+                                  onClick={markAllAsRead}
+                                  className="text-xs text-blue-400 hover:text-blue-300 transition-colors flex items-center space-x-1"
+                                >
+                                  <CheckCheck className="w-3 h-3" />
+                                  <span>Mark all read</span>
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="overflow-y-auto max-h-96">
+                            {notifications.length === 0 ? (
+                              <div className="px-4 py-8 text-center text-gray-400">
+                                <Bell className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                                <p className="font-grotesk">No notifications yet</p>
+                              </div>
+                            ) : (
+                              notifications.map((notification) => (
+                                <div
+                                  key={notification.id}
+                                  className={`px-4 py-3 border-b border-white/5 hover:bg-white/5 transition-all duration-300 cursor-pointer ${
+                                    !notification.read ? 'bg-blue-500/5' : ''
+                                  }`}
+                                  onClick={() => markAsRead(notification.id)}
+                                >
+                                  <div className="flex items-start justify-between space-x-3">
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center space-x-2 mb-1">
+                                        <span className="text-lg">{getNotificationIcon(notification.type)}</span>
+                                        <h4 className="font-grotesk font-medium text-white text-sm truncate">
+                                          {notification.title}
+                                        </h4>
+                                        {!notification.read && (
+                                          <span className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full"></span>
+                                        )}
+                                      </div>
+                                      <p className="text-xs text-gray-400 line-clamp-2 mb-1">
+                                        {notification.message}
+                                      </p>
+                                      <span className="text-xs text-gray-500">
+                                        {getTimeAgo(notification.timestamp)}
+                                      </span>
+                                    </div>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        clearNotification(notification.id);
+                                      }}
+                                      className="flex-shrink-0 text-gray-400 hover:text-red-400 transition-colors"
+                                    >
+                                      <X className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))
                             )}
                           </div>
                         </div>
-
-                        {/* Notifications List */}
-                        <div className="overflow-y-auto max-h-96">
-                          {notifications.length === 0 ? (
-                            <div className="px-4 py-8 text-center text-gray-400">
-                              <Bell className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                              <p className="font-grotesk">No notifications yet</p>
-                            </div>
-                          ) : (
-                            notifications.map((notification) => (
-                              <div
-                                key={notification.id}
-                                className={`px-4 py-3 border-b border-white/5 hover:bg-white/5 transition-all duration-300 cursor-pointer ${
-                                  !notification.read ? 'bg-blue-500/5' : ''
-                                }`}
-                                onClick={() => markAsRead(notification.id)}
-                              >
-                                <div className="flex items-start justify-between space-x-3">
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center space-x-2 mb-1">
-                                      <span className="text-lg">{getNotificationIcon(notification.type)}</span>
-                                      <h4 className="font-grotesk font-medium text-white text-sm truncate">
-                                        {notification.title}
-                                      </h4>
-                                      {!notification.read && (
-                                        <span className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full"></span>
-                                      )}
-                                    </div>
-                                    <p className="text-xs text-gray-400 line-clamp-2 mb-1">
-                                      {notification.message}
-                                    </p>
-                                    <span className="text-xs text-gray-500">
-                                      {getTimeAgo(notification.timestamp)}
-                                    </span>
-                                  </div>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      clearNotification(notification.id);
-                                    }}
-                                    className="flex-shrink-0 text-gray-400 hover:text-red-400 transition-colors"
-                                  >
-                                    <X className="w-4 h-4" />
-                                  </button>
-                                </div>
-                              </div>
-                            ))
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Profile Dropdown */}
                   <div className="relative">
                     <button
                       onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                      className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-2.5 rounded-full transition-all duration-300 font-grotesk font-medium text-white"
+                      className={`flex items-center space-x-2 ${
+                        isNGOAuthenticated
+                          ? 'bg-gradient-to-r from-green-500/20 to-teal-500/20 border-green-400/30'
+                          : 'bg-white/10 border-white/20'
+                      } hover:bg-white/20 border px-4 py-2.5 rounded-full transition-all duration-300 font-grotesk font-medium text-white`}
                     >
-                      <UserCircle className="w-5 h-5" />
-                      <span>{user?.firstName || user?.email?.split('@')[0]}</span>
+                      {isNGOAuthenticated ? (
+                        <Building2 className="w-5 h-5 text-green-400" />
+                      ) : (
+                        <UserCircle className="w-5 h-5" />
+                      )}
+                      <span className="max-w-[150px] truncate">{displayName}</span>
                       <ChevronDown className={`w-4 h-4 transition-transform ${profileDropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
 
                     {profileDropdownOpen && (
-                      <div className="absolute right-0 mt-2 w-48 bg-black/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50">
-                        <Link
-                          to="/profile"
-                          onClick={() => setProfileDropdownOpen(false)}
-                          className="flex items-center space-x-3 px-4 py-3 hover:bg-white/10 transition-all duration-300 text-white"
-                        >
-                          <User className="w-4 h-4" />
-                          <span>Profile</span>
-                        </Link>
+                      <div className="absolute right-0 mt-2 w-56 bg-black/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50">
+                        {isNGOAuthenticated ? (
+                          <>
+                            <div className="px-4 py-3 border-b border-white/10">
+                              <p className="text-xs text-gray-400">NGO Account</p>
+                              <p className="text-sm text-white font-medium truncate">{ngo?.name}</p>
+                              <p className="text-xs text-blue-300">{ngo?.region}</p>
+                            </div>
+                            <Link
+                              to="/ngo/dashboard"
+                              onClick={() => setProfileDropdownOpen(false)}
+                              className="flex items-center space-x-3 px-4 py-3 hover:bg-white/10 transition-all duration-300 text-white"
+                            >
+                              <Shield className="w-4 h-4" />
+                              <span>Dashboard</span>
+                            </Link>
+                          </>
+                        ) : (
+                          <Link
+                            to="/profile"
+                            onClick={() => setProfileDropdownOpen(false)}
+                            className="flex items-center space-x-3 px-4 py-3 hover:bg-white/10 transition-all duration-300 text-white"
+                          >
+                            <User className="w-4 h-4" />
+                            <span>Profile</span>
+                          </Link>
+                        )}
                         <button
                           onClick={handleLogout}
                           className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-red-500/10 transition-all duration-300 text-red-400"
@@ -288,7 +326,7 @@ const Navbar = () => {
             )}
           </button>
         </div>
-        
+
         {/* Elegant bottom line */}
         <div className={`absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent transition-opacity duration-500 ${
           scrolled ? 'opacity-100' : 'opacity-30'
@@ -313,79 +351,30 @@ const Navbar = () => {
                 <span>{item.name}</span>
               </Link>
             ))}
-            
+
             <div className="pt-6 space-y-3">
               {isAuthenticated ? (
                 <>
-                  {/* Mobile Notifications */}
-                  <div className="w-full bg-white/5 border border-white/10 rounded-2xl p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-2">
-                        <Bell className="w-5 h-5 text-white" />
-                        <h4 className="font-grotesk font-semibold text-white">Notifications</h4>
-                        {unreadCount > 0 && (
-                          <span className="bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                            {unreadCount > 9 ? '9+' : unreadCount}
-                          </span>
-                        )}
-                      </div>
-                      {notifications.length > 0 && (
-                        <button
-                          onClick={markAllAsRead}
-                          className="text-xs text-blue-400 hover:text-blue-300 transition-colors flex items-center space-x-1"
-                        >
-                          <CheckCheck className="w-3 h-3" />
-                          <span>Mark all read</span>
-                        </button>
-                      )}
-                    </div>
-                    <div className="space-y-2 max-h-64 overflow-y-auto">
-                      {notifications.length === 0 ? (
-                        <p className="text-center text-gray-400 text-sm py-4">No notifications</p>
-                      ) : (
-                        notifications.slice(0, 5).map((notification) => (
-                          <div
-                            key={notification.id}
-                            className={`p-3 rounded-xl hover:bg-white/5 transition-all cursor-pointer ${
-                              !notification.read ? 'bg-blue-500/10' : 'bg-white/5'
-                            }`}
-                            onClick={() => markAsRead(notification.id)}
-                          >
-                            <div className="flex items-start space-x-2">
-                              <span className="text-sm">{getNotificationIcon(notification.type)}</span>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center space-x-2">
-                                  <h5 className="text-xs font-medium text-white truncate">{notification.title}</h5>
-                                  {!notification.read && (
-                                    <span className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full"></span>
-                                  )}
-                                </div>
-                                <p className="text-xs text-gray-400 line-clamp-2">{notification.message}</p>
-                                <span className="text-xs text-gray-500">{getTimeAgo(notification.timestamp)}</span>
-                              </div>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  clearNotification(notification.id);
-                                }}
-                                className="text-gray-400 hover:text-red-400"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-
                   <Link
-                    to="/profile"
+                    to={isNGOAuthenticated ? "/ngo/dashboard" : "/profile"}
                     onClick={() => setIsOpen(false)}
-                    className="w-full flex items-center justify-center space-x-2 text-white border border-white/20 bg-white/10 px-8 py-4 rounded-2xl transition-all duration-300"
+                    className={`w-full flex items-center justify-center space-x-2 text-white border px-8 py-4 rounded-2xl transition-all duration-300 ${
+                      isNGOAuthenticated
+                        ? 'border-green-400/30 bg-gradient-to-r from-green-500/20 to-teal-500/20'
+                        : 'border-white/20 bg-white/10'
+                    }`}
                   >
-                    <UserCircle className="w-5 h-5" />
-                    <span>{user?.firstName || user?.email?.split('@')[0]}</span>
+                    {isNGOAuthenticated ? (
+                      <>
+                        <Building2 className="w-5 h-5" />
+                        <span className="truncate max-w-[200px]">{ngo?.name}</span>
+                      </>
+                    ) : (
+                      <>
+                        <UserCircle className="w-5 h-5" />
+                        <span>{displayName}</span>
+                      </>
+                    )}
                   </Link>
                   <button
                     onClick={() => {
