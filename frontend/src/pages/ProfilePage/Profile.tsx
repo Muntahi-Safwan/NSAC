@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import {
-  User,
+  User as UserIcon,
   Mail,
   Phone,
   Calendar,
@@ -17,10 +18,14 @@ import {
   Twitter,
   Linkedin,
   Instagram,
-  Globe
+  Globe,
+  Heart,
+  MapPin
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import authService from '../../services/auth.service';
+import { DISEASES, ALLERGIES } from '../../constants/healthOptions';
+import LocationTracker from '../../components/LocationTracker';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -30,9 +35,14 @@ const Profile = () => {
     firstName: '',
     lastName: '',
     email: '',
+    age: '',
   });
 
   const [phoneNumbers, setPhoneNumbers] = useState<string[]>([]);
+  const [primaryPhone, setPrimaryPhone] = useState('');
+  const [diseases, setDiseases] = useState<string[]>([]);
+  const [allergies, setAllergies] = useState<string[]>([]);
+  const [location, setLocation] = useState<any>(null);
   const [socialUsernames, setSocialUsernames] = useState({
     twitter: '',
     linkedin: '',
@@ -46,59 +56,71 @@ const Profile = () => {
 
   useEffect(() => {
     if (authUser) {
-      setProfileData({
-        firstName: authUser.firstName || '',
-        lastName: authUser.lastName || '',
-        email: authUser.email || '',
-      });
-      setPhoneNumbers(authUser.phoneNumbers || []);
-      setSocialUsernames({
-        twitter: authUser.socialUsernames?.twitter || '',
-        linkedin: authUser.socialUsernames?.linkedin || '',
-        github: authUser.socialUsernames?.github || '',
-        instagram: authUser.socialUsernames?.instagram || '',
-      });
+      fetchProfile();
     }
   }, [authUser]);
+
+  const fetchProfile = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/user/profile/${authUser?.id}`);
+      if (response.data.success) {
+        const userData = response.data.data.user;
+        setProfileData({
+          firstName: userData.firstName || '',
+          lastName: userData.lastName || '',
+          email: userData.email || '',
+          age: userData.age?.toString() || '',
+        });
+        setPhoneNumbers(userData.phoneNumbers || []);
+        setPrimaryPhone(userData.primaryPhone || '');
+        setDiseases(userData.diseases || []);
+        setAllergies(userData.allergies || []);
+        setLocation(userData.lastLocation || null);
+        setSocialUsernames({
+          twitter: userData.socialUsernames?.twitter || '',
+          linkedin: userData.socialUsernames?.linkedin || '',
+          github: userData.socialUsernames?.github || '',
+          instagram: userData.socialUsernames?.instagram || '',
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
 
   const handleSave = async () => {
     setSaveStatus('saving');
     setErrorMessage('');
 
     try {
-      const response = await authService.updateProfile({
+      // Update profile with new fields
+      const response = await axios.put('http://localhost:3000/api/user/profile', {
+        userId: authUser?.id,
         firstName: profileData.firstName,
         lastName: profileData.lastName,
         phoneNumbers,
+        primaryPhone,
         socialUsernames,
+        age: profileData.age ? parseInt(profileData.age) : undefined,
+        diseases,
+        allergies
       });
 
-      updateUser(response.data.user);
-      setIsEditing(false);
-      setSaveStatus('saved');
-      setTimeout(() => setSaveStatus('idle'), 3000);
+      if (response.data.success) {
+        updateUser(response.data.data.user);
+        setIsEditing(false);
+        setSaveStatus('saved');
+        setTimeout(() => setSaveStatus('idle'), 3000);
+      }
     } catch (error: any) {
       setSaveStatus('error');
-      setErrorMessage(error.response?.data?.message || 'Failed to update profile');
+      setErrorMessage(error.response?.data?.error || 'Failed to update profile');
       setTimeout(() => setSaveStatus('idle'), 3000);
     }
   };
 
   const handleCancel = () => {
-    if (authUser) {
-      setProfileData({
-        firstName: authUser.firstName || '',
-        lastName: authUser.lastName || '',
-        email: authUser.email || '',
-      });
-      setPhoneNumbers(authUser.phoneNumbers || []);
-      setSocialUsernames({
-        twitter: authUser.socialUsernames?.twitter || '',
-        linkedin: authUser.socialUsernames?.linkedin || '',
-        github: authUser.socialUsernames?.github || '',
-        instagram: authUser.socialUsernames?.instagram || '',
-      });
-    }
+    fetchProfile();
     setIsEditing(false);
     setSaveStatus('idle');
     setErrorMessage('');
@@ -111,8 +133,27 @@ const Profile = () => {
     }
   };
 
-  const removePhoneNumber = (index: number) => {
-    setPhoneNumbers(phoneNumbers.filter((_, i) => i !== index));
+  const removePhoneNumber = (phone: string) => {
+    setPhoneNumbers(phoneNumbers.filter(p => p !== phone));
+    if (primaryPhone === phone) {
+      setPrimaryPhone('');
+    }
+  };
+
+  const toggleDisease = (disease: string) => {
+    setDiseases(
+      diseases.includes(disease)
+        ? diseases.filter(d => d !== disease)
+        : [...diseases, disease]
+    );
+  };
+
+  const toggleAllergy = (allergy: string) => {
+    setAllergies(
+      allergies.includes(allergy)
+        ? allergies.filter(a => a !== allergy)
+        : [...allergies, allergy]
+    );
   };
 
   const handleLogout = () => {
@@ -185,11 +226,11 @@ const Profile = () => {
                 <span>Edit Profile</span>
               </button>
             ) : (
-              <div className="flex space-x-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={handleCancel}
                   disabled={saveStatus === 'saving'}
-                  className="flex items-center space-x-2 px-4 py-2 bg-white/[0.05] hover:bg-white/[0.1] text-white/60 rounded-xl transition-colors disabled:opacity-50"
+                  className="flex items-center justify-center space-x-2 px-4 py-2 bg-white/[0.05] hover:bg-white/[0.1] text-white/60 rounded-xl transition-colors disabled:opacity-50"
                 >
                   <X className="w-4 h-4" />
                   <span>Cancel</span>
@@ -197,7 +238,7 @@ const Profile = () => {
                 <button
                   onClick={handleSave}
                   disabled={saveStatus === 'saving'}
-                  className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-xl transition-colors disabled:opacity-50"
+                  className="flex items-center justify-center space-x-2 px-4 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-xl transition-colors disabled:opacity-50"
                 >
                   {saveStatus === 'saving' ? (
                     <>
@@ -218,7 +259,7 @@ const Profile = () => {
           {/* Basic Info */}
           <div className="space-y-6 mb-8">
             <h2 className="text-xl font-semibold text-white flex items-center space-x-2">
-              <User className="w-5 h-5" />
+              <UserIcon className="w-5 h-5" />
               <span>Basic Information</span>
             </h2>
 
@@ -258,26 +299,44 @@ const Profile = () => {
                   </p>
                 )}
               </div>
-            </div>
 
-            {/* Email */}
-            <div>
-              <label className="block text-white/70 text-sm mb-2 flex items-center space-x-2">
-                <Mail className="w-4 h-4" />
-                <span>Email Address</span>
-              </label>
-              <p className="text-white px-4 py-3 bg-white/[0.02] rounded-xl">
-                {profileData.email}
-              </p>
-              <p className="text-white/40 text-xs mt-1">Email cannot be changed</p>
+              {/* Age */}
+              <div>
+                <label className="block text-white/70 text-sm mb-2 flex items-center space-x-2">
+                  <Calendar className="w-4 h-4" />
+                  <span>Age</span>
+                </label>
+                {isEditing ? (
+                  <input
+                    type="number"
+                    value={profileData.age}
+                    onChange={(e) => setProfileData({ ...profileData, age: e.target.value })}
+                    className="w-full px-4 py-3 bg-white/[0.05] border border-white/[0.1] rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter age"
+                  />
+                ) : (
+                  <p className="text-white px-4 py-3 bg-white/[0.02] rounded-xl">
+                    {profileData.age || 'Not set'}
+                  </p>
+                )}
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-white/70 text-sm mb-2 flex items-center space-x-2">
+                  <Mail className="w-4 h-4" />
+                  <span>Email Address</span>
+                </label>
+                <p className="text-white px-4 py-3 bg-white/[0.02] rounded-xl">
+                  {profileData.email}
+                </p>
+                <p className="text-white/40 text-xs mt-1">Email cannot be changed</p>
+              </div>
             </div>
 
             {/* Join Date */}
             <div>
-              <label className="block text-white/70 text-sm mb-2 flex items-center space-x-2">
-                <Calendar className="w-4 h-4" />
-                <span>Member Since</span>
-              </label>
+              <label className="block text-white/70 text-sm mb-2">Member Since</label>
               <p className="text-white px-4 py-3 bg-white/[0.02] rounded-xl">
                 {authUser.createdAt ? new Date(authUser.createdAt).toLocaleDateString() : 'N/A'}
               </p>
@@ -291,15 +350,48 @@ const Profile = () => {
               <span>Phone Numbers</span>
             </h2>
 
+            {isEditing && (
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-4">
+                <input
+                  type="tel"
+                  value={newPhone}
+                  onChange={(e) => setNewPhone(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && addPhoneNumber()}
+                  placeholder="Add new phone number"
+                  className="flex-1 px-4 py-3 bg-white/[0.05] border border-white/[0.1] rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  onClick={addPhoneNumber}
+                  className="px-4 py-3 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-xl transition-colors"
+                >
+                  <Plus className="w-5 h-5" />
+                </button>
+              </div>
+            )}
+
             <div className="space-y-3">
               {phoneNumbers.map((phone, index) => (
-                <div key={index} className="flex items-center space-x-3">
-                  <div className="flex-1 px-4 py-3 bg-white/[0.02] rounded-xl text-white">
-                    {phone}
+                <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 bg-white/[0.02] rounded-xl">
+                  <div className="flex-1 w-full">
+                    <div className="text-white font-medium">{phone}</div>
+                    {isEditing && (
+                      <label className="flex items-center space-x-2 mt-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          checked={primaryPhone === phone}
+                          onChange={() => setPrimaryPhone(phone)}
+                          className="w-4 h-4 text-blue-500 focus:ring-blue-400/50"
+                        />
+                        <span className="text-white/70 text-sm">Primary (for SMS alerts)</span>
+                      </label>
+                    )}
+                    {!isEditing && primaryPhone === phone && (
+                      <span className="text-blue-400 text-sm">Primary (for SMS alerts)</span>
+                    )}
                   </div>
                   {isEditing && (
                     <button
-                      onClick={() => removePhoneNumber(index)}
+                      onClick={() => removePhoneNumber(phone)}
                       className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -308,27 +400,78 @@ const Profile = () => {
                 </div>
               ))}
 
-              {isEditing && (
-                <div className="flex items-center space-x-3">
-                  <input
-                    type="tel"
-                    value={newPhone}
-                    onChange={(e) => setNewPhone(e.target.value)}
-                    placeholder="Add new phone number"
-                    className="flex-1 px-4 py-3 bg-white/[0.05] border border-white/[0.1] rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <button
-                    onClick={addPhoneNumber}
-                    className="p-3 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-xl transition-colors"
-                  >
-                    <Plus className="w-5 h-5" />
-                  </button>
-                </div>
-              )}
-
               {phoneNumbers.length === 0 && !isEditing && (
                 <p className="text-white/40 text-sm">No phone numbers added</p>
               )}
+            </div>
+          </div>
+
+          {/* Location Section */}
+          <div className="space-y-6 mb-8">
+            <h2 className="text-xl font-semibold text-white flex items-center space-x-2">
+              <MapPin className="w-5 h-5" />
+              <span>Location</span>
+            </h2>
+            <LocationTracker
+              userId={authUser?.id || ''}
+              currentLocation={location}
+              onLocationUpdate={(newLocation) => setLocation(newLocation)}
+              autoTrigger={true}
+            />
+          </div>
+
+          {/* Health Information */}
+          <div className="space-y-6 mb-8">
+            <h2 className="text-xl font-semibold text-white flex items-center space-x-2">
+              <Heart className="w-5 h-5" />
+              <span>Health Information</span>
+            </h2>
+
+            {/* Diseases */}
+            <div>
+              <label className="block text-white/70 text-sm mb-3">
+                Medical Conditions (Select all that apply)
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {DISEASES.map((disease) => (
+                  <button
+                    key={disease}
+                    onClick={() => isEditing && toggleDisease(disease)}
+                    disabled={!isEditing}
+                    className={`p-3 rounded-xl border-2 transition-all text-left text-sm ${
+                      diseases.includes(disease)
+                        ? 'border-blue-400 bg-blue-500/20 text-white'
+                        : 'border-white/[0.1] bg-white/[0.02] text-white/70 hover:border-blue-400/50'
+                    } ${!isEditing && 'cursor-default opacity-60'}`}
+                  >
+                    {disease}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Allergies */}
+            <div>
+              <label className="block text-white/70 text-sm mb-3">
+                <AlertCircle className="w-4 h-4 inline mr-2" />
+                Allergies & Sensitivities (Select all that apply)
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {ALLERGIES.map((allergy) => (
+                  <button
+                    key={allergy}
+                    onClick={() => isEditing && toggleAllergy(allergy)}
+                    disabled={!isEditing}
+                    className={`p-3 rounded-xl border-2 transition-all text-left text-sm ${
+                      allergies.includes(allergy)
+                        ? 'border-orange-400 bg-orange-500/20 text-white'
+                        : 'border-white/[0.1] bg-white/[0.02] text-white/70 hover:border-orange-400/50'
+                    } ${!isEditing && 'cursor-default opacity-60'}`}
+                  >
+                    {allergy}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -339,7 +482,7 @@ const Profile = () => {
               <span>Social Media</span>
             </h2>
 
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {Object.entries(socialUsernames).map(([platform, username]) => {
                 const Icon = getSocialIcon(platform);
                 return (

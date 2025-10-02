@@ -1,20 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { User, LogIn, MapPin, LogOut, UserCircle, ChevronDown, Bell, X, CheckCheck, Building2, Shield } from 'lucide-react';
+import { User, LogIn, MapPin, LogOut, UserCircle, ChevronDown, Bell, X, CheckCheck, Building2, Shield, Map, Thermometer, Flame, BarChart3 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNGOAuth } from '../contexts/NGOAuthContext';
 import { useNotifications } from '../contexts/NotificationContext';
+import { useSimulation } from '../contexts/SimulationContext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
+  const [mapDropdownOpen, setMapDropdownOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout: userLogout, isAuthenticated: isUserAuthenticated } = useAuth();
   const { ngo, logoutNGO, isNGOAuthenticated } = useNGOAuth();
   const { notifications, unreadCount, markAsRead, markAllAsRead, clearNotification } = useNotifications();
+  const { simulation } = useSimulation();
   const notificationRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -76,8 +79,11 @@ const Navbar = () => {
   };
 
   const navItems = [
-    { name: 'Home', href: '/' },
-    { name: 'Map', href: '/map' },
+    { name: 'Air Quality', href: '/map', icon: MapPin },
+    { name: 'Heatwave', href: '/map/heatwave', icon: Thermometer },
+    { name: 'Wildfire', href: '/map/wildfire', icon: Flame },
+    { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+    { name: 'Search', href: '/search' },
     { name: 'About', href: '/about' },
     { name: 'Learning', href: '/learning' },
     { name: 'Contact', href: '/contact' },
@@ -91,13 +97,28 @@ const Navbar = () => {
   return (
     <>
       {/* Regional Banner - Above Navbar */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-600/20 to-cyan-600/20 backdrop-blur-xl border-b border-blue-400/20">
+      <div className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-xl border-b transition-all duration-500 ${
+        simulation.isActive
+          ? 'bg-gradient-to-r from-red-600/30 to-orange-600/30 border-red-400/30'
+          : 'bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border-blue-400/20'
+      }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
           <div className="flex items-center justify-center space-x-2 text-xs sm:text-sm">
-            <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400 flex-shrink-0" />
+            <MapPin className={`w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 ${
+              simulation.isActive ? 'text-red-400' : 'text-blue-400'
+            }`} />
             <p className="text-white/80 text-center">
-              <span className="font-semibold text-blue-300">Prototype Notice:</span>{' '}
-              <span className="text-white/70">Currently displaying North America regional data only</span>
+              {simulation.isActive ? (
+                <>
+                  <span className="font-semibold text-red-300">⚠️ Hazard Alert:</span>{' '}
+                  <span className="text-white/90">Air Quality Emergency - AQI {simulation.airQualityData.aqi} (Hazardous)</span>
+                </>
+              ) : (
+                <>
+                  <span className="font-semibold text-blue-300">Prototype Notice:</span>{' '}
+                  <span className="text-white/70">Currently displaying North America regional data only</span>
+                </>
+              )}
             </p>
           </div>
         </div>
@@ -121,24 +142,30 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-10">
             <div className="flex items-center space-x-8">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`flex items-center space-x-1.5 transition-all duration-300 font-grotesk font-medium text-[15px] tracking-wide hover:scale-105 relative group ${
-                    location.pathname === item.href
-                      ? 'text-white'
-                      : 'text-gray-300 hover:text-white'
-                  }`}
-                >
-                  <span>{item.name}</span>
-                  <div className={`absolute -bottom-2 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-cyan-400 transition-transform duration-300 rounded-full ${
-                    location.pathname === item.href
-                      ? 'scale-x-100'
-                      : 'scale-x-0 group-hover:scale-x-100'
-                  }`}></div>
-                </Link>
-              ))}
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isMapItem = item.href.startsWith('/map');
+
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={`flex items-center space-x-1.5 transition-all duration-300 font-grotesk font-medium text-[15px] tracking-wide hover:scale-105 relative group ${
+                      location.pathname === item.href
+                        ? 'text-white'
+                        : 'text-gray-300 hover:text-white'
+                    }`}
+                  >
+                    {Icon && <Icon className="w-4 h-4" />}
+                    <span>{item.name}</span>
+                    <div className={`absolute -bottom-2 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-cyan-400 transition-transform duration-300 rounded-full ${
+                      location.pathname === item.href
+                        ? 'scale-x-100'
+                        : 'scale-x-0 group-hover:scale-x-100'
+                    }`}></div>
+                  </Link>
+                );
+              })}
             </div>
 
             <div className="flex items-center space-x-4">

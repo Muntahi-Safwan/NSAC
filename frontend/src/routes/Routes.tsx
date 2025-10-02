@@ -2,6 +2,8 @@ import { createBrowserRouter } from "react-router";
 import RootLayout from "../layouts/RootLayout";
 import Home from "../pages/HomePage/Home";
 import MapPage from "../pages/MapPage/MapPage";
+import HeatwaveMap from "../pages/MapPage/HeatwaveMap";
+import WildfireMap from "../pages/MapPage/WildfireMap";
 import About from "../pages/AboutPage/About";
 import Contact from "../pages/ContactPage/Contact";
 import Learning from "../pages/LearningPage/Learning";
@@ -15,6 +17,9 @@ import NGOLogin from "../pages/NGO/NGOLogin";
 import NGORegister from "../pages/NGO/NGORegister";
 import NGODashboard from "../pages/NGO/NGODashboard";
 import QuizPage from "../pages/QuizPage/QuizPage";
+import UserDashboard from "../pages/User/UserDashboard";
+import SearchPage from "../pages/SearchPage/SearchPage";
+import AnalyticsDashboard from "../pages/Analytics/AnalyticsDashboard";
 
 export const router = createBrowserRouter([
     {
@@ -29,6 +34,22 @@ export const router = createBrowserRouter([
             {
                 path: "/map",
                 element: <MapPage />
+            },
+            {
+                path: "/map/heatwave",
+                element: <HeatwaveMap />
+            },
+            {
+                path: "/map/wildfire",
+                element: <WildfireMap />
+            },
+            {
+                path: "/search",
+                element: <SearchPage />
+            },
+            {
+                path: "/analytics",
+                element: <AnalyticsDashboard />
             },
             {
                 path: "/about",
@@ -55,6 +76,14 @@ export const router = createBrowserRouter([
                 element: (
                     <ProtectedRoute>
                         <Profile />
+                    </ProtectedRoute>
+                )
+            },
+            {
+                path: "/dashboard",
+                element: (
+                    <ProtectedRoute>
+                        <UserDashboard />
                     </ProtectedRoute>
                 )
             }

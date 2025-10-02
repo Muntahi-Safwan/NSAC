@@ -4,11 +4,15 @@ interface NGO {
   id: string;
   email: string;
   name: string;
+  description?: string;
+  website?: string;
+  address?: string;
   region: string;
   country: string;
-  verified: boolean;
-  description?: string;
   contactPhone?: string;
+  emergencyPhone?: string;
+  operatingHours?: string;
+  verified: boolean;
 }
 
 interface NGOAuthContextType {
@@ -16,6 +20,7 @@ interface NGOAuthContextType {
   ngoToken: string | null;
   loginNGO: (ngoData: NGO, token: string) => void;
   logoutNGO: () => void;
+  updateNGO: (ngoData: NGO) => void;
   isNGOAuthenticated: boolean;
 }
 
@@ -53,11 +58,17 @@ export const NGOAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
     localStorage.removeItem('ngoToken');
   };
 
+  const updateNGO = (ngoData: NGO) => {
+    setNGO(ngoData);
+    localStorage.setItem('ngoData', JSON.stringify(ngoData));
+  };
+
   const value: NGOAuthContextType = {
     ngo,
     ngoToken,
     loginNGO,
     logoutNGO,
+    updateNGO,
     isNGOAuthenticated: !!ngo && !!ngoToken,
   };
 

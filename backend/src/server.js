@@ -8,6 +8,8 @@ const quizRoutes = require('./routes/quiz.routes');
 const ngoRoutes = require('./routes/ngo.routes');
 const notificationRoutes = require('./routes/notification.routes');
 const userRoutes = require('./routes/user.routes');
+const searchRoutes = require('./routes/search.routes');
+const wildfireRoutes = require('./routes/wildfire.routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -57,9 +59,17 @@ console.log('=== Mounting notification routes at /api/notifications ===');
 app.use('/api/notifications', notificationRoutes);
 console.log('=== Notification routes mounted successfully ===');
 
-console.log('=== Mounting user routes at /api/users ===');
-app.use('/api/users', userRoutes);
+console.log('=== Mounting user routes at /api/user ===');
+app.use('/api/user', userRoutes);
 console.log('=== User routes mounted successfully ===');
+
+console.log('=== Mounting search routes at /api/search ===');
+app.use('/api/search', searchRoutes);
+console.log('=== Search routes mounted successfully ===');
+
+console.log('=== Mounting wildfire routes at /api/wildfire ===');
+app.use('/api/wildfire', wildfireRoutes);
+console.log('=== Wildfire routes mounted successfully ===');
 
 // 404 handler
 app.use((req, res) => {

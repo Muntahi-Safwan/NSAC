@@ -8,6 +8,7 @@ import { AuthProvider } from './contexts/AuthContext.tsx'
 import { NGOAuthProvider } from './contexts/NGOAuthContext.tsx'
 import { NotificationProvider } from './contexts/NotificationContext.tsx'
 import { AirQualityProvider } from './contexts/AirQualityContext.tsx'
+import { SimulationProvider } from './contexts/SimulationContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -15,7 +16,9 @@ createRoot(document.getElementById('root')!).render(
       <NGOAuthProvider>
         <NotificationProvider>
           <AirQualityProvider autoRefreshInterval={5 * 60 * 1000}>
-            <RouterProvider router={router} />
+            <SimulationProvider>
+              <RouterProvider router={router} />
+            </SimulationProvider>
           </AirQualityProvider>
         </NotificationProvider>
       </NGOAuthProvider>

@@ -1,4 +1,4 @@
-import { ArrowDown, Satellite, BarChart3, Shield, ChevronRight, MapPin, Map, Zap, Globe, Users, Brain, TrendingUp, CheckCircle, Star, Award, Target, Building2 } from 'lucide-react';
+import { ArrowDown, Satellite, BarChart3, Shield, ChevronRight, MapPin, Map, Zap, Globe, Users, Brain, TrendingUp, CheckCircle, Star, Award, Target, Building2, Thermometer, Flame } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AQISpeedometer from '../../components/AQISpeedometer';
 import PollutantDetails from '../../components/PollutantDetails';
@@ -249,6 +249,133 @@ const Home = () => {
                   <div className="text-white/50 text-sm">{stat.sublabel}</div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Environmental Monitoring Section - Wildfire & Heatwave */}
+      <section className="relative py-20 lg:py-28 overflow-hidden">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center px-4 py-2 bg-orange-500/10 backdrop-blur-xl border border-orange-400/20 rounded-full mb-6">
+              <Satellite className="w-4 h-4 text-orange-400 mr-2" />
+              <span className="text-orange-300 font-semibold text-sm">Comprehensive Monitoring</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-black text-white mb-6">
+              Beyond Air Quality
+              <span className="block bg-gradient-to-r from-orange-400 via-red-400 to-yellow-400 bg-clip-text text-transparent">
+                Wildfire & Heatwave Tracking
+              </span>
+            </h2>
+            <p className="text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
+              Real-time environmental hazard monitoring using NASA's advanced satellite systems
+              to keep communities safe from wildfires and extreme heat events.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* Wildfire Tracking Card */}
+            <Link
+              to="/map/wildfire"
+              className="group bg-gradient-to-br from-red-500/10 to-orange-500/10 hover:from-red-500/20 hover:to-orange-500/20 backdrop-blur-xl border border-red-400/30 rounded-3xl p-8 transition-all duration-300 hover:scale-105"
+            >
+              <div className="flex items-start justify-between mb-6">
+                <div className="p-4 bg-red-500/20 rounded-2xl group-hover:scale-110 transition-transform">
+                  <Flame className="w-8 h-8 text-red-400" />
+                </div>
+                <span className="px-3 py-1 bg-red-500/20 text-red-300 rounded-full text-xs font-semibold">
+                  NASA FIRMS
+                </span>
+              </div>
+
+              <h3 className="text-2xl font-display font-bold text-white mb-3">
+                Active Wildfire Detection
+              </h3>
+              <p className="text-white/70 mb-6 leading-relaxed">
+                Monitor active wildfires globally with NASA's Fire Information for Resource Management System (FIRMS).
+                Real-time fire detection from VIIRS and MODIS satellites with Fire Radiative Power (FRP) measurements.
+              </p>
+
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center gap-3 text-sm text-white/80">
+                  <CheckCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+                  <span>Near real-time fire detection (3-5 hours delay)</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-white/80">
+                  <CheckCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+                  <span>Fire intensity and confidence levels</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-white/80">
+                  <CheckCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+                  <span>Interactive map with fire locations</span>
+                </div>
+              </div>
+
+              <div className="flex items-center text-red-400 font-semibold group-hover:gap-3 gap-2 transition-all">
+                <span>Explore Wildfire Map</span>
+                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
+
+            {/* Heatwave Monitoring Card */}
+            <Link
+              to="/map/heatwave"
+              className="group bg-gradient-to-br from-orange-500/10 to-yellow-500/10 hover:from-orange-500/20 hover:to-yellow-500/20 backdrop-blur-xl border border-orange-400/30 rounded-3xl p-8 transition-all duration-300 hover:scale-105"
+            >
+              <div className="flex items-start justify-between mb-6">
+                <div className="p-4 bg-orange-500/20 rounded-2xl group-hover:scale-110 transition-transform">
+                  <Thermometer className="w-8 h-8 text-orange-400" />
+                </div>
+                <span className="px-3 py-1 bg-orange-500/20 text-orange-300 rounded-full text-xs font-semibold">
+                  NASA MODIS
+                </span>
+              </div>
+
+              <h3 className="text-2xl font-display font-bold text-white mb-3">
+                Heatwave & Temperature Tracking
+              </h3>
+              <p className="text-white/70 mb-6 leading-relaxed">
+                Track extreme heat events and land surface temperatures using NASA's MODIS Land Surface Temperature data.
+                Identify heat advisory zones and monitor temperature anomalies in real-time.
+              </p>
+
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center gap-3 text-sm text-white/80">
+                  <CheckCircle className="w-5 h-5 text-orange-400 flex-shrink-0" />
+                  <span>Land surface temperature visualization</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-white/80">
+                  <CheckCircle className="w-5 h-5 text-orange-400 flex-shrink-0" />
+                  <span>Heat advisory alerts by region</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-white/80">
+                  <CheckCircle className="w-5 h-5 text-orange-400 flex-shrink-0" />
+                  <span>Risk level classification system</span>
+                </div>
+              </div>
+
+              <div className="flex items-center text-orange-400 font-semibold group-hover:gap-3 gap-2 transition-all">
+                <span>Explore Heatwave Map</span>
+                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
+          </div>
+
+          {/* Info Banner */}
+          <div className="mt-12 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+              <div className="p-3 bg-blue-500/20 rounded-xl">
+                <Satellite className="w-6 h-6 text-blue-400" />
+              </div>
+              <div className="flex-1">
+                <h4 className="text-white font-semibold mb-1">Powered by NASA Earth Data</h4>
+                <p className="text-white/60 text-sm">
+                  Our platform integrates multiple NASA satellite data sources including FIRMS (Fire Information),
+                  MODIS (Land Surface Temperature), and VIIRS (Active Fire Detection) to provide comprehensive
+                  environmental monitoring and early warning systems.
+                </p>
+              </div>
             </div>
           </div>
         </div>

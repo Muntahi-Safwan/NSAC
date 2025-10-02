@@ -1,10 +1,16 @@
 import { Outlet } from "react-router";
+import { useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import UnifiedBackground from "../components/UnifiedBackground";
 import ErrorBoundary from "../components/ErrorBoundary";
+import SimulationButton from "../components/Simulation/SimulationButton";
+import SimulationModal from "../components/Simulation/SimulationModal";
+import SimulationToastContainer from "../components/Simulation/SimulationToastContainer";
 
 export default function RootLayout() {
+  const [isSimulationModalOpen, setIsSimulationModalOpen] = useState(false);
+
   return (
     <div className="min-h-screen relative">
       {/* Unified background for entire app */}
@@ -22,6 +28,14 @@ export default function RootLayout() {
         </main>
         <Footer />
       </div>
+
+      {/* Simulation Components */}
+      <SimulationButton onClick={() => setIsSimulationModalOpen(true)} />
+      <SimulationModal
+        isOpen={isSimulationModalOpen}
+        onClose={() => setIsSimulationModalOpen(false)}
+      />
+      <SimulationToastContainer />
     </div>
   );
 }

@@ -52,7 +52,14 @@ class NGOService {
           id: ngo.id,
           email: ngo.email,
           name: ngo.name,
+          description: ngo.description,
+          website: ngo.website,
+          address: ngo.address,
           region: ngo.region,
+          country: ngo.country,
+          contactPhone: ngo.contactPhone,
+          emergencyPhone: ngo.emergencyPhone,
+          operatingHours: ngo.operatingHours,
           verified: ngo.verified
         },
         token
@@ -97,11 +104,15 @@ class NGOService {
           id: ngo.id,
           email: ngo.email,
           name: ngo.name,
+          description: ngo.description,
+          website: ngo.website,
+          address: ngo.address,
           region: ngo.region,
           country: ngo.country,
-          verified: ngo.verified,
-          description: ngo.description,
-          contactPhone: ngo.contactPhone
+          contactPhone: ngo.contactPhone,
+          emergencyPhone: ngo.emergencyPhone,
+          operatingHours: ngo.operatingHours,
+          verified: ngo.verified
         },
         token
       };
@@ -123,10 +134,14 @@ class NGOService {
           email: true,
           name: true,
           description: true,
+          website: true,
+          address: true,
           region: true,
           country: true,
           coordinates: true,
           contactPhone: true,
+          emergencyPhone: true,
+          operatingHours: true,
           verified: true,
           createdAt: true
         }
@@ -151,25 +166,43 @@ class NGOService {
    */
   async updateNGOProfile(ngoId, updateData) {
     try {
-      const { name, description, contactPhone, coordinates } = updateData;
+      const {
+        name,
+        description,
+        website,
+        address,
+        contactPhone,
+        emergencyPhone,
+        operatingHours,
+        coordinates
+      } = updateData;
+
+      const dataToUpdate = {};
+      if (name !== undefined) dataToUpdate.name = name;
+      if (description !== undefined) dataToUpdate.description = description;
+      if (website !== undefined) dataToUpdate.website = website;
+      if (address !== undefined) dataToUpdate.address = address;
+      if (contactPhone !== undefined) dataToUpdate.contactPhone = contactPhone;
+      if (emergencyPhone !== undefined) dataToUpdate.emergencyPhone = emergencyPhone;
+      if (operatingHours !== undefined) dataToUpdate.operatingHours = operatingHours;
+      if (coordinates !== undefined) dataToUpdate.coordinates = coordinates;
 
       const ngo = await prisma.nGO.update({
         where: { id: ngoId },
-        data: {
-          ...(name && { name }),
-          ...(description && { description }),
-          ...(contactPhone && { contactPhone }),
-          ...(coordinates && { coordinates })
-        },
+        data: dataToUpdate,
         select: {
           id: true,
           email: true,
           name: true,
           description: true,
+          website: true,
+          address: true,
           region: true,
           country: true,
           coordinates: true,
           contactPhone: true,
+          emergencyPhone: true,
+          operatingHours: true,
           verified: true
         }
       });
@@ -197,37 +230,35 @@ class NGOService {
         throw new Error('NGO not found');
       }
 
-      // Get users from the NGO's region
-      const totalUsers = await prisma.user.count({
+      // Get all users with location data
+      const allUsers = await prisma.user.findMany({
         where: {
           lastLocation: {
-            path: ['city'],
-            string_contains: ngo.region
+            not: null
           }
-        }
-      });
-
-      // Get users marked as safe
-      const safeUsers = await prisma.user.count({
-        where: {
-          lastLocation: {
-            path: ['city'],
-            string_contains: ngo.region
-          },
+        },
+        select: {
+          id: true,
+          lastLocation: true,
           isSafe: true
         }
       });
 
-      // Get users potentially at risk (not marked as safe)
-      const atRiskUsers = await prisma.user.count({
-        where: {
-          lastLocation: {
-            path: ['city'],
-            string_contains: ngo.region
-          },
-          isSafe: false
-        }
+      // Filter users by region/city matching
+      const regionalUsers = allUsers.filter(user => {
+        if (!user.lastLocation) return false;
+        const location = user.lastLocation;
+        const region = location.region?.toLowerCase() || '';
+        const city = location.city?.toLowerCase() || '';
+        const ngoRegion = ngo.region.toLowerCase();
+
+        return region.includes(ngoRegion) || city.includes(ngoRegion) ||
+               ngoRegion.includes(region) || ngoRegion.includes(city);
       });
+
+      const totalUsers = regionalUsers.length;
+      const safeUsers = regionalUsers.filter(u => u.isSafe).length;
+      const atRiskUsers = regionalUsers.filter(u => !u.isSafe).length;
 
       // Get recent notifications sent
       const recentNotifications = await prisma.notification.count({
@@ -268,13 +299,11 @@ class NGOService {
         throw new Error('NGO not found');
       }
 
-      const skip = (page - 1) * limit;
-
-      const users = await prisma.user.findMany({
+      // Get all users with location data
+      const allUsers = await prisma.user.findMany({
         where: {
           lastLocation: {
-            path: ['city'],
-            string_contains: ngo.region
+            not: null
           }
         },
         select: {
@@ -285,23 +314,39 @@ class NGOService {
           isSafe: true,
           safetyUpdatedAt: true,
           lastLocation: true,
-          phoneNumbers: true
-        },
-        skip,
-        take: limit,
-        orderBy: {
-          safetyUpdatedAt: 'desc'
+          phoneNumbers: true,
+          primaryPhone: true,
+          age: true,
+          diseases: true,
+          allergies: true
         }
       });
 
-      const totalCount = await prisma.user.count({
-        where: {
-          lastLocation: {
-            path: ['city'],
-            string_contains: ngo.region
-          }
-        }
+      // Filter users by region/city matching
+      const regionalUsers = allUsers.filter(user => {
+        if (!user.lastLocation) return false;
+        const location = user.lastLocation;
+        const region = location.region?.toLowerCase() || '';
+        const city = location.city?.toLowerCase() || '';
+        const ngoRegion = ngo.region.toLowerCase();
+
+        return region.includes(ngoRegion) || city.includes(ngoRegion) ||
+               ngoRegion.includes(region) || ngoRegion.includes(city);
       });
+
+      // Sort by safety status (at risk first) and then by safetyUpdatedAt
+      regionalUsers.sort((a, b) => {
+        if (a.isSafe !== b.isSafe) {
+          return a.isSafe ? 1 : -1; // At risk users first
+        }
+        const aTime = a.safetyUpdatedAt ? new Date(a.safetyUpdatedAt).getTime() : 0;
+        const bTime = b.safetyUpdatedAt ? new Date(b.safetyUpdatedAt).getTime() : 0;
+        return bTime - aTime; // Most recent first
+      });
+
+      const totalCount = regionalUsers.length;
+      const skip = (page - 1) * limit;
+      const users = regionalUsers.slice(skip, skip + limit);
 
       return {
         success: true,

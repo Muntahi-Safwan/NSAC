@@ -13,14 +13,16 @@ import {
   Wind,
   Thermometer,
   Droplets,
-  TrendingUp
+  TrendingUp,
+  Flame
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AirQualityMap from '../../components/AirQualityMap';
 import AIChatbot from '../../components/AIChatbot';
 import { mockMapZones, getAQIColor, mockPollutants } from '../../data/mockData';
 
 const MapPage = () => {
+  const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'regions' | 'analytics'>('overview');
   const [selectedRegion, setSelectedRegion] = useState<any>(null);
@@ -95,15 +97,33 @@ const MapPage = () => {
             </div>
 
             <div className="flex items-center space-x-2 sm:space-x-3">
+              {/* Map Type Selector */}
+              <div className="flex items-center gap-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-1">
+                <button className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500 text-white rounded-lg text-xs font-medium">
+                  <Wind className="w-3.5 h-3.5" />
+                  Air Quality
+                </button>
+                <button
+                  onClick={() => navigate('/map/heatwave')}
+                  className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-white/10 text-white/70 hover:text-white rounded-lg text-xs font-medium transition-all"
+                >
+                  <Thermometer className="w-3.5 h-3.5" />
+                  Heatwave
+                </button>
+                <button
+                  onClick={() => navigate('/map/wildfire')}
+                  className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-white/10 text-white/70 hover:text-white rounded-lg text-xs font-medium transition-all"
+                >
+                  <Flame className="w-3.5 h-3.5" />
+                  Wildfire
+                </button>
+              </div>
+
               {/* Live Status */}
               <div className="flex items-center space-x-1.5 sm:space-x-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-xl border border-green-400/30 rounded-xl sm:rounded-2xl px-2.5 sm:px-4 py-1.5 sm:py-2">
                 <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse" />
                 <span className="text-green-400 font-semibold text-xs sm:text-sm">Live Data</span>
               </div>
-
-              
-
-              
             </div>
           </div>
         </div>

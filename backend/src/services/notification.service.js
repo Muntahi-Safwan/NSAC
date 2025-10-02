@@ -20,13 +20,25 @@ class NotificationService {
       }
 
       // Get all users from the NGO's region
+      // Check both region and city fields in lastLocation JSON
       const regionalUsers = await prisma.user.findMany({
         where: {
           lastLocation: {
-            path: ['city'],
-            string_contains: ngo.region
+            not: null
           }
         }
+      });
+
+      // Filter users manually by region or city matching NGO region
+      const filteredUsers = regionalUsers.filter(user => {
+        if (!user.lastLocation) return false;
+        const location = user.lastLocation;
+        const region = location.region?.toLowerCase() || '';
+        const city = location.city?.toLowerCase() || '';
+        const ngoRegion = ngo.region.toLowerCase();
+
+        return region.includes(ngoRegion) || city.includes(ngoRegion) ||
+               ngoRegion.includes(region) || ngoRegion.includes(city);
       });
 
       // Create notification
@@ -40,7 +52,7 @@ class NotificationService {
           isAlert: isAlert || false,
           expiresAt: expiresAt ? new Date(expiresAt) : null,
           recipients: {
-            connect: regionalUsers.map(user => ({ id: user.id }))
+            connect: filteredUsers.map(user => ({ id: user.id }))
           }
         },
         include: {
@@ -62,7 +74,7 @@ class NotificationService {
           severity: notification.severity,
           isAlert: notification.isAlert,
           region: notification.region,
-          recipientCount: regionalUsers.length,
+          recipientCount: filteredUsers.length,
           createdAt: notification.createdAt
         }
       };
@@ -146,7 +158,8 @@ class NotificationService {
           ngo: {
             select: {
               name: true,
-              region: true
+              region: true,
+              contactPhone: true
             }
           }
         },
@@ -179,7 +192,10 @@ class NotificationService {
           message: n.message,
           severity: n.severity,
           isAlert: n.isAlert,
-          ngoName: n.ngo.name,
+          ngo: {
+            name: n.ngo.name,
+            contactPhone: n.ngo.contactPhone
+          },
           region: n.region,
           createdAt: n.createdAt
         })),
