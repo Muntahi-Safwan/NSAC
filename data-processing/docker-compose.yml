@@ -13,6 +13,8 @@ services:
       - ./.env:/app/.env:ro
       # Mount air-quality module
       - ./air-quality:/app/air-quality
+      # Mount heatwave module
+      - ./heatwave:/app/heatwave
     networks:
       - nsac_network
     depends_on:
@@ -38,6 +40,8 @@ services:
       - ./.env:/app/.env:ro
       # Mount air-quality module
       - ./air-quality:/app/air-quality
+      # Mount heatwave module
+      - ./heatwave:/app/heatwave
       # Mount scripts
       - ./scripts:/app/scripts
     networks:

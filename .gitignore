@@ -60,5 +60,6 @@ docker-compose.override.yml
 *.nc4
 *.nc
 
-
+# Tools
+*/simple_table_check.py
 

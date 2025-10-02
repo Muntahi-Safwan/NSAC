@@ -84,3 +84,72 @@ model AirQualityRealtime {
   @@map("air_quality_realtime")
 }
 
+// Meteorological Data - Raw weather data from NASA GEOS-CF
+model MeteorologicalData {
+  id                    Int      @id @default(autoincrement())
+  
+  // Location
+  latitude              Float    // Geographic latitude
+  longitude             Float    // Geographic longitude
+  
+  // Temporal information (hourly resolution)
+  forecastHour          DateTime // Specific hour this forecast is for
+  forecastInitTime      DateTime // When forecast was generated
+  createdAt             DateTime @default(now())
+  
+  // Raw meteorological parameters
+  temperature           Float    // Temperature (°C)
+  humidity              Float    // Relative humidity (%)
+  windSpeed             Float    // Wind speed (m/s)
+  pressure              Float    // Surface pressure (Pa)
+  
+  // Metadata
+  source                String   @default("GEOS-CF")
+  
+  // Unique constraint - one record per location per hour
+  @@unique([latitude, longitude, forecastHour, forecastInitTime])
+  
+  // Indexes for efficient queries
+  @@index([forecastHour])
+  @@index([latitude, longitude])
+  @@index([forecastHour, latitude, longitude]) // Spatial-temporal queries
+  
+  @@map("meteorological_data")
+}
+
+// Heatwave Alerts - Simple daily heatwave alerts
+model HeatwaveAlerts {
+  id                    Int      @id @default(autoincrement())
+  
+  // Location
+  latitude              Float    // Geographic latitude
+  longitude             Float    // Geographic longitude
+  
+  // Temporal information
+  alertDate             DateTime @db.Date // Date this alert is for
+  forecastInitTime      DateTime // When forecast was generated
+  createdAt             DateTime @default(now())
+  
+  // Simple heatwave indicators
+  maxTemperature        Float    // Daily maximum temperature (°C)
+  minTemperature        Float    // Daily minimum temperature (°C)
+  maxHeatIndex          Float    // Maximum heat index (°C)
+  
+  // Alert level
+  alertLevel            Int      // 0=None, 1=Watch, 2=Warning, 3=Emergency
+  alertMessage          String?  // Human-readable alert message
+  
+  // Metadata
+  source                String   @default("GEOS-CF")
+  
+  // Unique constraint to prevent duplicate alerts
+  @@unique([latitude, longitude, alertDate, forecastInitTime])
+  
+  // Indexes for efficient queries
+  @@index([latitude, longitude])
+  @@index([alertDate])
+  @@index([alertLevel]) // For filtering alerts by severity
+  
+  @@map("heatwave_alerts")
+}
+
