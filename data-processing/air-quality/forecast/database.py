@@ -290,6 +290,49 @@ class AirQualityDatabase:
         results.sort(key=lambda x: x.timestamp, reverse=True)
         return results[0]
     
+    async def get_latest_forecast_timestamp(self) -> Optional[datetime]:
+        """
+        Get the timestamp of the most recent forecast data
+        
+        Returns:
+            Latest timestamp or None if no data exists
+        """
+        try:
+            # Get the most recent record
+            latest = await self.db.airqualityforecast.find_first(
+                order_by=[{'timestamp': 'desc'}]
+            )
+            
+            return latest.timestamp if latest else None
+            
+        except Exception as e:
+            print(f"Error getting latest forecast timestamp: {e}")
+            return None
+    
+    async def check_forecast_exists(self, forecast_init_time: datetime, data_timestamp: datetime) -> bool:
+        """
+        Check if forecast data already exists for a specific init time and data timestamp
+        
+        Args:
+            forecast_init_time: The forecast initialization time
+            data_timestamp: The data timestamp
+        
+        Returns:
+            True if data exists, False otherwise
+        """
+        try:
+            existing = await self.db.airqualityforecast.find_first(
+                where={
+                    'forecastInitTime': forecast_init_time,
+                    'timestamp': data_timestamp
+                }
+            )
+            return existing is not None
+            
+        except Exception as e:
+            print(f"Error checking forecast existence: {e}")
+            return False
+    
     async def get_statistics(self) -> Dict:
         """Get database statistics"""
         total_records = await self.db.airqualityforecast.count()

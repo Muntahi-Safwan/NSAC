@@ -94,12 +94,40 @@ class RealtimeAirQualitySystem:
         
         try:
             # Download latest analysis data
-            analysis_file = self.analysis_downloader.download_latest_analysis()
+            analysis_file = await self.analysis_downloader.download_latest_analysis()
             
             if not analysis_file:
                 return {
                     "success": False,
                     "message": "Failed to download analysis data",
+                    "data_points": 0
+                }
+            
+            # Extract timestamp from the downloaded file to check for duplicates
+            analysis_timestamp = self.analysis_processor._extract_timestamp_from_filename(analysis_file)
+            
+            self.logger.info(f"🔍 Checking for duplicate analysis data...")
+            self.logger.info(f"   Analysis time: {analysis_timestamp} UTC")
+            
+            # Check if this specific analysis timestamp already exists
+            already_exists = await self.analysis_database.check_analysis_exists(analysis_timestamp)
+            
+            if already_exists:
+                self.logger.info(f"✓ This analysis data already exists in database, skipping")
+                self.logger.info(f"   Analysis: {analysis_timestamp} UTC")
+                
+                # Clean up downloaded file
+                try:
+                    import os
+                    if os.path.exists(analysis_file):
+                        os.remove(analysis_file)
+                        self.logger.info(f"🗑️ Cleaned up duplicate file: {os.path.basename(analysis_file)}")
+                except Exception as e:
+                    self.logger.warning(f"Could not clean up file {analysis_file}: {e}")
+                
+                return {
+                    "success": True,
+                    "message": "Analysis data already exists, skipped collection",
                     "data_points": 0
                 }
             
@@ -115,6 +143,15 @@ class RealtimeAirQualitySystem:
                 result = await self.analysis_database.insert_analysis_data_batch(data_points)
                 
                 if result["success"]:
+                    # Cleanup downloaded file after successful processing
+                    try:
+                        import os
+                        if os.path.exists(analysis_file):
+                            os.remove(analysis_file)
+                            self.logger.info(f"🗑️ Cleaned up downloaded file: {os.path.basename(analysis_file)}")
+                    except Exception as e:
+                        self.logger.warning(f"Could not clean up file {analysis_file}: {e}")
+                    
                     self.logger.info(f"✓ Real-time collection complete: {result['inserted_count']} data points stored")
                     return {
                         "success": True,
@@ -153,19 +190,9 @@ class RealtimeAirQualitySystem:
         self.logger.info("⏰ Starting hourly data collection...")
         
         try:
-            # Check if we already have recent data
-            latest_timestamp = await self.analysis_database.get_latest_analysis_timestamp()
-            
-            if latest_timestamp:
-                time_since_last = datetime.utcnow() - latest_timestamp
-                if time_since_last.total_seconds() < 3600:  # Less than 1 hour ago
-                    self.logger.info(f"✓ Recent data already exists ({time_since_last.total_seconds()/3600:.1f}h ago), skipping")
-                    return {
-                        "success": True,
-                        "message": "Recent data already exists, skipped collection",
-                        "data_points": 0
-                    }
-            
+            # Run real-time collection
+            result = await self.run_realtime_collection()
+            return result
             # Run real-time collection
             result = await self.run_realtime_collection()
             return result

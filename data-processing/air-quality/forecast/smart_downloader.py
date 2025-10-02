@@ -203,17 +203,18 @@ class SmartForecastDownloader:
     
     def download_24h_forecast(self, target_time: Optional[datetime] = None) -> Optional[str]:
         """
-        Download the 24-hour forecast file for a specific time (or current time)
+        Download the 24-hour forecast file for a specific time (or 24h ahead of current time)
         Automatically finds the latest available forecast folder
         
         Args:
-            target_time: Time to get forecast for (defaults to current UTC time)
+            target_time: Time to get forecast for (defaults to current UTC time + 24 hours)
             
         Returns:
             Path to downloaded file, or None if failed
         """
         if target_time is None:
-            target_time = self.get_current_utc_time()
+            # For forecast, we want data 24 hours ahead of current time
+            target_time = self.get_current_utc_time() + timedelta(hours=24)
         
         print(f"\n{'='*70}")
         print(f"🌍 SMART FORECAST DOWNLOADER - 24h Forecast Mode")

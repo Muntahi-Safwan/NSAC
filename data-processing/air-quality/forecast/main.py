@@ -51,10 +51,10 @@ class AirQualityPipeline:
     
     def download_latest_forecast(self, target_time: Optional[datetime] = None) -> Optional[str]:
         """
-        Download the 24-hour forecast file for current time (or specified time)
+        Download the 24-hour forecast file for future time (or specified time)
         
         Args:
-            target_time: Target time (defaults to current UTC time)
+            target_time: Target forecast time (defaults to current UTC time + 24 hours)
         
         Returns:
             Path to downloaded file or None if failed
@@ -152,7 +152,7 @@ class AirQualityPipeline:
         print(f"Pipeline started at: {start_time} UTC")
         
         try:
-            # Step 1: Download (unless skipped)
+            # Step 1: Download (unless skipped) - we need to check the file first to get timestamps
             if file_path:
                 print(f"\n📁 Using specified file: {file_path}")
                 downloaded_file = file_path
@@ -172,6 +172,34 @@ class AirQualityPipeline:
                 if not downloaded_file:
                     return False
             
+            # Check if this specific forecast has already been processed
+            with NetCDFProcessor(downloaded_file) as temp_processor:
+                forecast_init_time = temp_processor.forecast_init_time
+                data_timestamp = temp_processor.data_timestamp
+                
+                print(f"\n🔍 Checking for duplicate forecast data...")
+                print(f"   Forecast Init: {forecast_init_time} UTC")
+                print(f"   Data Time: {data_timestamp} UTC")
+                
+                async with AirQualityDatabase() as db:
+                    already_exists = await db.check_forecast_exists(forecast_init_time, data_timestamp)
+                    
+                    if already_exists and not file_path:  # Don't skip user-specified files
+                        print(f"\n✓ This forecast data already exists in database, skipping")
+                        print(f"   Forecast: {forecast_init_time} UTC -> {data_timestamp} UTC")
+                        
+                        # Clean up downloaded file if we downloaded it
+                        if not skip_download:
+                            try:
+                                import os
+                                if os.path.exists(downloaded_file):
+                                    os.remove(downloaded_file)
+                                    print(f"🗑️ Cleaned up duplicate file: {os.path.basename(downloaded_file)}")
+                            except Exception as e:
+                                print(f"⚠️ Warning: Could not clean up file {downloaded_file}: {e}")
+                        
+                        return True
+            
             # Step 2: Process
             data_points = self.process_netcdf_file(downloaded_file)
             
@@ -181,6 +209,16 @@ class AirQualityPipeline:
             
             # Step 3: Store
             inserted = await self.store_data(data_points)
+            
+            # Step 4: Cleanup downloaded file (unless it was user-specified)
+            if not file_path and not skip_download:
+                try:
+                    import os
+                    if os.path.exists(downloaded_file):
+                        os.remove(downloaded_file)
+                        print(f"🗑️ Cleaned up downloaded file: {os.path.basename(downloaded_file)}")
+                except Exception as e:
+                    print(f"⚠️ Warning: Could not clean up file {downloaded_file}: {e}")
             
             # Summary
             end_time = datetime.utcnow()
