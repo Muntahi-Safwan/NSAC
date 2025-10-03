@@ -15,11 +15,6 @@ services:
       - ./air-quality:/app/air-quality
       # Mount heatwave module
       - ./heatwave:/app/heatwave
-    networks:
-      - nsac_network
-    depends_on:
-      postgres:
-        condition: service_healthy
     # Run pipeline on demand (not as a service)
     profiles:
       - tools
@@ -43,11 +38,6 @@ services:
       - ./heatwave:/app/heatwave
       - ./wildfire:/app/wildfire
       - ./scripts:/app/scripts
-    networks:
-      - nsac_network
-    depends_on:
-      postgres:
-        condition: service_healthy
     # Run continuous scheduler (hourly execution)
     command: python scripts/run_hourly_collection.py --sample-rate 1
     restart: unless-stopped
@@ -65,44 +55,9 @@ services:
       - "5555:5555"
     volumes:
       - ./.env:/app/.env:ro
-    networks:
-      - nsac_network
     command: python -m prisma studio --hostname 0.0.0.0 --port 5555
     profiles:
       - tools
 
-  # Reference to the database from ../database
-  postgres:
-    image: timescale/timescaledb-ha:pg16
-    container_name: nsac_postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-airquality}
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ../database/init-scripts:/docker-entrypoint-initdb.d
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-airquality}",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - nsac_network
-
-volumes:
-  postgres_data:
-    name: nsac_postgres_data
-    external: true
-
-networks:
-  nsac_network:
-    name: nsac_network
-    external: true
+# Local postgres service removed - using external database (Neon, AWS RDS, etc.)
+# Configure DATABASE_URL in .env file to point to your external database

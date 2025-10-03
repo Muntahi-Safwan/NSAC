@@ -27,8 +27,8 @@ RUN python -m prisma generate
 # Create downloads directory
 RUN mkdir -p /app/downloads
 
-# Set environment variable for Prisma
-ENV DATABASE_URL="postgresql://postgres:postgres@host.docker.internal:5432/airquality?schema=public"
+# DATABASE_URL should be set via .env file or environment variables
+# No default database URL - use external database (Neon, AWS RDS, etc.)
 
 # Run the pipeline
 CMD ["python", "main.py"]
