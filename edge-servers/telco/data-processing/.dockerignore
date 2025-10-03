@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+.pytest_cache/
+
+# Prisma generated files (will be regenerated in container)
+.prisma/
+
+# Environment files
+.env
+.env.local
+
+# Downloaded data files
+downloads/*.nc4
+downloads/*.nc
+
+# Logs
+*.log
+
+# Documentation (not needed in container)
+*.md
+!README.md
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+

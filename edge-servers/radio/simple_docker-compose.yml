@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  simple-radio-server:
+    build:
+      context: .
+      dockerfile: simple_Dockerfile
+    container_name: simple_radio_server
+    volumes:
+      # Persist audio files
+      - ./audio:/app/audio
+      # Mount logs
+      - ./logs:/app/logs
+    ports:
+      - "8002:8000"
+    environment:
+      - PYTHONPATH=/app
+    restart: unless-stopped

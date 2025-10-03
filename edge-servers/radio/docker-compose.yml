@@ -1,0 +1,98 @@
+version: "3.8"
+
+services:
+  radio-edge-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nsac_radio_edge_server
+    env_file:
+      - .env
+    volumes:
+      # Mount config files
+      - ./.env:/app/.env:ro
+      # Mount independent data processing modules
+      - ./data-processing:/app/data-processing
+      # Persist logs and audio files
+      - ./logs:/app/logs
+      - ./audio:/app/audio
+    ports:
+      - "8002:8000"
+    networks:
+      - radio_network
+    depends_on:
+      radio_postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Independent PostgreSQL database for radio edge server
+  radio_postgres:
+    image: timescale/timescaledb-ha:pg16
+    container_name: nsac_radio_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-nsac}
+    ports:
+      - "${POSTGRES_PORT:-5434}:5432"
+    volumes:
+      - radio_postgres_data:/var/lib/postgresql/data
+      - ./database/init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-nsac}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - radio_network
+
+  # Data Collection Scheduler
+  radio-scheduler:
+    build: .
+    container_name: radio-scheduler
+    env_file:
+      - .env
+    volumes:
+      # Mount config files
+      - ./.env:/app/.env:ro
+      # Mount independent data processing modules
+      - ./data-processing:/app/data-processing
+      # Persist logs
+      - ./logs:/app/logs
+    command: python data-processing/scripts/run_hourly_collection.py --sample-rate 1
+    networks:
+      - radio_network
+    depends_on:
+      radio_postgres:
+        condition: service_healthy
+
+  # Prisma Studio for radio database management
+  radio_prisma_studio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nsac_radio_prisma_studio
+    env_file:
+      - .env
+    ports:
+      - "5557:5555"
+    volumes:
+      - ./.env:/app/.env:ro
+    networks:
+      - radio_network
+    command: python -m prisma studio --hostname 0.0.0.0 --port 5555
+    profiles:
+      - tools
+
+volumes:
+  radio_postgres_data:
+    name: nsac_radio_postgres_data
+
+networks:
+  radio_network:
+    name: nsac_radio_network

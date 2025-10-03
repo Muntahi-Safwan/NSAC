@@ -1,0 +1,108 @@
+version: "3.8"
+
+services:
+  data-pipeline:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nsac_data_pipeline
+    env_file:
+      - .env
+    volumes:
+      # Mount config files
+      - ./.env:/app/.env:ro
+      # Mount air-quality module
+      - ./air-quality:/app/air-quality
+      # Mount heatwave module
+      - ./heatwave:/app/heatwave
+    networks:
+      - nsac_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Run pipeline on demand (not as a service)
+    profiles:
+      - tools
+    command: python air-quality/forecast/main.py --sample-rate 5
+
+  # NSAC Data Processing Scheduler (All Pipelines)
+  nsac-scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nsac_scheduler
+    env_file:
+      - .env
+    volumes:
+      # Persist logs
+      - ./logs:/app/logs
+      # Mount config files
+      - ./.env:/app/.env:ro
+      # Mount all modules
+      - ./air-quality:/app/air-quality
+      - ./heatwave:/app/heatwave
+      - ./wildfire:/app/wildfire
+      - ./scripts:/app/scripts
+    networks:
+      - nsac_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Run continuous scheduler (hourly execution)
+    command: python scripts/run_hourly_collection.py --sample-rate 1
+    restart: unless-stopped
+    # This service runs continuously and schedules all pipelines hourly
+
+  # Prisma Studio for database management
+  prisma-studio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: prisma_studio
+    env_file:
+      - .env
+    ports:
+      - "5555:5555"
+    volumes:
+      - ./.env:/app/.env:ro
+    networks:
+      - nsac_network
+    command: python -m prisma studio --hostname 0.0.0.0 --port 5555
+    profiles:
+      - tools
+
+  # Reference to the database from ../database
+  postgres:
+    image: timescale/timescaledb-ha:pg16
+    container_name: nsac_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-airquality}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../database/init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-airquality}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nsac_network
+
+volumes:
+  postgres_data:
+    name: nsac_postgres_data
+    external: true
+
+networks:
+  nsac_network:
+    name: nsac_network
+    external: true

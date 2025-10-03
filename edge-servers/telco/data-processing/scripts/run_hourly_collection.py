@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-NSAC Data Collection Scheduler
-Runs air quality and wildfire data collection hourly, heatwave daily
+Hourly NSAC Data Collection Scheduler
+Runs air quality, heatwave, and wildfire data collection every hour continuously
 """
 
 import asyncio
@@ -30,13 +30,6 @@ spec = importlib.util.spec_from_file_location("wildfire_main", wildfire_path)
 wildfire_main = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(wildfire_main)
 FireSystem = wildfire_main.FireSystem
-
-# Import heatwave system
-heatwave_path = Path(__file__).parent.parent / "heatwave" / "main.py"
-spec = importlib.util.spec_from_file_location("heatwave_main", heatwave_path)
-heatwave_main = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(heatwave_main)
-HeatwavePredictionPipeline = heatwave_main.HeatwavePredictionPipeline
 
 
 def setup_logging():
@@ -67,11 +60,11 @@ def setup_logging():
     return logger
 
 
-async def run_hourly_collection(air_quality_system, fire_system):
-    """Run hourly data collection for air quality and wildfire systems"""
+async def run_single_collection(air_quality_system, fire_system):
+    """Run a single data collection for all systems"""
     logger = logging.getLogger("NSACScheduler")
     
-    logger.info("🕐 Starting hourly NSAC data collection")
+    logger.info("🕐 Starting NSAC data collection")
     logger.info(f"⏰ Collection time: {datetime.now().isoformat()}")
     
     results = {}
@@ -124,64 +117,19 @@ async def run_hourly_collection(air_quality_system, fire_system):
     
     # Summary
     if overall_success:
-        logger.info("🏁 Hourly collections completed successfully")
+        logger.info("🏁 All collections completed successfully")
     else:
-        logger.warning("⚠️ Some hourly collections failed, but continuing...")
+        logger.warning("⚠️ Some collections failed, but continuing...")
     
     return overall_success, results
 
 
-async def run_daily_heatwave():
-    """Run daily heatwave processing"""
-    logger = logging.getLogger("NSACScheduler")
-    
-    logger.info("🌡️ Starting daily heatwave processing")
-    logger.info(f"⏰ Processing time: {datetime.now().isoformat()}")
-    
-    try:
-        # Initialize heatwave pipeline
-        pipeline = HeatwavePredictionPipeline(sample_rate=5)
-        logger.info("✅ Heatwave pipeline initialized")
-        
-        # Run sequential pipeline (auto-detects latest available forecast)
-        logger.info("📊 Running heatwave prediction pipeline...")
-        result = await pipeline.run_sequential_pipeline()
-        
-        if result.get("success"):
-            duration = result.get("duration_seconds", 0)
-            met_records = result.get("meteorological_records", 0)
-            heatwave_alerts = result.get("heatwave_alerts", 0)
-            files_processed = result.get("files_processed", 0)
-            forecast_days = result.get("forecast_days", 0)
-            start_date = result.get("forecast_start_date", "Unknown")
-            end_date = result.get("forecast_end_date", "Unknown")
-            
-            logger.info("✅ Daily heatwave processing completed successfully")
-            logger.info(f"   Duration: {duration:.1f} seconds")
-            logger.info(f"   Meteorological records: {met_records:,}")
-            logger.info(f"   Heatwave alerts: {heatwave_alerts:,}")
-            logger.info(f"   Files processed: {files_processed}")
-            logger.info(f"   Forecast period: {start_date} to {end_date} ({forecast_days} days)")
-            
-            return True, result
-        else:
-            error_msg = result.get("message", "Unknown error")
-            logger.error(f"❌ Daily heatwave processing failed: {error_msg}")
-            return False, result
-        
-    except Exception as e:
-        logger.error(f"💥 Daily heatwave processing error: {e}")
-        logger.exception("Full traceback:")
-        return False, {"success": False, "error": str(e)}
-
-
 async def scheduler_loop(sample_rate: int = 1):
-    """Main scheduler loop that runs collections hourly and heatwave daily"""
+    """Main scheduler loop that runs collections every hour"""
     logger = setup_logging()
     
     logger.info("🚀 NSAC Data Collection Scheduler Starting")
     logger.info("⏰ Will run Air Quality and Wildfire collections every hour")
-    logger.info("🌡️ Will run Heatwave processing daily at midnight")
     logger.info(f"📊 Air Quality sample rate: 1/{sample_rate} ({100/sample_rate:.1f}% of data points)")
     
     # Initialize the systems once
@@ -191,28 +139,13 @@ async def scheduler_loop(sample_rate: int = 1):
     fire_system = FireSystem()
     logger.info("🔥 Fire system initialized")
     
-    # Track last heatwave run date
-    last_heatwave_date = None
-    
     try:
         # Run immediately on startup
         logger.info("🚀 Running initial data collection immediately...")
-        success, results = await run_hourly_collection(air_quality_system, fire_system)
+        success, results = await run_single_collection(air_quality_system, fire_system)
         
         if not success:
             logger.warning("⚠️ Initial collection had some failures, but continuing...")
-        
-        # Run initial heatwave processing if it hasn't been run today
-        now = datetime.now()
-        today = now.date()
-        if last_heatwave_date != today:
-            logger.info("🌡️ Running initial daily heatwave processing...")
-            heatwave_success, heatwave_results = await run_daily_heatwave()
-            if heatwave_success:
-                last_heatwave_date = today
-                logger.info("✅ Initial heatwave processing completed")
-            else:
-                logger.warning("⚠️ Initial heatwave processing failed, will retry tomorrow")
         
         # Now schedule hourly runs
         while True:
@@ -227,24 +160,8 @@ async def scheduler_loop(sample_rate: int = 1):
             # Sleep until next hour
             await asyncio.sleep(sleep_seconds)
             
-            # Check if it's a new day for heatwave processing (run at midnight)
-            current_time = datetime.now()
-            current_date = current_time.date()
-            
-            # Run heatwave processing if it's a new day and it's midnight
-            if (last_heatwave_date != current_date and 
-                current_time.hour == 0 and current_time.minute < 5):  # Run within first 5 minutes of new day
-                
-                logger.info("🌡️ New day detected - running daily heatwave processing...")
-                heatwave_success, heatwave_results = await run_daily_heatwave()
-                if heatwave_success:
-                    last_heatwave_date = current_date
-                    logger.info("✅ Daily heatwave processing completed")
-                else:
-                    logger.warning("⚠️ Daily heatwave processing failed, will retry next day")
-            
-            # Run hourly collection
-            success, results = await run_hourly_collection(air_quality_system, fire_system)
+            # Run collection
+            success, results = await run_single_collection(air_quality_system, fire_system)
             
             if not success:
                 logger.warning("⚠️ Some collections failed, will retry next hour")
@@ -262,7 +179,7 @@ async def scheduler_loop(sample_rate: int = 1):
 
 def main():
     """Main entry point for the scheduler"""
-    parser = argparse.ArgumentParser(description="NSAC Data Collection Scheduler - Hourly Air Quality & Wildfire, Daily Heatwave")
+    parser = argparse.ArgumentParser(description="Hourly NSAC Data Collection Scheduler")
     parser.add_argument('--sample-rate', type=int, default=1, 
                         help='Sample rate for air quality data collection (1=100%% for health alerts, 10=10%%, 20=5%%)')
     
@@ -275,7 +192,6 @@ def main():
         print(f"📊 Using air quality sample rate: 1/{sample_rate} ({100/sample_rate:.1f}% of data points)")
     
     print("🔥 Wildfire detection: Using VIIRS and MODIS satellites with 1-hour lookback and duplicate avoidance")
-    print("🌡️ Heatwave prediction: Daily processing at midnight with 5-day forecast analysis")
     
     try:
         asyncio.run(scheduler_loop(sample_rate))

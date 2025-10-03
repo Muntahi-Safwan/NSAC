@@ -1,0 +1,194 @@
+// TV Edge Server Database Schema
+// This schema is specifically designed for television broadcast alert delivery
+
+generator client {
+  provider = "prisma-client-py"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// TV alert broadcast tracking
+model TVAlert {
+  id                String   @id @default(cuid())
+  alertId           String   @map("alert_id")
+  alertType         String   @map("alert_type")
+  priority          String
+  title             String
+  message           String
+  location          String?
+  coordinates       Json?
+  
+  // TV-specific fields
+  broadcastChannels String[] @map("broadcast_channels")
+  videoDuration     Int      @map("video_duration")
+  repeatCount       Int      @map("repeat_count")
+  overlayEnabled    Boolean  @default(false) @map("overlay_enabled")
+  crawlerEnabled    Boolean  @default(false) @map("crawler_enabled")
+  easCode           String?  @map("eas_code")
+  
+  // Visual content
+  videoText         String   @map("video_text")
+  videoFilePath     String?  @map("video_file_path")
+  thumbnailPath     String?  @map("thumbnail_path")
+  backgroundImage   String?  @map("background_image")
+  
+  // Graphics settings
+  fontSize          Int      @default(48) @map("font_size")
+  fontColor         String   @default("#FFFFFF") @map("font_color")
+  backgroundColor   String   @default("#000000") @map("background_color")
+  alertColor        String   @default("#FF0000") @map("alert_color")
+  
+  // Broadcast status
+  status            String   @default("pending") // pending, broadcasting, completed, failed
+  currentRepeat     Int      @default(0) @map("current_repeat")
+  broadcastStartTime DateTime? @map("broadcast_start_time")
+  broadcastEndTime  DateTime? @map("broadcast_end_time")
+  
+  // Timestamps
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  expiresAt         DateTime? @map("expires_at")
+  
+  // Relations
+  broadcastLogs     BroadcastLog[]
+  
+  @@map("tv_alerts")
+}
+
+// Individual broadcast attempts and results
+model BroadcastLog {
+  id                String   @id @default(cuid())
+  tvAlertId         String   @map("tv_alert_id")
+  channel           String
+  providerId        String?  @map("provider_id") // cable headend, satellite provider, etc.
+  
+  // Broadcast details
+  status            String   // pending, broadcasting, completed, failed
+  signalStrength    Float?   @map("signal_strength")
+  videoQuality      String?  @map("video_quality")
+  coverageArea      Json?    @map("coverage_area")
+  
+  // Error handling
+  errorCode         String?  @map("error_code")
+  errorMessage      String?  @map("error_message")
+  retryCount        Int      @default(0) @map("retry_count")
+  
+  // Timestamps
+  createdAt         DateTime @default(now()) @map("created_at")
+  startedAt         DateTime? @map("started_at")
+  completedAt       DateTime? @map("completed_at")
+  failedAt          DateTime? @map("failed_at")
+  
+  // Relations
+  tvAlert           TVAlert @relation(fields: [tvAlertId], references: [id])
+  
+  @@map("broadcast_logs")
+}
+
+// TV station configuration
+model TVStation {
+  id                String   @id @default(cuid())
+  stationName       String   @map("station_name")
+  callSign          String   @unique @map("call_sign")
+  channel           String
+  network           String
+  frequency         String
+  
+  // Location
+  location          String
+  coordinates       Json
+  coverageRadius    Float    @map("coverage_radius") // km
+  
+  // Status
+  active            Boolean  @default(true)
+  maintenanceMode   Boolean  @default(false) @map("maintenance_mode")
+  
+  // Timestamps
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  lastMaintenance   DateTime? @map("last_maintenance")
+  
+  @@map("tv_stations")
+}
+
+// Cable headend configuration
+model CableHeadend {
+  id                String   @id @default(cuid())
+  headendName       String   @map("headend_name")
+  operator          String
+  location          String
+  coordinates       Json
+  
+  // Coverage
+  coverageArea      Json     @map("coverage_area")
+  subscriberCount   Int      @map("subscriber_count")
+  
+  // Status
+  active            Boolean  @default(true)
+  maintenanceMode   Boolean  @default(false) @map("maintenance_mode")
+  
+  // Timestamps
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  lastMaintenance   DateTime? @map("last_maintenance")
+  
+  @@map("cable_headends")
+}
+
+// Video file management
+model VideoFile {
+  id                String   @id @default(cuid())
+  fileName          String   @map("file_name")
+  filePath          String   @map("file_path")
+  fileSize          Int      @map("file_size")
+  duration          Int      // seconds
+  
+  // Video properties
+  resolution        String
+  frameRate         Int      @map("frame_rate")
+  bitRate           Int      @map("bit_rate")
+  codec             String
+  format            String
+  
+  // Content
+  textContent       String?  @map("text_content")
+  language          String
+  subtitleTrack     Boolean  @default(false) @map("subtitle_track")
+  
+  // Status
+  status            String   @default("active") // active, archived, deleted
+  
+  // Timestamps
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  
+  @@unique([filePath])
+  @@map("video_files")
+}
+
+// Emergency Alert System (EAS) configuration
+model EASConfiguration {
+  id                String   @id @default(cuid())
+  originatorId      String   @map("originator_id")
+  eventCodes        String[] @map("event_codes")
+  duration          Int      // seconds
+  
+  // Visual settings
+  overlayEnabled    Boolean  @default(true) @map("overlay_enabled")
+  crawlerEnabled    Boolean  @default(true) @map("crawler_enabled")
+  flashEnabled      Boolean  @default(true) @map("flash_enabled")
+  
+  // Compliance
+  fccCompliant      Boolean  @default(true) @map("fcc_compliant")
+  fccLicenseNumber  String?  @map("fcc_license_number")
+  
+  // Timestamps
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  
+  @@map("eas_configuration")
+}
+
