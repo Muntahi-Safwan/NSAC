@@ -30,7 +30,7 @@ const AQISpeedometer: React.FC<AQISpeedometerProps> = ({ data, location }) => {
   const currentRange = aqiRanges.find(range => data.value >= range.min && data.value <= range.max);
 
   return (
-    <div className="relative bg-white/[0.03] backdrop-blur-3xl border border-white/[0.08] rounded-3xl p-4 h-full flex flex-col overflow-hidden group hover:border-white/[0.12] transition-all duration-500">
+    <div className="relative bg-white/[0.03] backdrop-blur-3xl border border-white/[0.08] rounded-3xl p-4 flex flex-col overflow-hidden group hover:border-white/[0.12] transition-all duration-500">
       {/* Subtle Background Glow */}
       <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/[0.01] via-blue-500/[0.02] to-indigo-500/[0.01] rounded-3xl" />
 
@@ -48,7 +48,7 @@ const AQISpeedometer: React.FC<AQISpeedometerProps> = ({ data, location }) => {
       </div>
 
       {/* Centered Circular Progress */}
-      <div className="relative z-10 flex-1 flex items-center justify-center py-2">
+      <div className="relative z-10 flex items-center justify-center py-2">
         <div className="relative w-44 h-44 sm:w-48 sm:h-48 lg:w-52 lg:h-52">
           {/* Background Circle */}
           <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">

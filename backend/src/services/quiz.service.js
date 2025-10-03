@@ -13,22 +13,25 @@ class QuizService {
    */
   async generateAdaptiveQuiz(userId, category = 'air_quality', difficulty = 'beginner') {
     try {
-      // Get user's past performance
-      const userAttempts = await prisma.quizAttempt.findMany({
-        where: { userId },
-        orderBy: { completedAt: 'desc' },
-        take: 5
-      });
-
-      // Calculate average score to adjust difficulty
+      // Get user's past performance (only for authenticated users)
       let adjustedDifficulty = difficulty;
-      if (userAttempts.length > 0) {
-        const avgScore = userAttempts.reduce((sum, attempt) =>
-          sum + (attempt.score / attempt.totalQuestions), 0) / userAttempts.length;
 
-        if (avgScore > 0.8) adjustedDifficulty = 'advanced';
-        else if (avgScore > 0.6) adjustedDifficulty = 'intermediate';
-        else adjustedDifficulty = 'beginner';
+      if (userId && userId !== 'guest') {
+        const userAttempts = await prisma.quizAttempt.findMany({
+          where: { userId },
+          orderBy: { completedAt: 'desc' },
+          take: 5
+        });
+
+        // Calculate average score to adjust difficulty
+        if (userAttempts.length > 0) {
+          const avgScore = userAttempts.reduce((sum, attempt) =>
+            sum + (attempt.score / attempt.totalQuestions), 0) / userAttempts.length;
+
+          if (avgScore > 0.8) adjustedDifficulty = 'advanced';
+          else if (avgScore > 0.6) adjustedDifficulty = 'intermediate';
+          else adjustedDifficulty = 'beginner';
+        }
       }
 
       // Generate quiz using AI
@@ -97,8 +100,12 @@ Important: Return ONLY the JSON array, no additional text, no markdown formattin
           category: quiz.category,
           questions: questions.map(q => ({
             question: q.question,
-            options: q.options
-          })) // Don't send correct answers yet
+            options: typeof q.options === 'object' && !Array.isArray(q.options)
+              ? Object.values(q.options) // Convert object to array
+              : q.options,
+            correctAnswer: q.correctAnswer,
+            explanation: q.explanation
+          }))
         },
         fullQuestions: questions // For server-side validation
       };
@@ -141,17 +148,28 @@ Important: Return ONLY the JSON array, no additional text, no markdown formattin
         });
       });
 
-      // Save attempt
-      const attempt = await prisma.quizAttempt.create({
-        data: {
-          userId,
-          quizId,
-          score,
-          totalQuestions: questions.length,
-          answers: results,
-          difficulty: quiz.difficulty
+      // Save attempt only for authenticated users
+      let attemptId = null;
+      if (userId && userId !== 'guest') {
+        // Verify user exists
+        const userExists = await prisma.user.findUnique({
+          where: { id: userId }
+        });
+
+        if (userExists) {
+          const attempt = await prisma.quizAttempt.create({
+            data: {
+              userId,
+              quizId,
+              score,
+              totalQuestions: questions.length,
+              answers: results,
+              difficulty: quiz.difficulty
+            }
+          });
+          attemptId = attempt.id;
         }
-      });
+      }
 
       // Generate personalized feedback using AI
       const feedbackPrompt = `The user scored ${score}/${questions.length} on a ${quiz.difficulty} level ${quiz.category} quiz.
@@ -176,7 +194,7 @@ Keep it positive and motivating.`;
         percentage: Math.round((score / questions.length) * 100),
         results,
         feedback: feedbackResponse.text,
-        attemptId: attempt.id
+        attemptId
       };
     } catch (error) {
       console.error('Error submitting quiz:', error);
@@ -189,6 +207,14 @@ Keep it positive and motivating.`;
    */
   async getUserQuizHistory(userId) {
     try {
+      // Return empty array for guest users
+      if (!userId || userId === 'guest') {
+        return {
+          success: true,
+          attempts: []
+        };
+      }
+
       const attempts = await prisma.quizAttempt.findMany({
         where: { userId },
         include: { quiz: true },
@@ -219,6 +245,18 @@ Keep it positive and motivating.`;
    */
   async getPersonalizedRecommendations(userId) {
     try {
+      // Return default recommendations for guest users
+      if (!userId || userId === 'guest') {
+        return {
+          success: true,
+          recommendations: [
+            'Start with beginner level quizzes to build your foundation',
+            'Learn about Air Quality Index (AQI) basics',
+            'Understand common pollutants and their health impacts'
+          ]
+        };
+      }
+
       const attempts = await prisma.quizAttempt.findMany({
         where: { userId },
         orderBy: { completedAt: 'desc' },

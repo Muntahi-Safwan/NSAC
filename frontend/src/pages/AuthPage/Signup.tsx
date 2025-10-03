@@ -405,7 +405,7 @@ const Signup = () => {
       <div className="hidden lg:block absolute right-8 top-1/2 transform -translate-y-1/2 max-w-sm">
         <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-6">
           <h3 className="text-lg font-display font-bold text-white mb-4">
-            Why Join AirWatch?
+            Why Join AiroWatch?
           </h3>
           <ul className="space-y-4">
             {[

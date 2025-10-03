@@ -73,7 +73,7 @@ const Contact = () => {
                   {
                     icon: Mail,
                     title: 'Email Us',
-                    info: 'hello@airwatch.com',
+                    info: 'hello@AiroWatch.com',
                     description: 'Send us an email anytime',
                     gradient: 'from-blue-500 to-cyan-600'
                   },

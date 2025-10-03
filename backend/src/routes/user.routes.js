@@ -4,6 +4,7 @@ const userController = require('../controllers/user.controller');
 
 // User profile routes
 router.get('/profile/:userId', userController.getUserProfile);
+router.put('/profile', userController.updateUserProfile);
 
 // Safety status routes
 router.put('/safety-status', userController.updateSafetyStatus);

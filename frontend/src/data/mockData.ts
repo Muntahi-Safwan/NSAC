@@ -3,7 +3,8 @@ export const northAmericaLocation = {
   lat: 40.7128,
   lng: -74.0060,
   city: "New York",
-  country: "United States"
+  country: "United States",
+  name: "New York, United States"
 };
 
 export interface PollutantData {
@@ -19,13 +20,15 @@ export interface AQIData {
   level: 'good' | 'moderate' | 'unhealthy' | 'very_unhealthy' | 'hazardous';
   description: string;
   color: string;
+  aqi: number;
 }
 
 export const mockAQIData: AQIData = {
   value: 165,
   level: 'unhealthy',
   description: 'Unhealthy for Sensitive Groups',
-  color: '#ff6b35'
+  color: '#ff6b35',
+  aqi: 165
 };
 
 export interface EnhancedPollutantData extends PollutantData {

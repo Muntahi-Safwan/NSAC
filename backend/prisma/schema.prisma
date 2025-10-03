@@ -20,7 +20,11 @@ model User {
   firstName       String?
   lastName        String?
   phoneNumbers    String[]          @default([])
+  primaryPhone    String?           // Primary phone for SMS alerts
   socialUsernames Json?
+  age             Int?              // User's age
+  diseases        String[]          @default([]) // User's diseases (multi-select)
+  allergies       String[]          @default([]) // User's allergies (multi-select)
   lastLocation    Json?             // {city, region, country, lat, lng}
   isSafe          Boolean           @default(true)
   safetyUpdatedAt DateTime?
@@ -39,10 +43,14 @@ model NGO {
   password        String
   name            String
   description     String?
+  website         String?        // NGO website
+  address         String?        // Physical address
   region          String         // City/Region they operate in
   country         String         @default("Bangladesh")
   coordinates     Json?          // {lat, lng}
   contactPhone    String?
+  emergencyPhone  String?        // Emergency contact number
+  operatingHours  String?        // Operating hours
   verified        Boolean        @default(false)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt

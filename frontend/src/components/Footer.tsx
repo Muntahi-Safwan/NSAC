@@ -33,7 +33,7 @@ const Footer = () => {
   ] as const;
 
   const socialLinks = [
-    { name: 'GitHub', icon: Github, href: 'https://github.com/nasa-space-apps-airwatch' },
+    { name: 'GitHub', icon: Github, href: 'https://github.com/nasa-space-apps-AiroWatch' },
     { name: 'Contact', icon: Mail, href: '/contact' },
   ];
 
@@ -52,7 +52,7 @@ const Footer = () => {
                   <Satellite className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </div>
                 <span className="font-grotesk font-bold text-2xl sm:text-3xl text-white">
-                  AirWatch
+                  AiroWatch
                 </span>
               </Link>
 
@@ -125,7 +125,7 @@ const Footer = () => {
           <div className="flex flex-col lg:flex-row justify-between items-center space-y-4 sm:space-y-6 lg:space-y-0">
             {/* Copyright */}
             <div className="text-gray-400 font-inter text-center lg:text-left">
-              <p className="text-sm sm:text-base mb-1">© {currentYear} AirWatch. All rights reserved.</p>
+              <p className="text-sm sm:text-base mb-1">© {currentYear} AiroWatch. All rights reserved.</p>
               <p className="text-xs sm:text-sm opacity-80">
                 NASA Space Apps Challenge 2024 - Air Quality Intelligence for North America
               </p>
