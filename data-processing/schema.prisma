@@ -153,3 +153,51 @@ model HeatwaveAlerts {
   @@map("heatwave_alerts")
 }
 
+model FireDetections {
+  id                    Int      @id @default(autoincrement())
+  
+  // Location
+  latitude              Float    // Geographic latitude
+  longitude             Float    // Geographic longitude
+  
+  // Fire detection data
+  brightness            Float    // Fire brightness temperature (K)
+  scan                  Float    // Scan size
+  track                 Float    // Track size
+  brightT31             Float    // Brightness temperature (31um)
+  frp                   Float    // Fire Radiative Power (MW)
+  
+  // Temporal information
+  acqDate               DateTime @db.Date // Acquisition date
+  acqTime               String   // Acquisition time
+  daynight              String   // Day or night detection
+  
+  // Satellite information
+  satellite             String   // Satellite name (MODIS_Terra, VIIRS_Suomi, etc.)
+  confidence            String   // Confidence level (nominal, low, high)
+  version               String   // Data version
+  
+  // Alert information
+  alertLevel            Int?     // Alert level: 1=Watch, 2=Warning, 3=Emergency
+  alertSent             Boolean  @default(false) // Whether alert was sent
+  
+  // Metadata
+  source                String   @default("NASA-FIRMS")
+  createdAt             DateTime @default(now())
+  
+  // Unique constraint to prevent duplicate detections
+  @@unique([latitude, longitude, acqDate, acqTime, satellite])
+  
+  // Indexes for efficient queries
+  @@index([latitude, longitude])
+  @@index([acqDate])
+  @@index([satellite])
+  @@index([confidence])
+  @@index([frp]) // For filtering by fire intensity
+  @@index([alertLevel]) // For filtering by alert level
+  @@index([alertSent]) // For tracking sent alerts
+  
+  @@map("fire_detections")
+}
+
+

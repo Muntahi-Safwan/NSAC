@@ -25,12 +25,12 @@ services:
       - tools
     command: python air-quality/forecast/main.py --sample-rate 5
 
-  # Hourly Air Quality Data Collection Service
-  air-quality-scheduler:
+  # NSAC Data Processing Scheduler (All Pipelines)
+  nsac-scheduler:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: nsac_air_quality_scheduler
+    container_name: nsac_scheduler
     env_file:
       - .env
     volumes:
@@ -38,21 +38,20 @@ services:
       - ./logs:/app/logs
       # Mount config files
       - ./.env:/app/.env:ro
-      # Mount air-quality module
+      # Mount all modules
       - ./air-quality:/app/air-quality
-      # Mount heatwave module
       - ./heatwave:/app/heatwave
-      # Mount scripts
+      - ./wildfire:/app/wildfire
       - ./scripts:/app/scripts
     networks:
       - nsac_network
     depends_on:
       postgres:
         condition: service_healthy
-    # Run hourly collection every hour
-    command: python scripts/run_hourly_collection.py
+    # Run continuous scheduler (hourly execution)
+    command: python scripts/run_hourly_collection.py --sample-rate 1
     restart: unless-stopped
-    # This service runs continuously and schedules itself
+    # This service runs continuously and schedules all pipelines hourly
 
   # Prisma Studio for database management
   prisma-studio:
