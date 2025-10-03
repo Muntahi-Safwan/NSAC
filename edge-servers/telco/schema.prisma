@@ -1,0 +1,159 @@
+// Telco Edge Server Database Schema
+// This schema is specifically designed for telecommunications alert delivery
+
+generator client {
+  provider = "prisma-client-py"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Alert delivery tracking
+model AlertDelivery {
+  id          String   @id @default(cuid())
+  alertId     String   @map("alert_id")
+  alertType   String   @map("alert_type")
+  priority    String
+  title       String
+  message     String
+  location    String?
+  coordinates Json?
+  
+  // Delivery channels
+  smsEnabled    Boolean @default(true) @map("sms_enabled")
+  voiceEnabled  Boolean @default(false) @map("voice_enabled")
+  pushEnabled   Boolean @default(true) @map("push_enabled")
+  
+  // Target information
+  targetPhones  String[] @map("target_phones")
+  targetApps    String[] @map("target_apps")
+  
+  // Delivery status
+  status        String   @default("pending") // pending, sending, sent, failed, cancelled
+  attempts      Int      @default(0)
+  lastAttempt   DateTime? @map("last_attempt")
+  deliveredAt   DateTime? @map("delivered_at")
+  
+  // Timestamps
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  expiresAt     DateTime? @map("expires_at")
+  
+  // Relations
+  deliveryLogs  DeliveryLog[]
+  
+  @@map("alert_deliveries")
+}
+
+// Individual delivery attempts and results
+model DeliveryLog {
+  id                String   @id @default(cuid())
+  alertDeliveryId   String   @map("alert_delivery_id")
+  deliveryChannel   String   @map("delivery_channel") // sms, voice, push
+  targetIdentifier  String   @map("target_identifier") // phone number, app ID, etc.
+  
+  // Delivery details
+  status            String   // pending, sent, delivered, failed, bounced
+  provider          String?  // twilio, aws_sns, firebase, etc.
+  providerId        String?  @map("provider_id") // external provider's ID
+  providerResponse  Json?    @map("provider_response")
+  
+  // Error handling
+  errorCode         String?  @map("error_code")
+  errorMessage      String?  @map("error_message")
+  retryCount        Int      @default(0) @map("retry_count")
+  
+  // Timestamps
+  createdAt         DateTime @default(now()) @map("created_at")
+  sentAt            DateTime? @map("sent_at")
+  deliveredAt       DateTime? @map("delivered_at")
+  failedAt          DateTime? @map("failed_at")
+  
+  // Relations
+  alertDelivery     AlertDelivery @relation(fields: [alertDeliveryId], references: [id])
+  
+  @@map("delivery_logs")
+}
+
+// Subscriber management
+model Subscriber {
+  id                String   @id @default(cuid())
+  phoneNumber       String?  @unique @map("phone_number")
+  appId             String?  @unique @map("app_id")
+  email             String?  @unique
+  
+  // Preferences
+  smsEnabled        Boolean  @default(true) @map("sms_enabled")
+  voiceEnabled      Boolean  @default(false) @map("voice_enabled")
+  pushEnabled       Boolean  @default(true) @map("push_enabled")
+  
+  // Alert preferences
+  airQualityAlerts  Boolean  @default(true) @map("air_quality_alerts")
+  wildfireAlerts    Boolean  @default(true) @map("wildfire_alerts")
+  heatwaveAlerts    Boolean  @default(true) @map("heatwave_alerts")
+  
+  // Location preferences
+  location          String?
+  coordinates       Json?
+  radiusKm          Float    @default(50) @map("radius_km")
+  
+  // Priority preferences
+  minPriority       String   @default("low") @map("min_priority") // low, medium, high, critical
+  
+  // Status
+  active            Boolean  @default(true)
+  verified          Boolean  @default(false)
+  
+  // Timestamps
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  lastActiveAt      DateTime? @map("last_active_at")
+  
+  // Relations
+  deliveryLogs      DeliveryLog[]
+  
+  @@map("subscribers")
+}
+
+// Service configuration and status
+model ServiceStatus {
+  id                String   @id @default(cuid())
+  serviceName       String   @map("service_name")
+  status            String   // active, inactive, maintenance, error
+  
+  // Configuration
+  config            Json?
+  
+  // Health metrics
+  lastHealthCheck   DateTime @map("last_health_check")
+  responseTime      Int?     @map("response_time") // milliseconds
+  errorRate         Float    @default(0) @map("error_rate")
+  
+  // Timestamps
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  
+  @@unique([serviceName])
+  @@map("service_status")
+}
+
+// Rate limiting and quotas
+model RateLimit {
+  id                String   @id @default(cuid())
+  serviceName       String   @map("service_name")
+  limitType         String   @map("limit_type") // sms, voice, push
+  limitValue        Int      @map("limit_value")
+  windowMinutes     Int      @map("window_minutes")
+  currentCount      Int      @default(0) @map("current_count")
+  
+  // Timestamps
+  windowStart       DateTime @map("window_start")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  
+  @@unique([serviceName, limitType, windowStart])
+  @@map("rate_limits")
+}
+

@@ -1,0 +1,97 @@
+version: "3.8"
+
+services:
+  telco-edge-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nsac_telco_edge_server
+    env_file:
+      - .env
+    volumes:
+      # Mount config files
+      - ./.env:/app/.env:ro
+      # Mount independent data processing modules
+      - ./data-processing:/app/data-processing
+      # Persist logs
+      - ./logs:/app/logs
+    ports:
+      - "8001:8000"
+    networks:
+      - telco_network
+    depends_on:
+      telco_postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Independent PostgreSQL database for telco edge server
+  telco_postgres:
+    image: timescale/timescaledb-ha:pg16
+    container_name: nsac_telco_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-nsac}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - telco_postgres_data:/var/lib/postgresql/data
+      - ./database/init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-nsac}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - telco_network
+
+  # Data Collection Scheduler
+  telco-scheduler:
+    build: .
+    container_name: telco-scheduler
+    env_file:
+      - .env
+    volumes:
+      # Mount config files
+      - ./.env:/app/.env:ro
+      # Mount independent data processing modules
+      - ./data-processing:/app/data-processing
+      # Persist logs
+      - ./logs:/app/logs
+    command: python data-processing/scripts/run_hourly_collection.py --sample-rate 1
+    networks:
+      - telco_network
+    depends_on:
+      telco_postgres:
+        condition: service_healthy
+
+  # Prisma Studio for telco database management
+  telco_prisma_studio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nsac_telco_prisma_studio
+    env_file:
+      - .env
+    ports:
+      - "5556:5555"
+    volumes:
+      - ./.env:/app/.env:ro
+    networks:
+      - telco_network
+    command: python -m prisma studio --hostname 0.0.0.0 --port 5555
+    profiles:
+      - tools
+
+volumes:
+  telco_postgres_data:
+    name: nsac_telco_postgres_data
+
+networks:
+  telco_network:
+    name: nsac_telco_network

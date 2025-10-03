@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  focused-radio-server:
+    build:
+      context: .
+      dockerfile: focused_Dockerfile
+    container_name: focused_radio_server
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@localhost:5432/nsac}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - RADIO_COVERAGE_AREA=${RADIO_COVERAGE_AREA:-North America}
+      - PYTHONPATH=/app
+    volumes:
+      # Persist audio files
+      - ./audio:/app/audio
+    ports:
+      - "8003:8000"
+    restart: unless-stopped

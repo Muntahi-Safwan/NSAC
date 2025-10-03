@@ -1,0 +1,10 @@
+# Database Configuration
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/nsac
+
+# Gemini AI Configuration
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# Radio Coverage Area
+RADIO_COVERAGE_AREA=North America
+# Options: North America, United States, Canada, Mexico, California, Texas, etc.
+# Use specific area names for targeted insights

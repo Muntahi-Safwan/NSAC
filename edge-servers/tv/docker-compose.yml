@@ -1,0 +1,99 @@
+version: "3.8"
+
+services:
+  tv-edge-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nsac_tv_edge_server
+    env_file:
+      - .env
+    volumes:
+      # Mount config files
+      - ./.env:/app/.env:ro
+      # Mount independent data processing modules
+      - ./data-processing:/app/data-processing
+      # Persist logs and media files
+      - ./logs:/app/logs
+      - ./media:/app/media
+      - ./templates:/app/templates
+    ports:
+      - "8003:8000"
+    networks:
+      - tv_network
+    depends_on:
+      tv_postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Independent PostgreSQL database for TV edge server
+  tv_postgres:
+    image: timescale/timescaledb-ha:pg16
+    container_name: nsac_tv_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-nsac}
+    ports:
+      - "${POSTGRES_PORT:-5435}:5432"
+    volumes:
+      - tv_postgres_data:/var/lib/postgresql/data
+      - ./database/init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-nsac}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tv_network
+
+  # Data Collection Scheduler
+  tv-scheduler:
+    build: .
+    container_name: tv-scheduler
+    env_file:
+      - .env
+    volumes:
+      # Mount config files
+      - ./.env:/app/.env:ro
+      # Mount independent data processing modules
+      - ./data-processing:/app/data-processing
+      # Persist logs
+      - ./logs:/app/logs
+    command: python data-processing/scripts/run_hourly_collection.py --sample-rate 1
+    networks:
+      - tv_network
+    depends_on:
+      tv_postgres:
+        condition: service_healthy
+
+  # Prisma Studio for TV database management
+  tv_prisma_studio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nsac_tv_prisma_studio
+    env_file:
+      - .env
+    ports:
+      - "5558:5555"
+    volumes:
+      - ./.env:/app/.env:ro
+    networks:
+      - tv_network
+    command: python -m prisma studio --hostname 0.0.0.0 --port 5555
+    profiles:
+      - tools
+
+volumes:
+  tv_postgres_data:
+    name: nsac_tv_postgres_data
+
+networks:
+  tv_network:
+    name: nsac_tv_network
