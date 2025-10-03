@@ -1,0 +1,36 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Environment files (use Vercel dashboard for env vars)
+.env
+.env.local
+.env.development
+
+# Development files
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Testing
+coverage
+.nyc_output
+test-results
+
+# Build artifacts (will be regenerated)
+dist
+build
+.next
+out
+
+# Logs
+logs
+*.log
