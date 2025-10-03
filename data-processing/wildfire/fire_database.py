@@ -107,7 +107,7 @@ class FireDatabase:
         
         return {"inserted": inserted_count, "skipped": skipped_count}
     
-    async def get_fire_statistics(self) -> Dict[str, int]:
+    async def get_fire_statistics(self) -> Dict[str, any]:
         """
         Get fire detection statistics from the database
         
@@ -115,24 +115,40 @@ class FireDatabase:
             Dictionary with fire detection statistics
         """
         try:
-            # Get total fire detections
-            total_result = await self.prisma.execute_raw("SELECT COUNT(*) FROM fire_detections")
+            # Get total fire detections using a more reliable approach
+            count_result = await self.prisma.execute_raw("SELECT COUNT(*) as count FROM fire_detections")
+            
             # Handle different result formats from Prisma
-            if isinstance(total_result, int):
-                total_detections = total_result
-            elif isinstance(total_result, list) and len(total_result) > 0:
-                total_detections = total_result[0][0] if isinstance(total_result[0], (list, tuple)) else total_result[0]
+            if isinstance(count_result, int):
+                total_detections = count_result
+            elif isinstance(count_result, list) and len(count_result) > 0:
+                # Check if it's a list of tuples or a list of dicts
+                first_result = count_result[0]
+                if isinstance(first_result, (list, tuple)):
+                    total_detections = first_result[0] if len(first_result) > 0 else 0
+                elif isinstance(first_result, dict):
+                    total_detections = first_result.get('count', 0)
+                else:
+                    total_detections = first_result if isinstance(first_result, (int, float)) else 0
             else:
                 total_detections = 0
             
             # Get latest detection date
-            latest_result = await self.prisma.execute_raw("SELECT MAX(\"acqDate\") FROM fire_detections")
+            latest_result = await self.prisma.execute_raw("SELECT MAX(\"acqDate\") as latest_date FROM fire_detections")
+            latest_date = None
+            
             if isinstance(latest_result, list) and len(latest_result) > 0:
-                latest_date = latest_result[0][0] if isinstance(latest_result[0], (list, tuple)) else latest_result[0]
-            else:
-                latest_date = None
+                first_result = latest_result[0]
+                if isinstance(first_result, (list, tuple)):
+                    latest_date = first_result[0] if len(first_result) > 0 else None
+                elif isinstance(first_result, dict):
+                    latest_date = first_result.get('latest_date')
+                else:
+                    latest_date = first_result
             
             return {
+                "total_detections": total_detections,
+                "latest_date": latest_date,
                 "fire_detections": total_detections,
                 "latest_detection_date": latest_date,
                 "total_records": total_detections
@@ -140,7 +156,13 @@ class FireDatabase:
             
         except Exception as e:
             self.logger.error(f"Error getting fire statistics: {e}")
-            return {"fire_detections": 0, "latest_detection_date": None, "total_records": 0}
+            return {
+                "total_detections": 0, 
+                "latest_date": None,
+                "fire_detections": 0, 
+                "latest_detection_date": None, 
+                "total_records": 0
+            }
     
     async def cleanup_old_data(self, days_to_keep: int = 30) -> int:
         """
@@ -198,22 +220,43 @@ class FireDatabase:
             )
             
             alerts = []
-            # Prisma returns results as a list of tuples
-            if result and isinstance(result, list) and len(result) > 0:
-                for row in result:
-                    alerts.append({
-                        'id': row[0],
-                        'latitude': row[1],
-                        'longitude': row[2],
-                        'brightness': row[3],
-                        'frp': row[4],
-                        'acq_date': row[5],
-                        'acq_time': row[6],
-                        'satellite': row[7],
-                        'confidence': row[8],
-                        'alert_level': row[9],
-                        'alert_sent': row[10]
-                    })
+            # Handle different result formats from Prisma
+            if result is not None:
+                if isinstance(result, int):
+                    # If result is an integer, it might be an error code or count
+                    self.logger.warning(f"Fire alerts query returned integer: {result}")
+                    return []
+                elif isinstance(result, list) and len(result) > 0:
+                    for row in result:
+                        # Handle both tuple and dict formats
+                        if isinstance(row, (list, tuple)) and len(row) >= 11:
+                            alerts.append({
+                                'id': row[0],
+                                'latitude': row[1],
+                                'longitude': row[2],
+                                'brightness': row[3],
+                                'frp': row[4],
+                                'acq_date': row[5],
+                                'acq_time': row[6],
+                                'satellite': row[7],
+                                'confidence': row[8],
+                                'alert_level': row[9],
+                                'alert_sent': row[10]
+                            })
+                        elif isinstance(row, dict):
+                            alerts.append({
+                                'id': row.get('id'),
+                                'latitude': row.get('latitude'),
+                                'longitude': row.get('longitude'),
+                                'brightness': row.get('brightness'),
+                                'frp': row.get('frp'),
+                                'acq_date': row.get('acqDate'),
+                                'acq_time': row.get('acqTime'),
+                                'satellite': row.get('satellite'),
+                                'confidence': row.get('confidence'),
+                                'alert_level': row.get('alertLevel'),
+                                'alert_sent': row.get('alertSent')
+                            })
             
             self.logger.info(f"Found {len(alerts)} fire detections needing alerts")
             return alerts
