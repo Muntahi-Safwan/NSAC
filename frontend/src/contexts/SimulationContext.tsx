@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, type ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import pushNotificationService from '../services/pushNotification.service';
 
 interface SimulationState {
   isActive: boolean;
@@ -64,6 +65,15 @@ export const SimulationProvider: React.FC<{ children: ReactNode }> = ({ children
       ...prev,
       alerts: [...prev.alerts, newAlert]
     }));
+
+    // Send push notification for critical, danger, and warning alerts
+    if (alert.type === 'critical' || alert.type === 'danger' || alert.type === 'warning') {
+      pushNotificationService.sendHazardAlert(alert.type, alert.message, {
+        alertId: newAlert.id,
+        timestamp: newAlert.timestamp.toISOString(),
+        url: window.location.href,
+      });
+    }
   };
 
   const clearAlerts = () => {

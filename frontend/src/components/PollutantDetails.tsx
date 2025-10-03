@@ -53,7 +53,7 @@ const PollutantDetails: React.FC<PollutantDetailsProps> = ({ pollutants }) => {
   };
 
   return (
-    <div className="relative bg-white/[0.03] backdrop-blur-3xl border border-white/[0.08] rounded-3xl p-4 h-full flex flex-col overflow-hidden group hover:border-white/[0.12] transition-all duration-500">
+    <div className="relative bg-white/[0.03] backdrop-blur-3xl border border-white/[0.08] rounded-3xl p-4 flex flex-col overflow-hidden group hover:border-white/[0.12] transition-all duration-500">
       {/* Subtle Background Glow */}
       <div className="absolute inset-0 bg-gradient-to-br from-orange-500/[0.01] via-red-500/[0.02] to-pink-500/[0.01] rounded-3xl" />
 
@@ -99,7 +99,7 @@ const PollutantDetails: React.FC<PollutantDetailsProps> = ({ pollutants }) => {
       </div>
 
       {/* Compact Pollutant List */}
-      <div className="relative z-10 flex-1 space-y-2 overflow-y-auto">
+      <div className="relative z-10 space-y-2 max-h-[400px] md:max-h-[500px] lg:max-h-[600px] overflow-y-auto">
         {pollutants.map((pollutant, index) => (
           <div
             key={index}
