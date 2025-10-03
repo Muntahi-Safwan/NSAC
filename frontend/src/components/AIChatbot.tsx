@@ -118,7 +118,7 @@ const AIChatbot = ({ airQualityContext }: AIChatbotProps) => {
     setMessages(prev => [...prev, placeholderMessage]);
 
     try {
-      const response = await axios.post('http://localhost:3000/api/chatbot/message', {
+      const response = await axios.post('https://nsac-mu.vercel.app/api/chatbot/message', {
         message: content,
         context: airQualityContext
       });
@@ -152,7 +152,7 @@ const AIChatbot = ({ airQualityContext }: AIChatbotProps) => {
     setMessages(prev => [...prev, placeholderMessage]);
 
     try {
-      const response = await axios.post('http://localhost:3000/api/chatbot/tips', {
+      const response = await axios.post('https://nsac-mu.vercel.app/api/chatbot/tips', {
         context: airQualityContext
       });
 
@@ -184,7 +184,7 @@ const AIChatbot = ({ airQualityContext }: AIChatbotProps) => {
     setMessages(prev => [...prev, placeholderMessage]);
 
     try {
-      const response = await axios.post('http://localhost:3000/api/chatbot/analyze-trends', {
+      const response = await axios.post('https://nsac-mu.vercel.app/api/chatbot/analyze-trends', {
         historicalData: [airQualityContext]
       });
 
@@ -211,7 +211,7 @@ const AIChatbot = ({ airQualityContext }: AIChatbotProps) => {
     setMessages(prev => [...prev, placeholderMessage]);
 
     try {
-      const response = await axios.post('http://localhost:3000/api/chatbot/activity-recommendations', {
+      const response = await axios.post('https://nsac-mu.vercel.app/api/chatbot/activity-recommendations', {
         activity: 'outdoor exercise',
         airQuality: airQualityContext
       });

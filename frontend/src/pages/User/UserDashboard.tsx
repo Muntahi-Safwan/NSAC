@@ -63,7 +63,7 @@ const UserDashboard: React.FC = () => {
 
   const fetchUserData = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/user/profile/${user?.id}`);
+      const response = await axios.get(`https://nsac-mu.vercel.app/api/user/profile/${user?.id}`);
       if (response.data.success) {
         const userData = response.data.data.user;
         setIsSafe(userData.isSafe);
@@ -80,7 +80,7 @@ const UserDashboard: React.FC = () => {
 
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/notifications/user/${user?.id}`);
+      const response = await axios.get(`https://nsac-mu.vercel.app/api/notifications/user/${user?.id}`);
       if (response.data.success) {
         setNotifications(response.data.data.notifications);
       }
@@ -120,7 +120,7 @@ const UserDashboard: React.FC = () => {
 
             // Save location to backend
             console.log('💾 Saving location to backend...');
-            const saveResponse = await axios.put('http://localhost:3000/api/user/location', {
+            const saveResponse = await axios.put('https://nsac-mu.vercel.app/api/user/location', {
               userId: user?.id,
               city: locationData.city,
               region: locationData.region,
@@ -175,7 +175,7 @@ const UserDashboard: React.FC = () => {
 
   const updateSafetyStatus = async (safe: boolean) => {
     try {
-      const response = await axios.put('http://localhost:3000/api/user/safety-status', {
+      const response = await axios.put('https://nsac-mu.vercel.app/api/user/safety-status', {
         userId: user?.id,
         isSafe: safe
       });

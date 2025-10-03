@@ -21,7 +21,7 @@ const SafetyStatusModal: React.FC<SafetyStatusModalProps> = ({ isOpen, onClose, 
 
   const fetchCurrentStatus = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/users/safety-status/${userId}`);
+      const response = await axios.get(`https://nsac-mu.vercel.app/api/users/safety-status/${userId}`);
       if (response.data.success) {
         setCurrentStatus(response.data.data.isSafe);
         setIsSafe(response.data.data.isSafe);
@@ -34,7 +34,7 @@ const SafetyStatusModal: React.FC<SafetyStatusModalProps> = ({ isOpen, onClose, 
   const handleUpdateStatus = async () => {
     setLoading(true);
     try {
-      const response = await axios.put('http://localhost:3000/api/users/safety-status', {
+      const response = await axios.put('https://nsac-mu.vercel.app/api/users/safety-status', {
         userId,
         isSafe
       });

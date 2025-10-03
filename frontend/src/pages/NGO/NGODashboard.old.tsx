@@ -137,7 +137,7 @@ const NGODashboard: React.FC = () => {
 
   const fetchStats = async (ngoId: string) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/ngo/stats/${ngoId}`);
+      const response = await axios.get(`https://nsac-mu.vercel.app/api/ngo/stats/${ngoId}`);
       if (response.data.success) {
         setStats(response.data.data);
       }
@@ -148,7 +148,7 @@ const NGODashboard: React.FC = () => {
 
   const fetchUsers = async (ngoId: string) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/ngo/users/${ngoId}`);
+      const response = await axios.get(`https://nsac-mu.vercel.app/api/ngo/users/${ngoId}`);
       if (response.data.success) {
         setUsers(response.data.data.users);
         setFilteredUsers(response.data.data.users);
@@ -160,7 +160,7 @@ const NGODashboard: React.FC = () => {
 
   const fetchNotifications = async (ngoId: string) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/notifications/ngo/${ngoId}`);
+      const response = await axios.get(`https://nsac-mu.vercel.app/api/notifications/ngo/${ngoId}`);
       if (response.data.success) {
         setNotifications(response.data.data.notifications);
       }
@@ -174,7 +174,7 @@ const NGODashboard: React.FC = () => {
     if (!ngo) return;
 
     try {
-      const response = await axios.post('http://localhost:3000/api/notifications/create', {
+      const response = await axios.post('https://nsac-mu.vercel.app/api/notifications/create', {
         ngoId: ngo.id,
         ...notificationForm
       });

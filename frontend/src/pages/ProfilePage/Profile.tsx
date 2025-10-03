@@ -62,7 +62,7 @@ const Profile = () => {
 
   const fetchProfile = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/user/profile/${authUser?.id}`);
+      const response = await axios.get(`https://nsac-mu.vercel.app/api/user/profile/${authUser?.id}`);
       if (response.data.success) {
         const userData = response.data.data.user;
         setProfileData({
@@ -94,7 +94,7 @@ const Profile = () => {
 
     try {
       // Update profile with new fields
-      const response = await axios.put('http://localhost:3000/api/user/profile', {
+      const response = await axios.put('https://nsac-mu.vercel.app/api/user/profile', {
         userId: authUser?.id,
         firstName: profileData.firstName,
         lastName: profileData.lastName,

@@ -220,7 +220,7 @@ frontend/src/
 
 ## 🔗 Key URLs
 
-- **API Base**: `http://localhost:3000/api/chatbot`
+- **API Base**: `https://nsac-mu.vercel.app/api/chatbot`
 - **Documentation**: This file
 - **NASA Data Explanation**: `NASA_MAP_DATA_EXPLANATION.md`
 

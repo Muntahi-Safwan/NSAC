@@ -28,7 +28,7 @@ const NotificationBell: React.FC = () => {
 
   const fetchNotifications = async (userId: string) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/notifications/user/${userId}`);
+      const response = await axios.get(`https://nsac-mu.vercel.app/api/notifications/user/${userId}`);
       if (response.data.success) {
         setNotifications(response.data.data.notifications);
         setUnreadCount(response.data.data.notifications.length);

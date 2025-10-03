@@ -108,9 +108,9 @@ const ImprovedNGODashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       const [statsRes, usersRes, notificationsRes] = await Promise.all([
-        axios.get(`http://localhost:3000/api/ngo/${ngo?.id}/stats`),
-        axios.get(`http://localhost:3000/api/ngo/${ngo?.id}/regional-users`),
-        axios.get(`http://localhost:3000/api/ngo/${ngo?.id}/notifications`)
+        axios.get(`https://nsac-mu.vercel.appl.appl.app/api/ngo/${ngo?.id}/stats`),
+        axios.get(`https://nsac-mu.vercel.appl.appl.app/api/ngo/${ngo?.id}/regional-users`),
+        axios.get(`https://nsac-mu.vercel.appl.appl.app/api/ngo/${ngo?.id}/notifications`)
       ]);
 
       if (statsRes.data.success) setStats(statsRes.data.data);
@@ -144,7 +144,7 @@ const ImprovedNGODashboard: React.FC = () => {
   const handleSendNotification = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/api/notifications/send', {
+      const response = await axios.post('https://nsac-mu.vercel.appl.appl.app/api/notifications/send', {
         ngoId: ngo?.id,
         title: notificationForm.title,
         message: notificationForm.message,

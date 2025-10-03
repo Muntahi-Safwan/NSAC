@@ -49,7 +49,7 @@ const SearchPage = () => {
     setSearched(true);
 
     try {
-      const response = await axios.get(`http://localhost:3000/api/search/users?query=${encodeURIComponent(searchQuery)}`);
+      const response = await axios.get(`https://nsac-mu.vercel.app/api/search/users?query=${encodeURIComponent(searchQuery)}`);
 
       if (response.data.success) {
         setResults(response.data.data);

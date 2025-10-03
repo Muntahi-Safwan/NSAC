@@ -441,7 +441,7 @@ cd ../frontend
 npm install
 
 # Create .env file:
-# VITE_API_URL=http://localhost:3000
+# VITE_API_URL=https://nsac-mu.vercel.app
 ```
 
 ### 🏃 Running the Application
@@ -473,7 +473,7 @@ npm start
 # Or for development with auto-reload
 npm run dev
 ```
-🌐 API available at: `http://localhost:3000`
+🌐 API available at: `https://nsac-mu.vercel.app`
 
 **Terminal 4 - Frontend**
 ```bash
@@ -519,9 +519,9 @@ docker-compose up -d
 
 #### Test Health Endpoints
 ```bash
-curl http://localhost:3000/health
-curl http://localhost:3000/ready
-curl http://localhost:3000/live
+curl https://nsac-mu.vercel.app/health
+curl https://nsac-mu.vercel.app/ready
+curl https://nsac-mu.vercel.app/live
 ```
 
 ### ☁️ Production Deployment

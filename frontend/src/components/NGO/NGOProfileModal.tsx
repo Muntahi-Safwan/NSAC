@@ -65,7 +65,7 @@ const NGOProfileModal: React.FC<NGOProfileModalProps> = ({
     setSuccess(false);
 
     try {
-      const response = await axios.put('http://localhost:3000/api/ngo/profile', {
+      const response = await axios.put('https://nsac-mu.vercel.app/api/ngo/profile', {
         ngoId: ngo?.id,
         name: formData.name,
         description: formData.description,

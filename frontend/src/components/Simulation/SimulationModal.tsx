@@ -36,7 +36,7 @@ Current Air Quality:
 
 Provide immediate health risks and urgent recommendations.`;
 
-      const response = await axios.post('http://localhost:3000/api/ai/generate', {
+      const response = await axios.post('https://nsac-mu.vercel.app/api/ai/generate', {
         prompt,
         options: {
           maxTokens: 200,

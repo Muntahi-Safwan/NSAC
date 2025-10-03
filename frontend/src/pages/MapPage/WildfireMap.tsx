@@ -34,7 +34,7 @@ const WildfireMap = () => {
   const fetchFireData = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:3000/api/wildfire/active?dayRange=2');
+      const response = await axios.get('https://nsac-mu.vercel.app/api/wildfire/active?dayRange=2');
 
       if (response.data.success) {
         const fireData = response.data.data;

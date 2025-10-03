@@ -26,7 +26,7 @@ const NGOLogin: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:3000/api/ngo/login', {
+      const response = await axios.post('https://nsac-mu.vercel.app/api/ngo/login', {
         email,
         password
       });

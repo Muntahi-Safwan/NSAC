@@ -40,7 +40,7 @@ const QuizPage: React.FC = () => {
       const userData = localStorage.getItem('user');
       const userId = userData ? JSON.parse(userData).id : 'guest';
 
-      const response = await axios.post('http://localhost:3000/api/quiz/generate', {
+      const response = await axios.post('https://nsac-mu.vercel.app/api/quiz/generate', {
         userId,
         category,
         difficulty
@@ -99,7 +99,7 @@ const QuizPage: React.FC = () => {
         isCorrect: answer === quiz.questions[index].correctAnswer
       }));
 
-      const response = await axios.post('http://localhost:3000/api/quiz/submit', {
+      const response = await axios.post('https://nsac-mu.vercel.app/api/quiz/submit', {
         userId,
         quizId: quiz.id,
         answers

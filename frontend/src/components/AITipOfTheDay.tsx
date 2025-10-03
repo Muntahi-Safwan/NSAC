@@ -14,7 +14,7 @@ const AITipOfTheDay: React.FC = () => {
   const fetchDailyTip = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:3000/api/chatbot/daily-tip');
+      const response = await axios.get('https://nsac-mu.vercel.app/api/chatbot/daily-tip');
       if (response.data.success) {
         setTip(response.data.data.tip);
         setDate(response.data.data.date);

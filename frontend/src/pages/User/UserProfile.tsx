@@ -66,7 +66,7 @@ const UserProfile: React.FC = () => {
 
   const fetchProfile = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/user/profile/${user?.id}`);
+      const response = await axios.get(`https://nsac-mu.vercel.app/api/user/profile/${user?.id}`);
       if (response.data.success) {
         const userData = response.data.data.user;
         setProfile(userData);
@@ -90,7 +90,7 @@ const UserProfile: React.FC = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const response = await axios.put('http://localhost:3000/api/user/profile', {
+      const response = await axios.put('https://nsac-mu.vercel.app/api/user/profile', {
         userId: user?.id,
         ...formData,
         age: formData.age ? parseInt(formData.age) : undefined

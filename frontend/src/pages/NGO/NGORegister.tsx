@@ -53,7 +53,7 @@ const NGORegister: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:3000/api/ngo/register', {
+      const response = await axios.post('https://nsac-mu.vercel.app/api/ngo/register', {
         name: formData.name,
         email: formData.email,
         password: formData.password,

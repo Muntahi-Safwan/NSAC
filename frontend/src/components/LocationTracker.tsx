@@ -82,7 +82,7 @@ const LocationTracker: React.FC<LocationTrackerProps> = ({
 
           // Save to backend
           console.log('💾 Sending to backend API...');
-          const response = await axios.put('http://localhost:3000/api/user/location', {
+          const response = await axios.put('https://nsac-mu.vercel.app/api/user/location', {
             userId,
             city: locationData.city,
             region: locationData.region,
