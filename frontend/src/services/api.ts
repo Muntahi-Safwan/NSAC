@@ -12,7 +12,8 @@ const api = axios.create({
 // Request interceptor to add token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    // Check for both user token and NGO token
+    const token = localStorage.getItem('token') || localStorage.getItem('ngoToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -28,10 +29,21 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid
+      // Token expired or invalid - check which type and redirect accordingly
+      const isNGO = localStorage.getItem('ngoToken');
+
+      // Clear tokens
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/auth/login';
+      localStorage.removeItem('ngoToken');
+      localStorage.removeItem('ngoData');
+
+      // Redirect to appropriate login
+      if (isNGO) {
+        window.location.href = '/ngo/login';
+      } else {
+        window.location.href = '/auth/login';
+      }
     }
     return Promise.reject(error);
   }

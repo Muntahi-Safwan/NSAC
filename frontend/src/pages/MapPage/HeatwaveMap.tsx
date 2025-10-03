@@ -9,12 +9,53 @@ const HeatwaveMap = () => {
 
   // Mock heatwave data - in production, this would come from NASA/weather APIs
   const heatwaveData = [
-    { lat: 36.7783, lng: -119.4179, location: 'California', temp: 115, severity: 'Extreme', risk: 'Critical' },
-    { lat: 33.4484, lng: -112.0740, location: 'Arizona', temp: 110, severity: 'Severe', risk: 'High' },
-    { lat: 36.1699, lng: -115.1398, location: 'Nevada', temp: 105, severity: 'Moderate', risk: 'Medium' },
-    { lat: 31.9686, lng: -99.9018, location: 'Texas', temp: 112, severity: 'Extreme', risk: 'Critical' },
-    { lat: 34.0522, lng: -118.2437, location: 'Los Angeles', temp: 108, severity: 'Severe', risk: 'High' },
-    { lat: 33.4484, lng: -112.0740, location: 'Phoenix', temp: 117, severity: 'Extreme', risk: 'Critical' },
+    // USA - Western States (High Heat)
+    { lat: 36.7783, lng: -119.4179, location: 'Central California', temp: 115, severity: 'Extreme', risk: 'Critical' },
+    { lat: 33.4484, lng: -112.0740, location: 'Phoenix, Arizona', temp: 117, severity: 'Extreme', risk: 'Critical' },
+    { lat: 36.1699, lng: -115.1398, location: 'Las Vegas, Nevada', temp: 113, severity: 'Extreme', risk: 'Critical' },
+    { lat: 31.9686, lng: -99.9018, location: 'Central Texas', temp: 112, severity: 'Extreme', risk: 'Critical' },
+    { lat: 34.0522, lng: -118.2437, location: 'Los Angeles, CA', temp: 108, severity: 'Severe', risk: 'High' },
+    { lat: 32.7157, lng: -117.1611, location: 'San Diego, CA', temp: 102, severity: 'Severe', risk: 'High' },
+    { lat: 37.7749, lng: -122.4194, location: 'San Francisco, CA', temp: 98, severity: 'Moderate', risk: 'Medium' },
+
+    // USA - Southern States
+    { lat: 29.7604, lng: -95.3698, location: 'Houston, Texas', temp: 110, severity: 'Extreme', risk: 'Critical' },
+    { lat: 32.7767, lng: -96.7970, location: 'Dallas, Texas', temp: 109, severity: 'Extreme', risk: 'Critical' },
+    { lat: 29.4241, lng: -98.4936, location: 'San Antonio, Texas', temp: 108, severity: 'Severe', risk: 'High' },
+    { lat: 30.2672, lng: -97.7431, location: 'Austin, Texas', temp: 107, severity: 'Severe', risk: 'High' },
+    { lat: 35.2271, lng: -80.8431, location: 'Charlotte, NC', temp: 102, severity: 'Severe', risk: 'High' },
+    { lat: 33.7490, lng: -84.3880, location: 'Atlanta, Georgia', temp: 101, severity: 'Severe', risk: 'High' },
+    { lat: 30.3322, lng: -81.6557, location: 'Jacksonville, FL', temp: 100, severity: 'Moderate', risk: 'Medium' },
+    { lat: 25.7617, lng: -80.1918, location: 'Miami, Florida', temp: 99, severity: 'Moderate', risk: 'Medium' },
+
+    // USA - Central States
+    { lat: 35.4676, lng: -97.5164, location: 'Oklahoma City, OK', temp: 106, severity: 'Severe', risk: 'High' },
+    { lat: 39.0997, lng: -94.5786, location: 'Kansas City, MO', temp: 104, severity: 'Severe', risk: 'High' },
+    { lat: 38.6270, lng: -90.1994, location: 'St. Louis, MO', temp: 103, severity: 'Severe', risk: 'High' },
+    { lat: 35.1495, lng: -90.0490, location: 'Memphis, TN', temp: 102, severity: 'Severe', risk: 'High' },
+
+    // USA - New Mexico & Desert Southwest
+    { lat: 35.0844, lng: -106.6504, location: 'Albuquerque, NM', temp: 108, severity: 'Severe', risk: 'High' },
+    { lat: 32.2226, lng: -110.9747, location: 'Tucson, Arizona', temp: 114, severity: 'Extreme', risk: 'Critical' },
+    { lat: 31.7619, lng: -106.4850, location: 'El Paso, Texas', temp: 109, severity: 'Extreme', risk: 'Critical' },
+
+    // Southeast Asia - Tropical Heat & Humidity
+    { lat: 13.7563, lng: 100.5018, location: 'Bangkok, Thailand', temp: 106, severity: 'Extreme', risk: 'Critical' },
+    { lat: 14.5995, lng: 120.9842, location: 'Manila, Philippines', temp: 104, severity: 'Extreme', risk: 'Critical' },
+    { lat: 10.8231, lng: 106.6297, location: 'Ho Chi Minh City, Vietnam', temp: 103, severity: 'Severe', risk: 'High' },
+    { lat: 21.0285, lng: 105.8542, location: 'Hanoi, Vietnam', temp: 102, severity: 'Severe', risk: 'High' },
+    { lat: -6.2088, lng: 106.8456, location: 'Jakarta, Indonesia', temp: 101, severity: 'Severe', risk: 'High' },
+    { lat: 1.3521, lng: 103.8198, location: 'Singapore', temp: 100, severity: 'Severe', risk: 'High' },
+    { lat: 3.1390, lng: 101.6869, location: 'Kuala Lumpur, Malaysia', temp: 102, severity: 'Severe', risk: 'High' },
+    { lat: 16.8661, lng: 96.1951, location: 'Yangon, Myanmar', temp: 105, severity: 'Extreme', risk: 'Critical' },
+    { lat: 11.5564, lng: 104.9282, location: 'Phnom Penh, Cambodia', temp: 104, severity: 'Extreme', risk: 'Critical' },
+    { lat: 17.9757, lng: 102.6331, location: 'Vientiane, Laos', temp: 103, severity: 'Severe', risk: 'High' },
+
+    // Southeast Asia - Indonesia & Malaysia Region
+    { lat: -6.9175, lng: 107.6191, location: 'Bandung, Indonesia', temp: 98, severity: 'Moderate', risk: 'Medium' },
+    { lat: -7.2575, lng: 112.7521, location: 'Surabaya, Indonesia', temp: 100, severity: 'Severe', risk: 'High' },
+    { lat: 5.4141, lng: 100.3288, location: 'George Town, Malaysia', temp: 99, severity: 'Moderate', risk: 'Medium' },
+    { lat: 1.5535, lng: 110.3593, location: 'Kuching, Malaysia', temp: 98, severity: 'Moderate', risk: 'Medium' },
   ];
 
   const getSeverityColor = (severity: string) => {

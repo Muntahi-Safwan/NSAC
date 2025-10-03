@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { MapPin, Navigation, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface LocationData {
@@ -82,7 +82,7 @@ const LocationTracker: React.FC<LocationTrackerProps> = ({
 
           // Save to backend
           console.log('💾 Sending to backend API...');
-          const response = await axios.put('https://nsac-mu.vercel.app/api/user/location', {
+          const response = await api.put('/api/user/location', {
             userId,
             city: locationData.city,
             region: locationData.region,

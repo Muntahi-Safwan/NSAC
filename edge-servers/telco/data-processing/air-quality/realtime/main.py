@@ -94,7 +94,7 @@ class RealtimeAirQualitySystem:
         
         try:
             # Download latest analysis data
-            analysis_file = await self.analysis_downloader.download_latest_analysis()
+            analysis_file = self.analysis_downloader.download_latest_analysis()
             
             if not analysis_file:
                 return {

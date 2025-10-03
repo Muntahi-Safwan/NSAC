@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-TV Edge Server Hourly Data Collection Scheduler
-Runs air quality, heatwave, and wildfire data collection every hour for TV broadcasts
+NSAC Data Collection Scheduler
+Runs air quality and wildfire data collection hourly, heatwave daily
 """
 
 import asyncio
@@ -16,10 +16,8 @@ from pathlib import Path
 # Add the parent directory to the path so we can import modules
 sys.path.append(str(Path(__file__).parent.parent))
 
-# Import independent data processing modules
-import importlib.util
-
 # Import air-quality system
+import importlib.util
 air_quality_path = Path(__file__).parent.parent / "air-quality" / "main.py"
 spec = importlib.util.spec_from_file_location("air_quality_main", air_quality_path)
 air_quality_main = importlib.util.module_from_spec(spec)
@@ -33,14 +31,28 @@ wildfire_main = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(wildfire_main)
 FireSystem = wildfire_main.FireSystem
 
+# Import heatwave system
+heatwave_path = Path(__file__).parent.parent / "heatwave" / "main.py"
+spec = importlib.util.spec_from_file_location("heatwave_main", heatwave_path)
+heatwave_main = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(heatwave_main)
+HeatwavePredictionPipeline = heatwave_main.HeatwavePredictionPipeline
+
+# Import Gemini video service
+video_path = Path(__file__).parent.parent / "gemini_video_service.py"
+spec = importlib.util.spec_from_file_location("gemini_video", video_path)
+gemini_video = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(gemini_video)
+GeminiVideoService = gemini_video.GeminiVideoService
+
 
 def setup_logging():
-    """Setup logging for the TV edge server scheduler"""
+    """Setup logging for the hourly collection scheduler"""
     log_dir = Path("logs")
     log_dir.mkdir(exist_ok=True)
     
     # Create logger
-    logger = logging.getLogger("TVEdgeScheduler")
+    logger = logging.getLogger("NSACScheduler")
     logger.setLevel(logging.INFO)
     
     # Create formatter
@@ -49,7 +61,7 @@ def setup_logging():
     )
     
     # Create file handler with daily rotation
-    log_file = log_dir / f"tv_edge_scheduler_{datetime.now().strftime('%Y%m%d')}.log"
+    log_file = log_dir / f"nsac_scheduler_{datetime.now().strftime('%Y%m%d')}.log"
     file_handler = logging.FileHandler(log_file)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
@@ -62,22 +74,22 @@ def setup_logging():
     return logger
 
 
-async def run_single_collection(air_quality_system, fire_system):
-    """Run a single data collection for TV edge server"""
-    logger = logging.getLogger("TVEdgeScheduler")
-    
-    logger.info("📺 Starting TV Edge Server data collection")
+async def run_hourly_collection(air_quality_system, fire_system, video_service):
+    """Run hourly data collection for air quality and wildfire systems"""
+    logger = logging.getLogger("NSACScheduler")
+
+    logger.info("🕐 Starting hourly NSAC data collection")
     logger.info(f"⏰ Collection time: {datetime.now().isoformat()}")
-    
+
     results = {}
     overall_success = True
-    
+
     # 1. Air Quality Collection
     logger.info("🌬️ Starting Air Quality collection...")
     try:
         air_result = await air_quality_system.run_hourly_collection()
         results['air_quality'] = air_result
-        
+
         if air_result.get("success"):
             total_points = air_result.get("total_data_points", 0)
             forecast_points = air_result.get("forecast", {}).get("data_points", 0)
@@ -88,19 +100,19 @@ async def run_single_collection(air_quality_system, fire_system):
         else:
             logger.error(f"❌ Air Quality failed: {air_result.get('message', 'Unknown error')}")
             overall_success = False
-            
+
     except Exception as e:
         logger.error(f"💥 Air Quality error: {e}")
         logger.exception("Full traceback:")
         results['air_quality'] = {"success": False, "error": str(e)}
         overall_success = False
-    
+
     # 2. Wildfire Collection
     logger.info("🔥 Starting Wildfire collection...")
     try:
         wildfire_result = await fire_system.run_hourly_cycle()
         results['wildfire'] = wildfire_result
-        
+
         if wildfire_result.get("status") == "success":
             fires_detected = wildfire_result.get("fires_detected", 0)
             fires_stored = wildfire_result.get("fires_stored", 0)
@@ -110,44 +122,146 @@ async def run_single_collection(air_quality_system, fire_system):
         else:
             logger.error(f"❌ Wildfire failed: {wildfire_result.get('message', 'Unknown error')}")
             overall_success = False
-            
+
     except Exception as e:
         logger.error(f"💥 Wildfire error: {e}")
         logger.exception("Full traceback:")
         results['wildfire'] = {"status": "error", "error": str(e)}
         overall_success = False
-    
+
+    # 3. TV Emergency Video Generation (Only when hazards detected)
+    logger.info("📺 Checking for hazards to generate emergency TV broadcast...")
+    try:
+        video_result = await video_service.generate_video_content()
+        results['video'] = video_result
+
+        if video_result is None:
+            logger.info("✅ No hazards detected - normal TV programming continues")
+            logger.info("   🎬 No emergency video generated")
+        else:
+            severity = video_result.get('severity', 'UNKNOWN')
+            hazards = video_result.get('hazards', [])
+            video_file = video_result.get('video_file', 'unknown')
+            script = video_result.get('script', '')
+
+            logger.info(f"🚨 HAZARDS DETECTED - Emergency video generated!")
+            logger.info(f"   🚦 Severity: {severity}")
+            logger.info(f"   ⚠️  Hazards: {', '.join(hazards)}")
+            logger.info(f"   📁 Video File: {video_file}")
+
+            # Display the video script in console
+            logger.info("\n" + "=" * 80)
+            logger.info("📺 EMERGENCY TV BROADCAST VIDEO SCRIPT:")
+            logger.info("=" * 80)
+            logger.info(script)
+            logger.info("=" * 80 + "\n")
+
+            logger.info(f"💾 Video metadata saved to: {video_service.video_output_dir / video_file}")
+            logger.info("🎬 Video ready for TV broadcast distribution")
+
+    except Exception as e:
+        logger.error(f"💥 Video generation error: {e}")
+        logger.exception("Full traceback:")
+        results['video'] = {"error": str(e)}
+        # Don't mark as failure since video is informational
+
     # Summary
     if overall_success:
-        logger.info("🏁 TV Edge Server collection completed successfully")
+        logger.info("🏁 Hourly collections completed successfully")
     else:
-        logger.warning("⚠️ Some collections failed, but continuing...")
-    
+        logger.warning("⚠️ Some hourly collections failed, but continuing...")
+
     return overall_success, results
 
 
+async def run_daily_heatwave():
+    """Run daily heatwave processing"""
+    logger = logging.getLogger("NSACScheduler")
+    
+    logger.info("🌡️ Starting daily heatwave processing")
+    logger.info(f"⏰ Processing time: {datetime.now().isoformat()}")
+    
+    try:
+        # Initialize heatwave pipeline
+        pipeline = HeatwavePredictionPipeline(sample_rate=5)
+        logger.info("✅ Heatwave pipeline initialized")
+        
+        # Run sequential pipeline (auto-detects latest available forecast)
+        logger.info("📊 Running heatwave prediction pipeline...")
+        result = await pipeline.run_sequential_pipeline()
+        
+        if result.get("success"):
+            duration = result.get("duration_seconds", 0)
+            met_records = result.get("meteorological_records", 0)
+            heatwave_alerts = result.get("heatwave_alerts", 0)
+            files_processed = result.get("files_processed", 0)
+            forecast_days = result.get("forecast_days", 0)
+            start_date = result.get("forecast_start_date", "Unknown")
+            end_date = result.get("forecast_end_date", "Unknown")
+            
+            logger.info("✅ Daily heatwave processing completed successfully")
+            logger.info(f"   Duration: {duration:.1f} seconds")
+            logger.info(f"   Meteorological records: {met_records:,}")
+            logger.info(f"   Heatwave alerts: {heatwave_alerts:,}")
+            logger.info(f"   Files processed: {files_processed}")
+            logger.info(f"   Forecast period: {start_date} to {end_date} ({forecast_days} days)")
+            
+            return True, result
+        else:
+            error_msg = result.get("message", "Unknown error")
+            logger.error(f"❌ Daily heatwave processing failed: {error_msg}")
+            return False, result
+        
+    except Exception as e:
+        logger.error(f"💥 Daily heatwave processing error: {e}")
+        logger.exception("Full traceback:")
+        return False, {"success": False, "error": str(e)}
+
+
 async def scheduler_loop(sample_rate: int = 1):
-    """Main scheduler loop that runs collections every hour"""
+    """Main scheduler loop that runs collections hourly and heatwave daily"""
     logger = setup_logging()
-    
-    logger.info("🚀 TV Edge Server Data Collection Scheduler Starting")
+
+    logger.info("🚀 NSAC Data Collection Scheduler Starting")
     logger.info("⏰ Will run Air Quality and Wildfire collections every hour")
+    logger.info("🌡️ Will run Heatwave processing daily at midnight")
+    logger.info("📺 Will generate emergency TV videos when hazards detected")
     logger.info(f"📊 Air Quality sample rate: 1/{sample_rate} ({100/sample_rate:.1f}% of data points)")
-    
+
     # Initialize the systems once
     air_quality_system = AirQualityMainSystem(sample_rate=sample_rate)
     await air_quality_system.initialize_components()
-    
+
     fire_system = FireSystem()
     logger.info("🔥 Fire system initialized")
-    
+
+    # Initialize video service
+    video_service = GeminiVideoService()
+    await video_service.connect()
+    logger.info("📺 TV video generation service initialized")
+
+    # Track last heatwave run date
+    last_heatwave_date = None
+
     try:
         # Run immediately on startup
         logger.info("🚀 Running initial data collection immediately...")
-        success, results = await run_single_collection(air_quality_system, fire_system)
+        success, results = await run_hourly_collection(air_quality_system, fire_system, video_service)
         
         if not success:
             logger.warning("⚠️ Initial collection had some failures, but continuing...")
+        
+        # Run initial heatwave processing if it hasn't been run today
+        now = datetime.now()
+        today = now.date()
+        if last_heatwave_date != today:
+            logger.info("🌡️ Running initial daily heatwave processing...")
+            heatwave_success, heatwave_results = await run_daily_heatwave()
+            if heatwave_success:
+                last_heatwave_date = today
+                logger.info("✅ Initial heatwave processing completed")
+            else:
+                logger.warning("⚠️ Initial heatwave processing failed, will retry tomorrow")
         
         # Now schedule hourly runs
         while True:
@@ -162,43 +276,61 @@ async def scheduler_loop(sample_rate: int = 1):
             # Sleep until next hour
             await asyncio.sleep(sleep_seconds)
             
-            # Run collection
-            success, results = await run_single_collection(air_quality_system, fire_system)
+            # Check if it's a new day for heatwave processing (run at midnight)
+            current_time = datetime.now()
+            current_date = current_time.date()
             
+            # Run heatwave processing if it's a new day and it's midnight
+            if (last_heatwave_date != current_date and 
+                current_time.hour == 0 and current_time.minute < 5):  # Run within first 5 minutes of new day
+                
+                logger.info("🌡️ New day detected - running daily heatwave processing...")
+                heatwave_success, heatwave_results = await run_daily_heatwave()
+                if heatwave_success:
+                    last_heatwave_date = current_date
+                    logger.info("✅ Daily heatwave processing completed")
+                else:
+                    logger.warning("⚠️ Daily heatwave processing failed, will retry next day")
+            
+            # Run hourly collection
+            success, results = await run_hourly_collection(air_quality_system, fire_system, video_service)
+
             if not success:
                 logger.warning("⚠️ Some collections failed, will retry next hour")
-            
+
     except KeyboardInterrupt:
-        logger.info("🛑 TV Edge Server scheduler stopped by user")
+        logger.info("🛑 Scheduler stopped by user")
     except Exception as e:
-        logger.error(f"💥 Fatal error in TV edge server scheduler: {e}")
+        logger.error(f"💥 Fatal error in scheduler: {e}")
         logger.exception("Full traceback:")
     finally:
         # Cleanup
         await air_quality_system.cleanup()
-        logger.info("🧹 TV Edge Server scheduler cleanup completed")
+        await video_service.disconnect()
+        logger.info("🧹 Scheduler cleanup completed")
 
 
 def main():
-    """Main entry point for the TV edge server scheduler"""
-    parser = argparse.ArgumentParser(description="TV Edge Server Hourly Data Collection Scheduler")
+    """Main entry point for the scheduler"""
+    parser = argparse.ArgumentParser(description="NSAC Data Collection Scheduler - Hourly Air Quality & Wildfire, Daily Heatwave")
     parser.add_argument('--sample-rate', type=int, default=1, 
-                        help='Sample rate for air quality data collection (1=100% for health alerts, 10=10%, 20=5%)')
+                        help='Sample rate for air quality data collection (1=100%% for health alerts, 10=10%%, 20=5%%)')
     
     args = parser.parse_args()
     
     sample_rate = args.sample_rate
     if sample_rate == 1:
-        print("🏥 TV Edge Server - Health Alert Mode: Using full air quality sampling (100% of data points)")
+        print("🏥 Health Alert Mode: Using full air quality sampling (100% of data points)")
     else:
-        print(f"📊 TV Edge Server - Using air quality sample rate: 1/{sample_rate} ({100/sample_rate:.1f}% of data points)")
+        print(f"📊 Using air quality sample rate: 1/{sample_rate} ({100/sample_rate:.1f}% of data points)")
     
-    print("🔥 TV Edge Server - Wildfire detection: Using VIIRS and MODIS satellites with 1-hour lookback")
+    print("🔥 Wildfire detection: Using VIIRS and MODIS satellites with 1-hour lookback and duplicate avoidance")
+    print("🌡️ Heatwave prediction: Daily processing at midnight with 5-day forecast analysis")
     
     try:
         asyncio.run(scheduler_loop(sample_rate))
     except KeyboardInterrupt:
-        print("\n⚠️ TV Edge Server scheduler interrupted by user")
+        print("\n⚠️ Scheduler interrupted by user")
     except Exception as e:
         print(f"💥 Fatal error: {e}")
         sys.exit(1)

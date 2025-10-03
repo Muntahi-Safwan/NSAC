@@ -18,19 +18,22 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
-COPY . .
+# Copy Prisma schema first
+COPY schema.prisma .
 
 # Generate Prisma client during build
 RUN python -m prisma generate
 
+# Copy application code
+COPY . .
+
 # Create downloads directory
 RUN mkdir -p /app/downloads
 
-# Set environment variable for Prisma
-ENV DATABASE_URL="postgresql://postgres:postgres@host.docker.internal:5432/airquality?schema=public"
+# DATABASE_URL should be set via .env file or environment variables
+# No default database URL - use external database (Neon, AWS RDS, etc.)
 
-# Run the pipeline
-CMD ["python", "main.py"]
+# Default command (can be overridden in docker-compose)
+CMD ["python", "scripts/run_hourly_collection.py", "--sample-rate", "1"]
 
 

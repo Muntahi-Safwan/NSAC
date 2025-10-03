@@ -3,8 +3,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { User, LogIn, MapPin, LogOut, UserCircle, ChevronDown, Bell, X, CheckCheck, Building2, Shield, Map, Thermometer, Flame, BarChart3, Code } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNGOAuth } from '../contexts/NGOAuthContext';
-import { useNotifications } from '../contexts/NotificationContext';
+import { useNotifications, type Notification } from '../contexts/NotificationContext';
 import { useSimulation } from '../contexts/SimulationContext';
+import NotificationModal from './NotificationModal';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,6 +13,9 @@ const Navbar = () => {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
   const [mapDropdownOpen, setMapDropdownOpen] = useState(false);
+  const [otherDropdownOpen, setOtherDropdownOpen] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout: userLogout, isAuthenticated: isUserAuthenticated } = useAuth();
@@ -57,17 +61,48 @@ const Navbar = () => {
     setProfileDropdownOpen(false);
   };
 
+  const handleNotificationClick = (notification: Notification) => {
+    setSelectedNotification(notification);
+    setIsModalOpen(true);
+    setNotificationDropdownOpen(false);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedNotification(null);
+  };
+
   const getNotificationIcon = (type: string) => {
     switch (type) {
+      case 'error':
+        return '🚨';
       case 'warning':
         return '⚠️';
       case 'success':
         return '✅';
-      case 'error':
-        return '❌';
       default:
         return 'ℹ️';
     }
+  };
+
+  const getSeverityBadge = (severity?: string) => {
+    if (!severity) return null;
+
+    const badges: Record<string, { text: string; className: string }> = {
+      critical: { text: 'CRITICAL', className: 'bg-red-600 text-white' },
+      danger: { text: 'DANGER', className: 'bg-orange-600 text-white' },
+      warning: { text: 'WARNING', className: 'bg-yellow-600 text-white' },
+      info: { text: 'INFO', className: 'bg-blue-600 text-white' },
+    };
+
+    const badge = badges[severity.toLowerCase()];
+    if (!badge) return null;
+
+    return (
+      <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${badge.className}`}>
+        {badge.text}
+      </span>
+    );
   };
 
   const getTimeAgo = (date: Date) => {
@@ -78,16 +113,22 @@ const Navbar = () => {
     return `${Math.floor(seconds / 86400)}d ago`;
   };
 
-  const navItems = [
+  const mapItems = [
     { name: 'Air Quality', href: '/map', icon: MapPin },
-    { name: 'Heatwave', href: '/map/heatwave', icon: Thermometer },
     { name: 'Wildfire', href: '/map/wildfire', icon: Flame },
-    { name: 'Analytics', href: '/analytics', icon: BarChart3 },
-    { name: 'Search', href: '/search' },
+    { name: 'Heatwave', href: '/map/heatwave', icon: Thermometer },
+  ];
+
+  const otherItems = [
     { name: 'About', href: '/about' },
+    { name: 'Contact', href: '/contact' },
+  ];
+
+  const mainNavItems = [
+    { name: 'Search', href: '/search' },
+    { name: 'Analytics', href: '/analytics', icon: BarChart3 },
     { name: 'How We Built It', href: '/how-we-built-it', icon: Code },
     { name: 'Learning', href: '/learning' },
-    { name: 'Contact', href: '/contact' },
   ];
 
   const isAuthenticated = isUserAuthenticated || isNGOAuthenticated;
@@ -143,10 +184,53 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-10">
             <div className="flex items-center space-x-8">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isMapItem = item.href.startsWith('/map');
+              {/* Map Dropdown */}
+              <div className="relative"
+                onMouseEnter={() => setMapDropdownOpen(true)}
+                onMouseLeave={() => setMapDropdownOpen(false)}
+              >
+                <button
+                  className={`flex items-center space-x-1.5 transition-all duration-300 font-grotesk font-medium text-[15px] tracking-wide hover:scale-105 relative group ${
+                    location.pathname.startsWith('/map')
+                      ? 'text-white'
+                      : 'text-gray-300 hover:text-white'
+                  }`}
+                >
+                  <Map className="w-4 h-4" />
+                  <span>Map</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${mapDropdownOpen ? 'rotate-180' : ''}`} />
+                  <div className={`absolute -bottom-2 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-cyan-400 transition-transform duration-300 rounded-full ${
+                    location.pathname.startsWith('/map')
+                      ? 'scale-x-100'
+                      : 'scale-x-0 group-hover:scale-x-100'
+                  }`}></div>
+                </button>
 
+                {/* Map Dropdown Menu */}
+                {mapDropdownOpen && (
+                  <div className="absolute top-full mt-2 w-48 bg-black/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50">
+                    {mapItems.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <Link
+                          key={item.name}
+                          to={item.href}
+                          className={`flex items-center space-x-3 px-4 py-3 hover:bg-white/10 transition-all duration-300 ${
+                            location.pathname === item.href ? 'bg-white/5 text-white' : 'text-gray-300'
+                          }`}
+                        >
+                          {Icon && <Icon className="w-4 h-4" />}
+                          <span className="font-grotesk font-medium">{item.name}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Main Nav Items */}
+              {mainNavItems.map((item) => {
+                const Icon = item.icon;
                 return (
                   <Link
                     key={item.name}
@@ -167,6 +251,45 @@ const Navbar = () => {
                   </Link>
                 );
               })}
+
+              {/* Other Dropdown */}
+              <div className="relative"
+                onMouseEnter={() => setOtherDropdownOpen(true)}
+                onMouseLeave={() => setOtherDropdownOpen(false)}
+              >
+                <button
+                  className={`flex items-center space-x-1.5 transition-all duration-300 font-grotesk font-medium text-[15px] tracking-wide hover:scale-105 relative group ${
+                    otherItems.some(item => location.pathname === item.href)
+                      ? 'text-white'
+                      : 'text-gray-300 hover:text-white'
+                  }`}
+                >
+                  <span>Other</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${otherDropdownOpen ? 'rotate-180' : ''}`} />
+                  <div className={`absolute -bottom-2 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-cyan-400 transition-transform duration-300 rounded-full ${
+                    otherItems.some(item => location.pathname === item.href)
+                      ? 'scale-x-100'
+                      : 'scale-x-0 group-hover:scale-x-100'
+                  }`}></div>
+                </button>
+
+                {/* Other Dropdown Menu */}
+                {otherDropdownOpen && (
+                  <div className="absolute top-full mt-2 w-40 bg-black/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50">
+                    {otherItems.map((item) => (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className={`flex items-center space-x-3 px-4 py-3 hover:bg-white/10 transition-all duration-300 ${
+                          location.pathname === item.href ? 'bg-white/5 text-white' : 'text-gray-300'
+                        }`}
+                      >
+                        <span className="font-grotesk font-medium">{item.name}</span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex items-center space-x-4">
@@ -217,10 +340,10 @@ const Navbar = () => {
                               notifications.map((notification) => (
                                 <div
                                   key={notification.id}
-                                  className={`px-4 py-3 border-b border-white/5 hover:bg-white/5 transition-all duration-300 cursor-pointer ${
+                                  className={`px-4 py-3 border-b border-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer ${
                                     !notification.read ? 'bg-blue-500/5' : ''
                                   }`}
-                                  onClick={() => markAsRead(notification.id)}
+                                  onClick={() => handleNotificationClick(notification)}
                                 >
                                   <div className="flex items-start justify-between space-x-3">
                                     <div className="flex-1 min-w-0">
@@ -229,6 +352,12 @@ const Navbar = () => {
                                         <h4 className="font-grotesk font-medium text-white text-sm truncate">
                                           {notification.title}
                                         </h4>
+                                        {notification.severity && getSeverityBadge(notification.severity)}
+                                        {notification.isAlert && (
+                                          <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-red-600 text-white">
+                                            ALERT
+                                          </span>
+                                        )}
                                         {!notification.read && (
                                           <span className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full"></span>
                                         )}
@@ -236,9 +365,14 @@ const Navbar = () => {
                                       <p className="text-xs text-gray-400 line-clamp-2 mb-1">
                                         {notification.message}
                                       </p>
-                                      <span className="text-xs text-gray-500">
-                                        {getTimeAgo(notification.timestamp)}
-                                      </span>
+                                      <div className="flex items-center justify-between text-xs">
+                                        <span className="text-blue-400 truncate">
+                                          {notification.ngo?.name || 'System'}
+                                        </span>
+                                        <span className="text-gray-500">
+                                          {getTimeAgo(notification.timestamp)}
+                                        </span>
+                                      </div>
                                     </div>
                                     <button
                                       onClick={(e) => {
@@ -365,20 +499,72 @@ const Navbar = () => {
       {isOpen && (
         <div className="lg:hidden bg-black/95 backdrop-blur-2xl border-b border-white/10 shadow-2xl">
           <div className="px-6 py-6 space-y-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                onClick={() => setIsOpen(false)}
-                className={`flex items-center space-x-3 px-6 py-4 hover:bg-white/10 rounded-2xl transition-all duration-300 font-grotesk font-medium text-[16px] tracking-wide ${
-                  location.pathname === item.href
-                    ? 'text-white bg-white/5'
-                    : 'text-gray-300 hover:text-white'
-                }`}
-              >
-                <span>{item.name}</span>
-              </Link>
-            ))}
+            {/* Map Section */}
+            <div className="mb-2">
+              <div className="flex items-center space-x-2 px-6 py-2 text-blue-300 text-xs font-semibold uppercase tracking-wider">
+                <Map className="w-4 h-4" />
+                <span>Map</span>
+              </div>
+              {mapItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    onClick={() => setIsOpen(false)}
+                    className={`flex items-center space-x-3 px-10 py-3 hover:bg-white/10 rounded-2xl transition-all duration-300 font-grotesk font-medium text-[15px] ${
+                      location.pathname === item.href
+                        ? 'text-white bg-white/5'
+                        : 'text-gray-300 hover:text-white'
+                    }`}
+                  >
+                    {Icon && <Icon className="w-4 h-4" />}
+                    <span>{item.name}</span>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Main Nav Items */}
+            {mainNavItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  onClick={() => setIsOpen(false)}
+                  className={`flex items-center space-x-3 px-6 py-4 hover:bg-white/10 rounded-2xl transition-all duration-300 font-grotesk font-medium text-[16px] tracking-wide ${
+                    location.pathname === item.href
+                      ? 'text-white bg-white/5'
+                      : 'text-gray-300 hover:text-white'
+                  }`}
+                >
+                  {Icon && <Icon className="w-4 h-4" />}
+                  <span>{item.name}</span>
+                </Link>
+              );
+            })}
+
+            {/* Other Section */}
+            <div className="mt-2">
+              <div className="px-6 py-2 text-blue-300 text-xs font-semibold uppercase tracking-wider">
+                Other
+              </div>
+              {otherItems.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  onClick={() => setIsOpen(false)}
+                  className={`flex items-center space-x-3 px-10 py-3 hover:bg-white/10 rounded-2xl transition-all duration-300 font-grotesk font-medium text-[15px] ${
+                    location.pathname === item.href
+                      ? 'text-white bg-white/5'
+                      : 'text-gray-300 hover:text-white'
+                  }`}
+                >
+                  <span>{item.name}</span>
+                </Link>
+              ))}
+            </div>
 
             <div className="pt-6 space-y-3">
               {isAuthenticated ? (
@@ -440,6 +626,16 @@ const Navbar = () => {
         </div>
       )}
       </nav>
+
+      {/* Notification Modal */}
+      {isModalOpen && selectedNotification && user && (
+        <NotificationModal
+          notification={selectedNotification}
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          userId={user.id}
+        />
+      )}
     </>
   );
 };

@@ -261,6 +261,152 @@ export const mockMapZones: MapZone[] = [
     id: 'montreal-01', lat: 45.5017, lng: -73.5673, name: "Montreal Metro", city: "Montreal",
     level: 'good', aqi: 48, radius: 55000, population: 4300000, dominantPollutant: 'PM2.5',
     lastUpdated: '4 min ago', trend: 'stable', pm25: 16, pm10: 28, no2: 20, so2: 8, co: 0.8, o3: 42
+  },
+
+  // Southeast Asia - High pollution zones
+  {
+    id: 'jakarta-01', lat: -6.2088, lng: 106.8456, name: "Jakarta Metro", city: "Jakarta",
+    level: 'very_unhealthy', aqi: 178, radius: 80000, population: 11000000, dominantPollutant: 'PM2.5',
+    lastUpdated: '2 min ago', trend: 'up', pm25: 82, pm10: 125, no2: 58, so2: 32, co: 3.8, o3: 92
+  },
+  {
+    id: 'bangkok-01', lat: 13.7563, lng: 100.5018, name: "Bangkok Metro", city: "Bangkok",
+    level: 'unhealthy', aqi: 135, radius: 75000, population: 10700000, dominantPollutant: 'PM2.5',
+    lastUpdated: '1 min ago', trend: 'stable', pm25: 62, pm10: 95, no2: 52, so2: 28, co: 3.2, o3: 88
+  },
+  {
+    id: 'hanoi-01', lat: 21.0285, lng: 105.8542, name: "Hanoi City", city: "Hanoi",
+    level: 'unhealthy', aqi: 142, radius: 65000, population: 8200000, dominantPollutant: 'PM2.5',
+    lastUpdated: '3 min ago', trend: 'up', pm25: 68, pm10: 102, no2: 48, so2: 26, co: 3.4, o3: 85
+  },
+  {
+    id: 'manila-01', lat: 14.5995, lng: 120.9842, name: "Manila Metro", city: "Manila",
+    level: 'unhealthy', aqi: 128, radius: 70000, population: 13900000, dominantPollutant: 'PM2.5',
+    lastUpdated: '2 min ago', trend: 'stable', pm25: 58, pm10: 88, no2: 46, so2: 24, co: 2.9, o3: 82
+  },
+  {
+    id: 'singapore-01', lat: 1.3521, lng: 103.8198, name: "Singapore City", city: "Singapore",
+    level: 'moderate', aqi: 82, radius: 50000, population: 5700000, dominantPollutant: 'PM2.5',
+    lastUpdated: '1 min ago', trend: 'down', pm25: 38, pm10: 62, no2: 35, so2: 18, co: 1.6, o3: 72
+  },
+  {
+    id: 'kualalumpur-01', lat: 3.1390, lng: 101.6869, name: "Kuala Lumpur Metro", city: "Kuala Lumpur",
+    level: 'moderate', aqi: 88, radius: 60000, population: 7900000, dominantPollutant: 'PM10',
+    lastUpdated: '2 min ago', trend: 'stable', pm25: 42, pm10: 68, no2: 38, so2: 20, co: 1.8, o3: 75
+  },
+  {
+    id: 'hochiminhcity-01', lat: 10.8231, lng: 106.6297, name: "Ho Chi Minh City", city: "Ho Chi Minh City",
+    level: 'unhealthy', aqi: 118, radius: 70000, population: 9000000, dominantPollutant: 'PM2.5',
+    lastUpdated: '1 min ago', trend: 'up', pm25: 52, pm10: 82, no2: 44, so2: 22, co: 2.7, o3: 80
+  },
+
+  // Middle East - Desert dust and industrial pollution
+  {
+    id: 'dubai-01', lat: 25.2048, lng: 55.2708, name: "Dubai Metro", city: "Dubai",
+    level: 'unhealthy', aqi: 125, radius: 65000, population: 3400000, dominantPollutant: 'PM10',
+    lastUpdated: '2 min ago', trend: 'up', pm25: 55, pm10: 95, no2: 42, so2: 28, co: 2.5, o3: 88
+  },
+  {
+    id: 'riyadh-01', lat: 24.7136, lng: 46.6753, name: "Riyadh City", city: "Riyadh",
+    level: 'unhealthy', aqi: 138, radius: 70000, population: 7700000, dominantPollutant: 'PM10',
+    lastUpdated: '1 min ago', trend: 'stable', pm25: 62, pm10: 105, no2: 45, so2: 25, co: 2.8, o3: 85
+  },
+  {
+    id: 'doha-01', lat: 25.2854, lng: 51.5310, name: "Doha Metro", city: "Doha",
+    level: 'moderate', aqi: 92, radius: 50000, population: 2400000, dominantPollutant: 'PM10',
+    lastUpdated: '3 min ago', trend: 'down', pm25: 42, pm10: 72, no2: 36, so2: 20, co: 1.9, o3: 78
+  },
+  {
+    id: 'abudhabi-01', lat: 24.4539, lng: 54.3773, name: "Abu Dhabi Metro", city: "Abu Dhabi",
+    level: 'moderate', aqi: 88, radius: 55000, population: 1500000, dominantPollutant: 'PM10',
+    lastUpdated: '2 min ago', trend: 'stable', pm25: 40, pm10: 68, no2: 34, so2: 18, co: 1.7, o3: 75
+  },
+  {
+    id: 'tehran-01', lat: 35.6892, lng: 51.3890, name: "Tehran Metro", city: "Tehran",
+    level: 'very_unhealthy', aqi: 168, radius: 75000, population: 9100000, dominantPollutant: 'PM2.5',
+    lastUpdated: '1 min ago', trend: 'up', pm25: 78, pm10: 118, no2: 62, so2: 35, co: 3.6, o3: 95
+  },
+  {
+    id: 'istanbul-01', lat: 41.0082, lng: 28.9784, name: "Istanbul Metro", city: "Istanbul",
+    level: 'moderate', aqi: 78, radius: 80000, population: 15500000, dominantPollutant: 'PM2.5',
+    lastUpdated: '2 min ago', trend: 'stable', pm25: 36, pm10: 58, no2: 32, so2: 16, co: 1.5, o3: 68
+  },
+  {
+    id: 'cairo-01', lat: 30.0444, lng: 31.2357, name: "Cairo Metro", city: "Cairo",
+    level: 'unhealthy', aqi: 145, radius: 70000, population: 20900000, dominantPollutant: 'PM10',
+    lastUpdated: '1 min ago', trend: 'up', pm25: 65, pm10: 110, no2: 50, so2: 30, co: 3.1, o3: 90
+  },
+
+  // Europe - Generally good to moderate
+  {
+    id: 'london-01', lat: 51.5074, lng: -0.1278, name: "Greater London", city: "London",
+    level: 'moderate', aqi: 68, radius: 85000, population: 9500000, dominantPollutant: 'NO2',
+    lastUpdated: '2 min ago', trend: 'stable', pm25: 32, pm10: 48, no2: 42, so2: 15, co: 1.2, o3: 62
+  },
+  {
+    id: 'paris-01', lat: 48.8566, lng: 2.3522, name: "Paris Metro", city: "Paris",
+    level: 'moderate', aqi: 72, radius: 70000, population: 11000000, dominantPollutant: 'NO2',
+    lastUpdated: '1 min ago', trend: 'up', pm25: 34, pm10: 52, no2: 45, so2: 16, co: 1.3, o3: 65
+  },
+  {
+    id: 'berlin-01', lat: 52.5200, lng: 13.4050, name: "Berlin Metro", city: "Berlin",
+    level: 'good', aqi: 52, radius: 60000, population: 6100000, dominantPollutant: 'O3',
+    lastUpdated: '3 min ago', trend: 'down', pm25: 18, pm10: 32, no2: 24, so2: 10, co: 0.9, o3: 52
+  },
+  {
+    id: 'madrid-01', lat: 40.4168, lng: -3.7038, name: "Madrid Metro", city: "Madrid",
+    level: 'moderate', aqi: 75, radius: 65000, population: 6700000, dominantPollutant: 'NO2',
+    lastUpdated: '2 min ago', trend: 'stable', pm25: 35, pm10: 55, no2: 48, so2: 17, co: 1.4, o3: 68
+  },
+  {
+    id: 'rome-01', lat: 41.9028, lng: 12.4964, name: "Rome Metro", city: "Rome",
+    level: 'moderate', aqi: 70, radius: 55000, population: 4300000, dominantPollutant: 'PM10',
+    lastUpdated: '1 min ago', trend: 'stable', pm25: 33, pm10: 50, no2: 38, so2: 14, co: 1.2, o3: 64
+  },
+  {
+    id: 'amsterdam-01', lat: 52.3676, lng: 4.9041, name: "Amsterdam Metro", city: "Amsterdam",
+    level: 'good', aqi: 48, radius: 45000, population: 2400000, dominantPollutant: 'NO2',
+    lastUpdated: '2 min ago', trend: 'down', pm25: 16, pm10: 28, no2: 22, so2: 9, co: 0.8, o3: 45
+  },
+  {
+    id: 'brussels-01', lat: 50.8503, lng: 4.3517, name: "Brussels Metro", city: "Brussels",
+    level: 'moderate', aqi: 65, radius: 50000, population: 2100000, dominantPollutant: 'NO2',
+    lastUpdated: '3 min ago', trend: 'stable', pm25: 30, pm10: 46, no2: 40, so2: 13, co: 1.1, o3: 60
+  },
+  {
+    id: 'warsaw-01', lat: 52.2297, lng: 21.0122, name: "Warsaw Metro", city: "Warsaw",
+    level: 'unhealthy', aqi: 108, radius: 55000, population: 3100000, dominantPollutant: 'PM2.5',
+    lastUpdated: '1 min ago', trend: 'up', pm25: 48, pm10: 72, no2: 44, so2: 22, co: 2.3, o3: 75
+  },
+  {
+    id: 'milan-01', lat: 45.4642, lng: 9.1900, name: "Milan Metro", city: "Milan",
+    level: 'unhealthy', aqi: 112, radius: 60000, population: 5200000, dominantPollutant: 'PM2.5',
+    lastUpdated: '2 min ago', trend: 'stable', pm25: 50, pm10: 75, no2: 46, so2: 20, co: 2.4, o3: 78
+  },
+  {
+    id: 'athens-01', lat: 37.9838, lng: 23.7275, name: "Athens Metro", city: "Athens",
+    level: 'moderate', aqi: 85, radius: 50000, population: 3700000, dominantPollutant: 'O3',
+    lastUpdated: '1 min ago', trend: 'up', pm25: 40, pm10: 62, no2: 36, so2: 18, co: 1.6, o3: 82
+  },
+  {
+    id: 'barcelona-01', lat: 41.3851, lng: 2.1734, name: "Barcelona Metro", city: "Barcelona",
+    level: 'moderate', aqi: 78, radius: 55000, population: 5600000, dominantPollutant: 'NO2',
+    lastUpdated: '2 min ago', trend: 'stable', pm25: 36, pm10: 56, no2: 44, so2: 16, co: 1.4, o3: 70
+  },
+  {
+    id: 'vienna-01', lat: 48.2082, lng: 16.3738, name: "Vienna Metro", city: "Vienna",
+    level: 'good', aqi: 55, radius: 50000, population: 1900000, dominantPollutant: 'NO2',
+    lastUpdated: '3 min ago', trend: 'down', pm25: 20, pm10: 35, no2: 26, so2: 11, co: 0.9, o3: 55
+  },
+  {
+    id: 'stockholm-01', lat: 59.3293, lng: 18.0686, name: "Stockholm Metro", city: "Stockholm",
+    level: 'good', aqi: 42, radius: 45000, population: 1600000, dominantPollutant: 'O3',
+    lastUpdated: '1 min ago', trend: 'stable', pm25: 12, pm10: 24, no2: 18, so2: 7, co: 0.7, o3: 42
+  },
+  {
+    id: 'copenhagen-01', lat: 55.6761, lng: 12.5683, name: "Copenhagen Metro", city: "Copenhagen",
+    level: 'good', aqi: 45, radius: 40000, population: 1300000, dominantPollutant: 'NO2',
+    lastUpdated: '2 min ago', trend: 'stable', pm25: 14, pm10: 26, no2: 20, so2: 8, co: 0.7, o3: 44
   }
 ];
 

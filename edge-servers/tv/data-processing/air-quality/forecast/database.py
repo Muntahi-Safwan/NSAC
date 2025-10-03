@@ -149,7 +149,7 @@ class AirQualityDatabase:
             try:
                 # Prisma doesn't have native createMany for all databases,
                 # so we use transaction with multiple creates
-                await self.db.airqualityforecast.create_many(
+                self.db.airqualityforecast.create_many(
                     data=batch,
                     skip_duplicates=True  # Skip if timestamp+location already exists
                 )

@@ -41,7 +41,7 @@ class NotificationService {
                ngoRegion.includes(region) || ngoRegion.includes(city);
       });
 
-      // Create notification
+      // Create notification with recipients
       const notification = await prisma.notification.create({
         data: {
           ngoId,
@@ -51,15 +51,20 @@ class NotificationService {
           region: ngo.region,
           isAlert: isAlert || false,
           expiresAt: expiresAt ? new Date(expiresAt) : null,
-          recipients: {
+          recipients: filteredUsers.length > 0 ? {
             connect: filteredUsers.map(user => ({ id: user.id }))
-          }
+          } : undefined
         },
         include: {
           ngo: {
             select: {
               name: true,
               region: true
+            }
+          },
+          _count: {
+            select: {
+              recipients: true
             }
           }
         }
@@ -74,7 +79,7 @@ class NotificationService {
           severity: notification.severity,
           isAlert: notification.isAlert,
           region: notification.region,
-          recipientCount: filteredUsers.length,
+          recipientCount: notification._count?.recipients || 0,
           createdAt: notification.createdAt
         }
       };
