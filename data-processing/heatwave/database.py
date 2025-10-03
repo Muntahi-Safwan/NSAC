@@ -119,9 +119,9 @@ class SimplifiedHeatwaveDatabase:
                         await self.prisma.execute_raw(
                             """
                             INSERT INTO meteorological_data 
-                            (latitude, longitude, forecast_hour, forecast_init_time, temperature, humidity, wind_speed, pressure, source)
+                            (latitude, longitude, "forecastHour", "forecastInitTime", temperature, humidity, "windSpeed", pressure, source)
                             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-                            ON CONFLICT (latitude, longitude, forecast_hour, forecast_init_time) DO NOTHING
+                            ON CONFLICT (latitude, longitude, "forecastHour", "forecastInitTime") DO NOTHING
                             """,
                             data_point['latitude'],
                             data_point['longitude'], 
