@@ -14,15 +14,15 @@
 
 ## 🔗 Live Demo
 
-**🚀 [View Live Application](https://airowatch.vercel.app/)** 
+**🚀 [View Live Application](https://airowatch.vercel.app/)**
 
-**📺 [View Youtube Video](https://youtu.be/ydBHcv_tUYo)** 
+**📺 [View Youtube Video](https://youtu.be/ydBHcv_tUYo)**
 
 ---
 
 ## 🚀 Overview
 
-**AiroWatch** is an award-winning environmental monitoring and disaster response platform developed for the NASA Space Apps Challenge 2025. This comprehensive solution combines NASA's satellite network, advanced AI, and cloud computing to deliver real-time air quality monitoring, wildfire tracking, heatwave detection, and emergency response coordination on a global scale.
+**AiroWatch** is an environmental monitoring and disaster response platform developed for the NASA Space Apps Challenge 2025. This comprehensive solution combines NASA's satellite network, advanced AI, and cloud computing to deliver real-time air quality monitoring, wildfire tracking, heatwave detection, and emergency response coordination on a global scale.
 
 ### 🎯 Mission Statement
 
@@ -31,6 +31,7 @@ We're working relentlessly, determined to bring transformative change by combini
 ## ✨ Core Features
 
 ### 🌬️ **Comprehensive Air Quality Monitoring**
+
 - **Multi-Pollutant Tracking**: Real-time monitoring of PM2.5, PM10, NO₂, O₃, SO₂, and CO
 - **NASA TEMPO Integration**: Hourly satellite data collection from NASA's TEMPO satellite
 - **24-Hour Forecasting**: AI-powered air quality predictions with machine learning models
@@ -40,6 +41,7 @@ We're working relentlessly, determined to bring transformative change by combini
 - **Regional Coverage**: Monitors 19+ regions with customizable geographic filters
 
 ### 🔥 **Real-Time Wildfire Detection & Tracking**
+
 - **NASA FIRMS Integration**: Live wildfire data from Fire Information for Resource Management System
 - **Dual Satellite System**: VIIRS and MODIS satellites for comprehensive coverage
 - **Fire Radiative Power (FRP)**: Measures fire intensity and severity in real-time
@@ -50,6 +52,7 @@ We're working relentlessly, determined to bring transformative change by combini
 - **Hourly Updates**: Automated data collection every hour with near real-time processing
 
 ### 🌡️ **Advanced Heatwave Monitoring & Prediction**
+
 - **NASA MODIS Data**: Land Surface Temperature (LST) monitoring from satellite imagery
 - **5-Day Forecast**: Temperature predictions with humidity integration
 - **Heat Advisory System**: Automated risk classification (Critical/High/Medium/Low)
@@ -59,6 +62,7 @@ We're working relentlessly, determined to bring transformative change by combini
 - **Geographic Filtering**: Regional targeting for precise monitoring
 
 ### 🤖 **AI-Powered Intelligence Suite**
+
 - **AI Chatbot Assistant**: Context-aware chatbot powered by GROQ AI
   - Real-time air quality context integration
   - Natural language processing for environmental queries
@@ -76,6 +80,7 @@ We're working relentlessly, determined to bring transformative change by combini
 - **Predictive Analytics**: Machine learning models for forecasting accuracy
 
 ### 🚨 **Emergency Response & NGO Coordination**
+
 - **NGO Dashboard**: Comprehensive platform for non-governmental organizations
   - Regional user management and safety statistics
   - Mass alert broadcasting with severity levels
@@ -87,6 +92,7 @@ We're working relentlessly, determined to bring transformative change by combini
 - **Real-Time Coordination**: Connect NGOs with at-risk community members
 
 ### 👤 **User-Centric Features**
+
 - **Personal Safety Dashboard**: Track your safety status and location during emergencies
 - **Health Profile Management**: Store diseases, allergies, age, emergency contacts
 - **Location Tracking**: GPS-based location sharing with reverse geocoding
@@ -96,6 +102,7 @@ We're working relentlessly, determined to bring transformative change by combini
 - **Profile Customization**: Update personal information, phone numbers, social media
 
 ### 📊 **Advanced Analytics & Visualizations**
+
 - **Multi-Tab Analytics Dashboard**: Overview, Air Quality, Heatwave, Wildfire sections
 - **Real-Time Statistics**: Average AQI, active heatwaves, active wildfires, monitored regions
 - **Interactive Charts**: 7-day trends, pollutant distribution, wildfire activity, time series
@@ -104,6 +111,7 @@ We're working relentlessly, determined to bring transformative change by combini
 - **Data Export**: Download reports and historical data
 
 ### 📚 **Educational & Training Resources**
+
 - **Learning Hub**: Comprehensive articles, guides, and blog posts
 - **Interactive Quizzes**: AI-generated questions across multiple difficulty levels
 - **Hazard Simulation**: Practice emergency response with realistic scenarios
@@ -112,6 +120,7 @@ We're working relentlessly, determined to bring transformative change by combini
 - **Progress Tracking**: Monitor quiz scores and learning achievements
 
 ### 🔔 **Intelligent Alert & Notification System**
+
 - **Multi-Level Severity**: Critical, Danger, Warning, Info classifications
 - **Targeted Alerts**: Regional broadcasting to affected communities
 - **NGO Alerts**: Receive notifications from local verified organizations
@@ -120,9 +129,11 @@ We're working relentlessly, determined to bring transformative change by combini
 - **Customizable Preferences**: Control notification types and frequencies
 
 ### 📡 **Edge Server System - Decentralized Alert Delivery**
+
 AiroWatch includes a revolutionary **Edge Server infrastructure** deployed at telecommunications towers, radio stations, and TV stations for independent, localized emergency broadcasting.
 
 #### 🗼 **Telco Edge Servers (Telecommunications Towers)**
+
 - **Independent Operation**: Each cell tower runs its own complete AiroWatch system
   - Own PostgreSQL database with air quality & wildfire data
   - Own data processing pipeline (hourly NASA satellite data collection)
@@ -141,6 +152,7 @@ AiroWatch includes a revolutionary **Edge Server infrastructure** deployed at te
 - **Geographic Resilience**: Tower failure doesn't affect other towers
 
 #### 📻 **Radio Edge Servers (Radio Broadcast Stations)**
+
 - **Independent Broadcasting System**: Self-contained at each radio station
   - Own database with real-time environmental data
   - Own scheduler for hourly data updates
@@ -153,6 +165,7 @@ AiroWatch includes a revolutionary **Edge Server infrastructure** deployed at te
 - **Compliance**: FCC Emergency Alert System (EAS) compliant
 
 #### 📺 **TV Edge Servers (Television Broadcast Stations)**
+
 - **Independent TV Alert System**: Complete system at each TV station
   - Own database with environmental monitoring data
   - Own video overlay and crawler text generation
@@ -207,6 +220,7 @@ AiroWatch includes a revolutionary **Edge Server infrastructure** deployed at te
 ```
 
 #### 🌟 **Edge Server Benefits**
+
 - ✅ **Complete Independence**: Each tower/station operates autonomously
 - ✅ **No Central Point of Failure**: System remains operational if central server fails
 - ✅ **Ultra-Low Latency**: Alerts generated and delivered locally (<1 second)
@@ -217,7 +231,9 @@ AiroWatch includes a revolutionary **Edge Server infrastructure** deployed at te
 - ✅ **Regulatory Compliance**: Meets FCC emergency broadcast requirements
 
 #### 📂 **Edge Server Deployment**
+
 Each edge server includes:
+
 - **FastAPI Application**: REST API for alert management
 - **PostgreSQL Database**: Local data storage (Port: 5433-5435)
 - **Prisma ORM**: Type-safe database access
@@ -295,6 +311,7 @@ python manage_services.py logs --follow
 ### **Tech Stack**
 
 #### 🎨 Frontend Technologies
+
 - **React 19.1.1** - Modern UI framework with React Compiler for optimal performance
 - **TypeScript 5.8.3** - Type-safe development with strict typing
 - **Tailwind CSS 4.1.13** - Utility-first CSS framework for responsive design
@@ -308,6 +325,7 @@ python manage_services.py logs --follow
 - **React Markdown** - Markdown rendering with GitHub-flavored markdown support
 
 #### ⚙️ Backend Technologies
+
 - **Node.js 20+** - JavaScript runtime environment
 - **Express.js 5.1.0** - Fast, minimalist web framework
 - **Prisma 6.16.2** - Next-generation ORM for type-safe database access
@@ -318,6 +336,7 @@ python manage_services.py logs --follow
 - **Express Validator 7.2.1** - Middleware for input validation
 
 #### 🐍 Data Processing Pipeline
+
 - **Python 3.8+** - Data processing and analysis
 - **NetCDF4** - Reading NASA satellite data files
 - **NumPy** - Numerical computing for large datasets
@@ -327,6 +346,7 @@ python manage_services.py logs --follow
 - **Cron Scheduler** - Automated hourly data collection
 
 #### 🛢️ Database & Infrastructure
+
 - **PostgreSQL 16** - Primary database with advanced features
 - **PostGIS** - Geospatial extension for location-based queries
 - **TimescaleDB** - Time-series optimization for temporal data
@@ -334,6 +354,7 @@ python manage_services.py logs --follow
 - **Prisma Schema** - Database modeling with migrations
 
 #### ☁️ Deployment & DevOps
+
 - **Docker** - Container platform for consistent deployment
 - **AWS ECS/Fargate** - Serverless container orchestration
 - **AWS ECR** - Container registry for Docker images
@@ -342,6 +363,7 @@ python manage_services.py logs --follow
 - **CloudWatch** - Logging, monitoring, and metrics
 
 #### 🛠️ Development Tools
+
 - **ESLint 9.36.0** - Code linting and quality enforcement
 - **TypeScript ESLint** - TypeScript-specific linting rules
 - **Babel React Compiler** - Optimized React compilation
@@ -351,6 +373,7 @@ python manage_services.py logs --follow
 ## 🎨 Design System
 
 The application features a stunning space-themed design with:
+
 - **Gradient backgrounds** from deep space blues to cosmic purples
 - **Interactive animations** including twinkling stars and floating planets
 - **Glass morphism effects** with backdrop blur and transparency
@@ -544,24 +567,28 @@ NSAC/
 ### Prerequisites
 
 #### Required Software
+
 - **Docker Desktop** - For PostgreSQL database ([Download](https://www.docker.com/products/docker-desktop))
 - **Python 3.8+** - For data processing pipelines ([Download](https://www.python.org/downloads/))
 - **Node.js 20+** - For frontend and backend ([Download](https://nodejs.org/))
 - **Git** - Version control system ([Download](https://git-scm.com/))
 
 #### API Keys (Required)
+
 - **NASA API Key** - Get from [NASA API Portal](https://api.nasa.gov/)
 - **GROQ AI API Key** - Get from [GROQ Console](https://console.groq.com/)
 
 ### Installation
 
 #### 1️⃣ Clone the Repository
+
 ```bash
 git clone https://github.com/Muntahi-Safwan/NSAC.git
 cd NSAC
 ```
 
 #### 2️⃣ Setup Database with Docker
+
 ```bash
 cd database
 
@@ -577,11 +604,13 @@ docker-compose up -d postgres
 ```
 
 📚 **Detailed Guides:**
+
 - Quick Setup: `database/QUICKSTART.md`
 - Complete Guide: `database/README.md`
 - Windows Users: `database/WINDOWS_SETUP.md`
 
 #### 3️⃣ Setup Data Processing Pipeline
+
 ```bash
 cd ../data-processing
 
@@ -601,6 +630,7 @@ prisma db push
 📚 **Data Pipeline Docs:** `data-processing/README.md`
 
 #### 4️⃣ Setup Backend API
+
 ```bash
 cd ../backend
 
@@ -623,6 +653,7 @@ npm run prisma:push
 📚 **Backend Guide:** `backend/DEPLOYMENT.md`
 
 #### 5️⃣ Setup Frontend Application
+
 ```bash
 cd ../frontend
 
@@ -634,6 +665,7 @@ npm install
 ```
 
 #### 6️⃣ Setup Edge Servers (Optional - For Decentralized Deployment)
+
 ```bash
 # Setup Telco Edge Server
 cd ../edge-servers/telco
@@ -663,12 +695,14 @@ python manage_services.py start
 #### Start All Services (Recommended Order)
 
 **Terminal 1 - Database**
+
 ```bash
 cd database
 docker-compose up -d postgres
 ```
 
 **Terminal 2 - Data Pipelines (Optional - for fresh data)**
+
 ```bash
 cd data-processing
 
@@ -681,24 +715,29 @@ cd scheduler
 ```
 
 **Terminal 3 - Backend API**
+
 ```bash
 cd backend
 npm start
 # Or for development with auto-reload
 npm run dev
 ```
+
 🌐 API available at: `https://nsac-mu.vercel.app`
 
 **Terminal 4 - Frontend**
+
 ```bash
 cd frontend
 npm run dev
 ```
+
 🌐 Application available at: `http://localhost:5173`
 
 ### 🔧 Development Commands
 
 #### Frontend
+
 ```bash
 npm run dev          # Start development server
 npm run build        # Build for production
@@ -707,6 +746,7 @@ npm run lint         # Run ESLint
 ```
 
 #### Backend
+
 ```bash
 npm start            # Start server
 npm run dev          # Start with auto-reload
@@ -715,6 +755,7 @@ npm run prisma:generate  # Generate Prisma Client
 ```
 
 #### Data Processing
+
 ```bash
 python main_pipeline.py              # Run all pipelines once
 python air-quality/main.py           # Air quality only
@@ -725,6 +766,7 @@ python heatwave/heatwave_calculator.py  # Heatwave prediction
 ### 🐳 Docker Deployment
 
 #### Build Backend Container
+
 ```bash
 cd backend
 docker build -t airowatch-backend .
@@ -732,6 +774,7 @@ docker-compose up -d
 ```
 
 #### Test Health Endpoints
+
 ```bash
 curl https://nsac-mu.vercel.app/health
 curl https://nsac-mu.vercel.app/ready
@@ -757,6 +800,7 @@ chmod +x deploy-to-aws.sh
 📚 **Full Deployment Guide:** `backend/DEPLOYMENT.md`
 
 **Deployment Options:**
+
 - AWS ECS/Fargate (Recommended)
 - AWS App Runner
 - Docker on any cloud provider
@@ -765,6 +809,7 @@ chmod +x deploy-to-aws.sh
 ## 🌟 Features Showcase
 
 ### 🗺️ **Interactive Air Quality Dashboard**
+
 - **Real-Time Monitoring**: Live pollutant levels (PM2.5, PM10, NO₂, O₃, SO₂, CO) updated hourly
 - **AQI Speedometer**: Visual gauge showing current air quality with color-coded severity
 - **Interactive Maps**: Leaflet-based maps with regional zones, pollutant layers, and statistics
@@ -774,6 +819,7 @@ chmod +x deploy-to-aws.sh
 - **Live Updates**: Real-time data refresh with monitoring indicators
 
 ### 🔥 **Wildfire Tracking System**
+
 - **Real-Time Detection**: NASA FIRMS data showing active fires from VIIRS and MODIS satellites
 - **Fire Intensity Metrics**: Fire Radiative Power (FRP) measurements for severity assessment
 - **Interactive Fire Map**: Color-coded markers (Red/Orange/Yellow) based on fire severity
@@ -783,6 +829,7 @@ chmod +x deploy-to-aws.sh
 - **Alert Generation**: Automatic notifications for new fire detections
 
 ### 🌡️ **Heatwave Prediction Dashboard**
+
 - **5-Day Forecast**: Temperature predictions with NASA MODIS Land Surface Temperature data
 - **Risk Classification**: Critical, High, Medium, Low heat advisory levels
 - **Interactive Heatwave Map**: Visual representation of heat zones with severity indicators
@@ -792,6 +839,7 @@ chmod +x deploy-to-aws.sh
 - **Location-Specific**: Regional temperature baselines and threshold detection
 
 ### 🤖 **AI-Powered Assistant Suite**
+
 - **Context-Aware Chatbot**: GROQ AI-powered assistant with real-time air quality context
 - **Natural Conversations**: Ask questions about air quality, health risks, and safety
 - **Quick Actions**: One-click access to tips, trends, and activity recommendations
@@ -801,6 +849,7 @@ chmod +x deploy-to-aws.sh
 - **Markdown Support**: Rich text responses with proper formatting
 
 ### 🚨 **Emergency Response Portal (NGO Dashboard)**
+
 - **Regional User Management**: View all users in your service area with safety statistics
 - **Mass Alert System**: Send critical alerts to all users in specific regions
 - **Safety Tracking**: Monitor users marked as "Safe" vs "Need Help"
@@ -810,6 +859,7 @@ chmod +x deploy-to-aws.sh
 - **Verification System**: Verified NGO badges for trusted organizations
 
 ### 👤 **Personal Safety Dashboard**
+
 - **Safety Status**: Mark yourself Safe/Need Help during emergencies with one click
 - **GPS Location Sharing**: Automatic location tracking with reverse geocoding
 - **Health Profile**: Store diseases, allergies, age, emergency contacts
@@ -819,6 +869,7 @@ chmod +x deploy-to-aws.sh
 - **Emergency Simulation**: Practice emergency procedures with realistic scenarios
 
 ### 📊 **Advanced Analytics Dashboard**
+
 - **Multi-Tab Interface**: Separate views for Overview, Air Quality, Heatwave, Wildfire
 - **Real-Time Statistics**:
   - Average AQI across all monitored regions
@@ -834,6 +885,7 @@ chmod +x deploy-to-aws.sh
 - **Performance Metrics**: Fires detected, acres burned, containment rates
 
 ### 📚 **Learning & Education Hub**
+
 - **Article Library**: Comprehensive guides on air quality, health, and safety
 - **Blog Posts**: Regular updates on environmental topics and research
 - **Category System**: Filter by Air Quality, Health, Safety, Technology
@@ -844,6 +896,7 @@ chmod +x deploy-to-aws.sh
 - **Featured Content**: Highlighted important articles and guides
 
 ### 🎯 **Interactive Quiz System**
+
 - **AI-Generated Questions**: Dynamic quiz creation using GROQ AI
 - **Difficulty Levels**: Beginner, Intermediate, Advanced categories
 - **Multiple Topics**: Air Quality, Health, Environment, Technology
@@ -854,6 +907,7 @@ chmod +x deploy-to-aws.sh
 - **Retry System**: Retake quizzes to improve scores
 
 ### 🎭 **Emergency Simulation Training**
+
 - **Realistic Scenarios**: Practice response to air quality emergencies
 - **AI Risk Assessment**: Personalized health risk based on your profile
 - **Sequential Alerts**: Progressive notification system during simulation
@@ -869,30 +923,35 @@ chmod +x deploy-to-aws.sh
 This project comprehensively addresses multiple NASA Space Apps Challenge themes:
 
 #### 🌍 **Earth Observation & Monitoring**
+
 - Real-time utilization of NASA's TEMPO, MODIS, VIIRS, and FIRMS satellites
 - Multi-satellite data fusion for comprehensive environmental monitoring
 - Processing terabytes of satellite data through automated pipelines
 - High-resolution atmospheric and land surface temperature monitoring
 
 #### 🌡️ **Climate Change & Environmental Impact**
+
 - Tracking atmospheric composition changes and pollutant trends
 - Long-term climate pattern analysis through historical data
 - Heatwave detection and prediction using NASA MODIS data
 - Environmental impact assessment and reporting tools
 
 #### 🚨 **Disaster Management & Early Warning**
+
 - Wildfire detection and tracking with NASA FIRMS integration
 - Heatwave prediction and advisory system
 - Air quality emergency forecasting with 24-hour predictions
 - Mass alert system for community protection and emergency response
 
 #### 📊 **Data Visualization & Communication**
+
 - Interactive dashboards for complex environmental data
 - Real-time charts, maps, and statistical visualizations
 - User-friendly interfaces for non-technical audiences
 - Educational resources and learning materials
 
 #### 👥 **Community Impact & Public Health**
+
 - Tools for protecting public health and safety
 - NGO coordination for emergency response
 - Personal safety tracking and health profile management
@@ -909,6 +968,7 @@ This project comprehensively addresses multiple NASA Space Apps Challenge themes
 ### Innovation & Impact
 
 🌟 **Key Innovations:**
+
 - **Decentralized Edge Server Architecture**: First-of-its-kind distributed system with independent servers at telco towers, radio stations, and TV stations
 - **Personalized AI-Based Messaging**: AI generates custom alerts for each individual based on health profile, location, and current conditions
 - **Complete Independence**: Each edge server operates autonomously with own database, data processing, and AI engine
@@ -921,6 +981,7 @@ This project comprehensively addresses multiple NASA Space Apps Challenge themes
 - Automated hourly data collection from multiple NASA satellites
 
 📈 **Measurable Impact:**
+
 - **Protects millions through edge computing**: Each telco tower covers 50km radius with personalized alerts
 - **Reaches underserved areas**: Radio and TV broadcasts reach communities without smartphones
 - **Resilient infrastructure**: No central point of failure, continues during internet outages
@@ -933,6 +994,7 @@ This project comprehensively addresses multiple NASA Space Apps Challenge themes
 ## 🔮 Future Enhancements
 
 ### Planned Features
+
 - [ ] **Mobile Application** - Native iOS/Android apps with offline capabilities
 - [ ] **Advanced AI Models** - Deep learning for enhanced prediction accuracy
 - [ ] **Social Features** - Community reporting and collaborative monitoring
@@ -945,6 +1007,7 @@ This project comprehensively addresses multiple NASA Space Apps Challenge themes
 - [ ] **AR Visualization** - Augmented reality for environmental data visualization
 
 ### Scalability Goals
+
 - [ ] Expand geographic coverage to global monitoring
 - [ ] Integrate additional NASA datasets (AIRS, OMI, OCO-2)
 - [ ] Real-time satellite image processing and analysis
@@ -955,12 +1018,14 @@ This project comprehensively addresses multiple NASA Space Apps Challenge themes
 ## 🤝 Contributing
 
 We welcome contributions from the community! Please feel free to:
+
 - Report bugs and issues
 - Suggest new features and improvements
 - Submit pull requests
 - Share feedback and ideas
 
 ### Development Guidelines
+
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
@@ -970,6 +1035,7 @@ We welcome contributions from the community! Please feel free to:
 ## 📊 Project Statistics
 
 ### Code Metrics
+
 - **Frontend**: 20+ pages, 35+ components
 - **Backend**: 50+ REST API endpoints (Central Cloud)
 - **Edge Servers**: 3 independent server types (Telco, Radio, TV)
@@ -979,6 +1045,7 @@ We welcome contributions from the community! Please feel free to:
 - **Total Lines of Code**: 50,000+ LOC
 
 ### Infrastructure & Deployment
+
 - **Central Cloud**: 1 backend API + 1 database + 1 data pipeline
 - **Edge Servers**: 3 independent server types
   - Telco Edge: Port 8001 (API), 5433 (DB), 5556 (Studio)
@@ -988,6 +1055,7 @@ We welcome contributions from the community! Please feel free to:
 - **Geographic Scalability**: Unlimited edge servers can be deployed
 
 ### Data & Coverage
+
 - **Pollutants Tracked**: 6 types (PM2.5, PM10, NO₂, O₃, SO₂, CO)
 - **Satellites Used**: 5 NASA satellites (TEMPO, MODIS, VIIRS, FIRMS, GEOS-CF)
 - **Update Frequency**: Hourly automated data collection (all servers)
@@ -996,6 +1064,7 @@ We welcome contributions from the community! Please feel free to:
 - **Edge Server Coverage**: 50km radius per telco tower
 
 ### Alert Delivery Channels
+
 - **Web/Mobile**: Browser push notifications, in-app alerts
 - **Telecommunications**: SMS, voice calls, mobile push (via Telco Edge)
 - **Radio Broadcast**: AM/FM emergency broadcasts (via Radio Edge)
@@ -1003,6 +1072,7 @@ We welcome contributions from the community! Please feel free to:
 - **NGO Coordination**: Direct alerts to relief organizations
 
 ### Technology Stack
+
 - **Languages**: TypeScript, JavaScript, Python, SQL
 - **Frameworks**: React 19, Node.js/Express, FastAPI (Edge), Prisma
 - **Databases**: PostgreSQL with PostGIS & TimescaleDB (4 independent instances)
@@ -1013,6 +1083,7 @@ We welcome contributions from the community! Please feel free to:
 ## 🔒 Security & Privacy
 
 ### Data Protection
+
 - **Password Security**: Bcrypt hashing with salt rounds
 - **Authentication**: JWT tokens with expiration
 - **Environment Variables**: Sensitive data in .env files (not committed)
@@ -1021,6 +1092,7 @@ We welcome contributions from the community! Please feel free to:
 - **SQL Injection Prevention**: Prisma ORM with parameterized queries
 
 ### User Privacy
+
 - **Optional Data**: Users control what information they share
 - **Location Privacy**: GPS data only shared during emergencies if user opts in
 - **Data Encryption**: Passwords and sensitive data encrypted at rest
@@ -1030,19 +1102,23 @@ We welcome contributions from the community! Please feel free to:
 ## 📚 Documentation
 
 ### Project Documentation
+
 - [README.md](README.md) - Main project overview (this file)
 - [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) - Detailed architecture and status
 
 ### Backend Documentation
+
 - [backend/DEPLOYMENT.md](backend/DEPLOYMENT.md) - AWS deployment guide
 - [backend/QUICK-DEPLOY.md](backend/QUICK-DEPLOY.md) - Quick deployment instructions
 
 ### Database Documentation
+
 - [database/QUICKSTART.md](database/QUICKSTART.md) - 5-minute database setup
 - [database/README.md](database/README.md) - Complete database guide
 - [database/WINDOWS_SETUP.md](database/WINDOWS_SETUP.md) - Windows-specific instructions
 
 ### Data Pipeline Documentation
+
 - [data-processing/README.md](data-processing/README.md) - Pipeline overview
 - [data-processing/SYSTEM_SUMMARY.md](data-processing/SYSTEM_SUMMARY.md) - System architecture
 - [data-processing/air-quality/README.md](data-processing/air-quality/README.md) - Air quality pipeline
@@ -1052,12 +1128,14 @@ We welcome contributions from the community! Please feel free to:
 ## 🐛 Known Issues & Limitations
 
 ### Current Limitations
+
 - Geographic coverage currently focused on North America (TEMPO satellite coverage area)
 - Data latency of 1-3 hours depending on satellite pass times
 - Requires internet connection for real-time updates
 - Push notifications require browser permission
 
 ### Planned Fixes
+
 - Expanding geographic coverage to global monitoring
 - Reducing data latency through additional data sources
 - Adding offline mode for critical alerts
@@ -1074,11 +1152,13 @@ This project is developed for the **NASA Space Apps Challenge 2025**.
 ## 🙏 Acknowledgments
 
 ### Organizations
+
 - **NASA** - For providing free access to Earth observation data and APIs
 - **Space Apps Challenge** - For the opportunity to create innovative solutions
 - **GROQ AI** - For providing AI API access for intelligent features
 
 ### Open Source Projects
+
 - **React Team** - For the amazing React framework
 - **Prisma** - For the excellent ORM and database tools
 - **Leaflet** - For interactive mapping capabilities
@@ -1086,25 +1166,30 @@ This project is developed for the **NASA Space Apps Challenge 2025**.
 - **All Contributors** - To the open-source libraries used in this project
 
 ### Inspiration
+
 - **Environmental Scientists** worldwide who inspire us to protect our planet
 - **First Responders & NGOs** who work tirelessly to save lives
 - **Communities** affected by air quality emergencies and natural disasters
 
 ### Repository
+
 **Project Repository:** [github.com/Muntahi-Safwan/NSAC](https://github.com/Muntahi-Safwan/NSAC)
 **Issues & Bug Reports:** [GitHub Issues](https://github.com/Muntahi-Safwan/NSAC/issues)
 **Feature Requests:** [GitHub Discussions](https://github.com/Muntahi-Safwan/NSAC/discussions)
 
 ### Challenge Information
+
 **Challenge:** From EarthData to Action: Cloud Computing with Earth Observation Data for Predicting Cleaner, Safer Skies
 **Year:** 2025
 
 ### Contributing
+
 We welcome contributions! See [CONTRIBUTING.md](#) for guidelines.
 
 ## 🌟 Support the Project
 
 If you find this project helpful:
+
 - ⭐ **Star** this repository on GitHub
 - 🐛 **Report bugs** and suggest features via Issues
 - 🤝 **Contribute** code, documentation, or ideas
@@ -1114,6 +1199,7 @@ If you find this project helpful:
 ## 🔗 Useful Links
 
 ### NASA Resources
+
 - [NASA API Portal](https://api.nasa.gov/)
 - [NASA Earthdata](https://www.earthdata.nasa.gov/)
 - [NASA FIRMS](https://firms.modaps.eosdis.nasa.gov/)
@@ -1121,6 +1207,7 @@ If you find this project helpful:
 - [GEOS-CF Documentation](https://gmao.gsfc.nasa.gov/GEOS_systems/geos-cf.php)
 
 ### Technologies
+
 - [React Documentation](https://react.dev/)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 - [Prisma Docs](https://www.prisma.io/docs)
@@ -1128,6 +1215,7 @@ If you find this project helpful:
 - [Docker Documentation](https://docs.docker.com/)
 
 ### Learning Resources
+
 - [Air Quality Index (AQI) Basics](https://www.airnow.gov/aqi/aqi-basics/)
 - [Understanding Wildfires](https://www.nasa.gov/mission_pages/fires/main/index.html)
 - [Climate Change Resources](https://climate.nasa.gov/)
@@ -1140,7 +1228,7 @@ If you find this project helpful:
 
 **Protecting Communities Through Intelligent Environmental Monitoring**
 
-*Powered by NASA Satellites • Enhanced by AI • Built for Humanity*
+_Powered by NASA Satellites • Enhanced by AI • Built for Humanity_
 
 ---
 
