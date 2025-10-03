@@ -16,10 +16,10 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5174', 'https://airowatch.vercel.app/'],
+  origin: ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5174', 'https://airowatch.vercel.app'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Referer']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
