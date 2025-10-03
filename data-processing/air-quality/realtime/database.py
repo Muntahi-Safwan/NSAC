@@ -196,7 +196,7 @@ class GeosCfAnalysisDatabase:
                 batch = batch_data[i:i + batch_size]
                 
                 # Fast batch insert (skip duplicates automatically)
-                await self.prisma.airqualityrealtime.create_many(data=batch, skip_duplicates=True)
+                self.prisma.airqualityrealtime.create_many(data=batch, skip_duplicates=True)
                 total_inserted += len(batch)
                 
                 # Progress indicator
