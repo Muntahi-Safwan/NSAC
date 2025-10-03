@@ -381,13 +381,3 @@ FROM air_quality_forecasts;
 
 ---
 
-## 🏆 NASA Space Apps Challenge 2025
-
-**Team:** Muntahi Safwan  
-**Challenge:** Air Quality Monitoring & Prediction  
-**Approach:** Multi-source data fusion with satellite forecasts, real-time observations, and ground truth
-
----
-
-**Last Updated:** September 30, 2025  
-**Version:** 1.0 - Foundation Complete

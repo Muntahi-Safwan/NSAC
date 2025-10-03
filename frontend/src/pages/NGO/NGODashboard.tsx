@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../services/api';
 import {
   Building2,
   Users,
@@ -108,9 +108,9 @@ const ImprovedNGODashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       const [statsRes, usersRes, notificationsRes] = await Promise.all([
-        axios.get(`https://nsac-mu.vercel.appl.appl.app/api/ngo/${ngo?.id}/stats`),
-        axios.get(`https://nsac-mu.vercel.appl.appl.app/api/ngo/${ngo?.id}/regional-users`),
-        axios.get(`https://nsac-mu.vercel.appl.appl.app/api/ngo/${ngo?.id}/notifications`)
+        api.get(`/api/ngo/${ngo?.id}/stats`),
+        api.get(`/api/ngo/${ngo?.id}/regional-users`),
+        api.get(`/api/ngo/${ngo?.id}/notifications`)
       ]);
 
       if (statsRes.data.success) setStats(statsRes.data.data);
@@ -144,7 +144,7 @@ const ImprovedNGODashboard: React.FC = () => {
   const handleSendNotification = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post('https://nsac-mu.vercel.appl.appl.app/api/notifications/send', {
+      const response = await api.post('/api/notifications/send', {
         ngoId: ngo?.id,
         title: notificationForm.title,
         message: notificationForm.message,

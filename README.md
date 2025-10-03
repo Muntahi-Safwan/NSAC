@@ -6,11 +6,17 @@
 [![Node.js](https://img.shields.io/badge/Node.js-20+-339933?style=for-the-badge&logo=node.js)](https://nodejs.org)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker)](https://docker.com)
 
+<div align="center">
+  <img src="banner.png" alt="AiroWatch Banner" width="100%" />
+</div>
+
 > **Your comprehensive environmental guardian powered by NASA satellites. Real-time air quality monitoring, wildfire tracking, heatwave detection, and AI-powered insights to protect communities worldwide.**
 
 ## 🔗 Live Demo
 
-**🚀 [View Live Application](#)** *(Deployment in progress - Coming soon!)*
+**🚀 [View Live Application](https://airowatch.vercel.app/)** 
+
+**📺 [View Youtube Video](https://youtu.be/ydBHcv_tUYo)** 
 
 ---
 
@@ -20,7 +26,7 @@
 
 ### 🎯 Mission Statement
 
-Protecting communities worldwide through intelligent environmental monitoring. We leverage NASA satellite data, artificial intelligence, and collaborative emergency response systems to predict and prevent environmental disasters before they threaten lives.
+We're working relentlessly, determined to bring transformative change by combining our innovative ideas with NASA's satellite data and the power of artificial intelligence — creating solutions that directly save lives and improve public health globally.
 
 ## ✨ Core Features
 
@@ -848,21 +854,13 @@ This project is developed for the **NASA Space Apps Challenge 2025**.
 - **First Responders & NGOs** who work tirelessly to save lives
 - **Communities** affected by air quality emergencies and natural disasters
 
-## 📞 Contact & Support
-
-### Project Team
-**Developer:** Muntahi Safwan
-**GitHub:** [@Muntahi-Safwan](https://github.com/Muntahi-Safwan)
-**Email:** airowatch@gmail.com
-
 ### Repository
 **Project Repository:** [github.com/Muntahi-Safwan/NSAC](https://github.com/Muntahi-Safwan/NSAC)
 **Issues & Bug Reports:** [GitHub Issues](https://github.com/Muntahi-Safwan/NSAC/issues)
 **Feature Requests:** [GitHub Discussions](https://github.com/Muntahi-Safwan/NSAC/discussions)
 
 ### Challenge Information
-**Challenge:** NASA Space Apps Challenge 2025
-**Category:** Earth Observation & Environmental Monitoring
+**Challenge:** From EarthData to Action: Cloud Computing with Earth Observation Data for Predicting Cleaner, Safer Skies
 **Year:** 2025
 
 ### Contributing
