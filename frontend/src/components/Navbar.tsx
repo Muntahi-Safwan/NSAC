@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { User, LogIn, MapPin, LogOut, UserCircle, ChevronDown, Bell, X, CheckCheck, Building2, Shield, Map, Thermometer, Flame, BarChart3 } from 'lucide-react';
+import { User, LogIn, MapPin, LogOut, UserCircle, ChevronDown, Bell, X, CheckCheck, Building2, Shield, Map, Thermometer, Flame, BarChart3, Code } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNGOAuth } from '../contexts/NGOAuthContext';
 import { useNotifications } from '../contexts/NotificationContext';
@@ -85,6 +85,7 @@ const Navbar = () => {
     { name: 'Analytics', href: '/analytics', icon: BarChart3 },
     { name: 'Search', href: '/search' },
     { name: 'About', href: '/about' },
+    { name: 'How We Built It', href: '/how-we-built-it', icon: Code },
     { name: 'Learning', href: '/learning' },
     { name: 'Contact', href: '/contact' },
   ];

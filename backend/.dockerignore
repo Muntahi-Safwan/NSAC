@@ -1,0 +1,71 @@
+# Node modules
+node_modules
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Environment files
+# .env - INCLUDED in the image for simplified deployment
+.env.local
+.env.*.local
+.env.example
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+CHANGELOG.md
+LICENSE
+*.md
+
+# Test files
+test
+tests
+__tests__
+*.test.js
+*.spec.js
+coverage
+
+# CI/CD files
+.github
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
+
+# Docker files (not needed in the image)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build artifacts
+dist
+build
+.cache
+
+# Temporary files
+tmp
+temp
+*.tmp
+
+# OS files
+Thumbs.db
+.DS_Store

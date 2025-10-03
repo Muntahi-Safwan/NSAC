@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5174'],
+  origin: ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5174', 'https://airowatch.vercel.app/'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -30,9 +30,48 @@ app.use((req, res, next) => {
   next();
 });
 
+// Health check endpoint for load balancers and monitoring
+app.get('/health', (req, res) => {
+  const healthCheck = {
+    uptime: process.uptime(),
+    message: 'OK',
+    timestamp: Date.now(),
+    status: 'healthy',
+    environment: process.env.NODE_ENV || 'development',
+    version: process.env.APP_VERSION || '1.0.0',
+    memoryUsage: {
+      rss: `${Math.round(process.memoryUsage().rss / 1024 / 1024 * 100) / 100} MB`,
+      heapTotal: `${Math.round(process.memoryUsage().heapTotal / 1024 / 1024 * 100) / 100} MB`,
+      heapUsed: `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024 * 100) / 100} MB`
+    }
+  };
+
+  res.status(200).json(healthCheck);
+});
+
+// Readiness check (for Kubernetes/AWS ECS)
+app.get('/ready', (req, res) => {
+  // Add any additional checks here (database connection, etc.)
+  res.status(200).json({ status: 'ready', timestamp: Date.now() });
+});
+
+// Liveness check (for Kubernetes/AWS ECS)
+app.get('/live', (req, res) => {
+  res.status(200).json({ status: 'alive', timestamp: Date.now() });
+});
+
 // Routes
 app.get('/', (req, res) => {
-  res.json({ message: 'Air Quality API Server' });
+  res.json({
+    message: 'Air Quality API Server',
+    version: process.env.APP_VERSION || '1.0.0',
+    endpoints: {
+      health: '/health',
+      ready: '/ready',
+      live: '/live',
+      api: '/api'
+    }
+  });
 });
 
 console.log('=== Mounting auth routes at /api/auth ===');

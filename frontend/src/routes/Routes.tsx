@@ -20,6 +20,7 @@ import QuizPage from "../pages/QuizPage/QuizPage";
 import UserDashboard from "../pages/User/UserDashboard";
 import SearchPage from "../pages/SearchPage/SearchPage";
 import AnalyticsDashboard from "../pages/Analytics/AnalyticsDashboard";
+import HowWeBuiltIt from "../pages/HowWeBuiltItPage/HowWeBuiltIt";
 
 export const router = createBrowserRouter([
     {
@@ -70,6 +71,10 @@ export const router = createBrowserRouter([
             {
                 path: "/quiz",
                 element: <QuizPage />
+            },
+            {
+                path: "/how-we-built-it",
+                element: <HowWeBuiltIt />
             },
             {
                 path: "/profile",
