@@ -120,7 +120,7 @@ class SimplifiedHeatwaveDatabase:
                             """
                             INSERT INTO meteorological_data 
                             (latitude, longitude, "forecastHour", "forecastInitTime", temperature, humidity, "windSpeed", pressure, source)
-                            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                            VALUES ($1, $2, $3::timestamp, $4::timestamp, $5, $6, $7, $8, $9)
                             ON CONFLICT (latitude, longitude, "forecastHour", "forecastInitTime") DO NOTHING
                             """,
                             data_point['latitude'],
@@ -187,7 +187,7 @@ class SimplifiedHeatwaveDatabase:
                             """
                             INSERT INTO heatwave_alerts 
                             (latitude, longitude, "alertDate", "forecastInitTime", "maxTemperature", "minTemperature", "maxHeatIndex", "alertLevel", "alertMessage", source)
-                            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                            VALUES ($1, $2, $3::date, $4::timestamp, $5, $6, $7, $8, $9, $10)
                             ON CONFLICT (latitude, longitude, "alertDate", "forecastInitTime") DO NOTHING
                             """,
                             alert_data['latitude'],
