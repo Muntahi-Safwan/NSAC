@@ -239,14 +239,16 @@ const NGOProfileModal: React.FC<NGOProfileModalProps> = ({
           </div>
 
           {/* Read-only Region Info */}
-          <div className="p-4 bg-blue-500/10 border border-blue-400/30 rounded-xl">
-            <p className="text-blue-200 text-sm mb-2">
-              <strong className="text-blue-300">Service Region:</strong> {ngo.region}, {ngo.country}
-            </p>
-            <p className="text-blue-300 text-xs">
-              Contact support to change your service region
-            </p>
-          </div>
+          {ngo && (
+            <div className="p-4 bg-blue-500/10 border border-blue-400/30 rounded-xl">
+              <p className="text-blue-200 text-sm mb-2">
+                <strong className="text-blue-300">Service Region:</strong> {ngo.region}, {ngo.country}
+              </p>
+              <p className="text-blue-300 text-xs">
+                Contact support to change your service region
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Action Buttons */}
