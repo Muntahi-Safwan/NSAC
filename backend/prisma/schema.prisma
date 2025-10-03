@@ -120,28 +120,28 @@ model AirQualityForecast {
   id               Int      @id @default(autoincrement())
   timestamp        DateTime // Forecast valid time
   forecastInitTime DateTime // When the forecast was initialized (00z or 12z)
-
+  
   // Location (filtered to TEMPO coverage: North America)
   latitude         Float    // Range: ~15°N to ~60°N
   longitude        Float    // Range: ~-130°W to ~-60°W
   level            Float    // Atmospheric level (surface = 0)
-
+  
   // Pollutant concentrations (μg/m³ unless noted)
   // All available from GEOS-CF
   pm25             Float?   // PM2.5 - Particulate Matter < 2.5μm
   no2              Float?   // NO2 - Nitrogen Dioxide
   o3               Float?   // O3 - Ozone
-  so2              Float?   // SO2 - Sulfur Dioxide
+  so2              Float?   // SO2 - Sulfur Dioxide  
   co               Float?   // CO - Carbon Monoxide (ppbv)
   hcho             Float?   // HCHO - Formaldehyde
-
+  
   // Calculated AQI
   aqi              Float?   // Overall Air Quality Index (0-500)
-
+  
   // Metadata
-  source           String   @default("GEOS-CF")
+  source           String   @default("GEOS-CF-FORECAST")
   createdAt        DateTime @default(now())
-
+  
   // Composite indexes for efficient geospatial + time queries
   // PostGIS will use these for nearest-neighbor searches
   @@index([latitude, longitude])
@@ -150,4 +150,156 @@ model AirQualityForecast {
   @@index([timestamp, latitude, longitude])
   @@index([source])
   @@map("air_quality_forecasts")
+}
+
+model AirQualityRealtime {
+  id               Int      @id @default(autoincrement())
+  timestamp        DateTime // Observation time (when measurement was taken)
+  
+  // Location (North America coverage)
+  latitude         Float    // Range: ~15°N to ~60°N
+  longitude        Float    // Range: ~-130°W to ~-60°W
+  level            Float    @default(0) // Atmospheric level (surface = 0)
+  
+  // Real-time pollutants (μg/m³ unless noted)
+  // GEOS-CF analysis data + AirNOW ground data
+  pm25             Float?   // PM2.5 - Particulate Matter (GEOS-CF analysis)
+  no2              Float?   // NO2 - Nitrogen Dioxide (GEOS-CF analysis)
+  o3               Float?   // O3 - Ozone (GEOS-CF analysis)
+  so2              Float?   // SO2 - Sulfur Dioxide (GEOS-CF analysis)
+  co               Float?   // CO - Carbon Monoxide (GEOS-CF analysis)
+  hcho             Float?   // HCHO - Formaldehyde (GEOS-CF analysis)
+  
+  // Calculated AQI (same method as forecast)
+  aqi              Float?   // Overall Air Quality Index (0-500)
+  
+  // Metadata
+  source           String   @default("GEOS-CF-ANALYSIS")
+  createdAt        DateTime @default(now())
+  
+  // Unique constraint to prevent duplicate data
+  @@unique([timestamp, latitude, longitude, source])
+  
+  // Composite indexes for efficient geospatial + time queries
+  @@index([latitude, longitude])
+  @@index([timestamp])
+  @@index([timestamp, latitude, longitude])
+  @@index([source])
+  @@map("air_quality_realtime")
+}
+
+// Meteorological Data - Raw weather data from NASA GEOS-CF
+model MeteorologicalData {
+  id                    Int      @id @default(autoincrement())
+  
+  // Location
+  latitude              Float    // Geographic latitude
+  longitude             Float    // Geographic longitude
+  
+  // Temporal information (hourly resolution)
+  forecastHour          DateTime // Specific hour this forecast is for
+  forecastInitTime      DateTime // When forecast was generated
+  createdAt             DateTime @default(now())
+  
+  // Raw meteorological parameters
+  temperature           Float    // Temperature (°C)
+  humidity              Float    // Relative humidity (%)
+  windSpeed             Float    // Wind speed (m/s)
+  pressure              Float    // Surface pressure (Pa)
+  
+  // Metadata
+  source                String   @default("GEOS-CF")
+  
+  // Unique constraint - one record per location per hour
+  @@unique([latitude, longitude, forecastHour, forecastInitTime])
+  
+  // Indexes for efficient queries
+  @@index([forecastHour])
+  @@index([latitude, longitude])
+  @@index([forecastHour, latitude, longitude]) // Spatial-temporal queries
+  
+  @@map("meteorological_data")
+}
+
+// Heatwave Alerts - Simple daily heatwave alerts
+model HeatwaveAlerts {
+  id                    Int      @id @default(autoincrement())
+  
+  // Location
+  latitude              Float    // Geographic latitude
+  longitude             Float    // Geographic longitude
+  
+  // Temporal information
+  alertDate             DateTime @db.Date // Date this alert is for
+  forecastInitTime      DateTime // When forecast was generated
+  createdAt             DateTime @default(now())
+  
+  // Simple heatwave indicators
+  maxTemperature        Float    // Daily maximum temperature (°C)
+  minTemperature        Float    // Daily minimum temperature (°C)
+  maxHeatIndex          Float    // Maximum heat index (°C)
+  
+  // Alert level
+  alertLevel            Int      // 0=None, 1=Watch, 2=Warning, 3=Emergency
+  alertMessage          String?  // Human-readable alert message
+  
+  // Metadata
+  source                String   @default("GEOS-CF")
+  
+  // Unique constraint to prevent duplicate alerts
+  @@unique([latitude, longitude, alertDate, forecastInitTime])
+  
+  // Indexes for efficient queries
+  @@index([latitude, longitude])
+  @@index([alertDate])
+  @@index([alertLevel]) // For filtering alerts by severity
+  
+  @@map("heatwave_alerts")
+}
+
+model FireDetections {
+  id                    Int      @id @default(autoincrement())
+  
+  // Location
+  latitude              Float    // Geographic latitude
+  longitude             Float    // Geographic longitude
+  
+  // Fire detection data
+  brightness            Float    // Fire brightness temperature (K)
+  scan                  Float    // Scan size
+  track                 Float    // Track size
+  brightT31             Float    // Brightness temperature (31um)
+  frp                   Float    // Fire Radiative Power (MW)
+  
+  // Temporal information
+  acqDate               DateTime @db.Date // Acquisition date
+  acqTime               String   // Acquisition time
+  daynight              String   // Day or night detection
+  
+  // Satellite information
+  satellite             String   // Satellite name (MODIS_Terra, VIIRS_Suomi, etc.)
+  confidence            String   // Confidence level (nominal, low, high)
+  version               String   // Data version
+  
+  // Alert information
+  alertLevel            Int?     // Alert level: 1=Watch, 2=Warning, 3=Emergency
+  alertSent             Boolean  @default(false) // Whether alert was sent
+  
+  // Metadata
+  source                String   @default("NASA-FIRMS")
+  createdAt             DateTime @default(now())
+  
+  // Unique constraint to prevent duplicate detections
+  @@unique([latitude, longitude, acqDate, acqTime, satellite])
+  
+  // Indexes for efficient queries
+  @@index([latitude, longitude])
+  @@index([acqDate])
+  @@index([satellite])
+  @@index([confidence])
+  @@index([frp]) // For filtering by fire intensity
+  @@index([alertLevel]) // For filtering by alert level
+  @@index([alertSent]) // For tracking sent alerts
+  
+  @@map("fire_detections")
 }

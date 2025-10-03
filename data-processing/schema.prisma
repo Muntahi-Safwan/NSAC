@@ -1,15 +1,119 @@
-// Prisma schema for GEOS-CF Air Quality Forecast Data
-// PostgreSQL + PostGIS + TimescaleDB configuration
-// Collects multiple pollutants for TEMPO coverage area (North America)
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider             = "prisma-client-py"
-  recursive_type_depth = 5
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String            @id @default(uuid())
+  email           String            @unique
+  password        String
+  firstName       String?
+  lastName        String?
+  phoneNumbers    String[]          @default([])
+  primaryPhone    String?           // Primary phone for SMS alerts
+  socialUsernames Json?
+  age             Int?              // User's age
+  diseases        String[]          @default([]) // User's diseases (multi-select)
+  allergies       String[]          @default([]) // User's allergies (multi-select)
+  lastLocation    Json?             // {city, region, country, lat, lng}
+  isSafe          Boolean           @default(true)
+  safetyUpdatedAt DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  notifications   Notification[]
+  quizAttempts    QuizAttempt[]
+
+  @@map("users")
+}
+
+model NGO {
+  id              String         @id @default(uuid())
+  email           String         @unique
+  password        String
+  name            String
+  description     String?
+  website         String?        // NGO website
+  address         String?        // Physical address
+  region          String         // City/Region they operate in
+  country         String         @default("Bangladesh")
+  coordinates     Json?          // {lat, lng}
+  contactPhone    String?
+  emergencyPhone  String?        // Emergency contact number
+  operatingHours  String?        // Operating hours
+  verified        Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  notifications   Notification[]
+
+  @@map("ngos")
+}
+
+model Notification {
+  id          String    @id @default(uuid())
+  ngoId       String
+  ngo         NGO       @relation(fields: [ngoId], references: [id], onDelete: Cascade)
+
+  title       String
+  message     String
+  severity    String    // info, warning, danger, critical
+  region      String    // Target region
+  isAlert     Boolean   @default(false) // Is this a disaster alert?
+
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime?
+
+  recipients  User[]
+
+  @@index([ngoId])
+  @@index([region])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model Quiz {
+  id          String        @id @default(uuid())
+  title       String
+  description String?
+  difficulty  String        // beginner, intermediate, advanced
+  category    String        // air_quality, health, environment
+  questions   Json          // Array of question objects
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  attempts    QuizAttempt[]
+
+  @@map("quizzes")
+}
+
+model QuizAttempt {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quizId      String
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  score       Int
+  totalQuestions Int
+  answers     Json     // Array of user answers with correctness
+  difficulty  String
+
+  completedAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([quizId])
+  @@map("quiz_attempts")
 }
 
 model AirQualityForecast {
@@ -199,5 +303,3 @@ model FireDetections {
   
   @@map("fire_detections")
 }
-
-
