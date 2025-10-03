@@ -1,28 +1,26 @@
 version: "3.8"
 
 services:
-  postgres:
-    image: timescale/timescaledb-ha:pg16
-    container_name: nsac_postgres
+  database:
+    image: postgres:16-alpine
+    container_name: nsac_database
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-airquality}
+      POSTGRES_DB: ${POSTGRES_DB:-nsac}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       # Persist database data
-      - postgres_data:/var/lib/postgresql/data
+      - database_data:/var/lib/postgresql/data
       # Mount initialization scripts (auto-run on first container start)
       - ./init-scripts:/docker-entrypoint-initdb.d
-      # Optional: mount setup script for manual execution if needed
-      - ../data-processing/setup_database.sql:/scripts/setup_database.sql
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-airquality}",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-nsac}",
         ]
       interval: 10s
       timeout: 5s
@@ -44,19 +42,19 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
-      - postgres
+      - database
     networks:
       - nsac_network
     profiles:
       - tools # Only starts when using --profile tools
 
 volumes:
-  postgres_data:
-    name: nsac_postgres_data
+  database_data:
+    name: nsac_database_data
   pgadmin_data:
     name: nsac_pgadmin_data
 
 networks:
   nsac_network:
     name: nsac_network
-    driver: bridge
+    external: true

@@ -2,6 +2,7 @@ version: "3.8"
 
 services:
   # NSAC Data Processing Scheduler (All Pipelines)
+  # Independent container - connects to local or external database
   data-processor:
     build:
       context: .
@@ -22,6 +23,8 @@ services:
     # Run continuous scheduler (hourly execution)
     command: python scripts/run_hourly_collection.py --sample-rate 1
     restart: unless-stopped
+    networks:
+      - nsac_network
     # This service runs continuously and schedules all pipelines hourly
 
   # Prisma Studio for database management
@@ -37,7 +40,13 @@ services:
     volumes:
       - ./.env:/app/.env:ro
     command: python -m prisma studio --hostname 0.0.0.0 --port 5555
+    networks:
+      - nsac_network
     profiles:
       - tools
-# Local postgres service removed - using external database (Neon, AWS RDS, etc.)
-# Configure DATABASE_URL in .env file to point to your external database
+
+networks:
+  nsac_network:
+    name: nsac_network
+    external: true
+# Both containers now use the same external network for communication
