@@ -122,10 +122,10 @@ class ErrorBoundary extends Component<Props, State> {
               <p className="text-white/60 text-sm">
                 If this problem persists, please contact our support team at{' '}
                 <a
-                  href="mailto:support@airwatch.com"
+                  href="mailto:support@AiroWatch.com"
                   className="text-cyan-400 hover:text-cyan-300 underline transition-colors duration-300"
                 >
-                  support@airwatch.com
+                  support@AiroWatch.com
                 </a>
               </p>
             </div>

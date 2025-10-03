@@ -135,7 +135,7 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3">
             <span className="font-grotesk font-bold text-2xl text-white tracking-tight">
-              AirWatch
+              AiroWatch
             </span>
           </Link>
 

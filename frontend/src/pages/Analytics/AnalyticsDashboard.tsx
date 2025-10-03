@@ -93,7 +93,7 @@ const AnalyticsDashboard = () => {
   };
 
   return (
-    <Background>
+    // <Background>
       <div className="min-h-screen px-4 py-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -362,7 +362,7 @@ const AnalyticsDashboard = () => {
           )}
         </div>
       </div>
-    </Background>
+    // </Background>
   );
 };
 

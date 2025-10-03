@@ -242,7 +242,8 @@ const NGODashboard: React.FC = () => {
     : 0;
 
   return (
-    <Background>
+    // <Background>
+    <section>
       {/* Hero Header with Image */}
       <div className="relative h-64 md:h-80 overflow-hidden">
         <img
@@ -726,7 +727,8 @@ const NGODashboard: React.FC = () => {
           background: rgba(255, 255, 255, 0.3);
         }
       `}</style>
-    </Background>
+      </section>
+    // </Background>
   );
 };
 

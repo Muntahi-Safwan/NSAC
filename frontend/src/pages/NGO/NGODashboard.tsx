@@ -185,7 +185,8 @@ const ImprovedNGODashboard: React.FC = () => {
     : 0;
 
   return (
-    <Background>
+    // <Background>
+    <section>
       {/* Hero Header */}
       <div className="relative h-72 overflow-hidden">
         <img
@@ -492,7 +493,8 @@ const ImprovedNGODashboard: React.FC = () => {
         isOpen={showProfileModal}
         onClose={() => setShowProfileModal(false)}
       />
-    </Background>
+    {/* </Background> */}
+    </section>
   );
 };
 
