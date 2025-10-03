@@ -21,11 +21,11 @@ services:
     command: python air-quality/forecast/main.py --sample-rate 5
 
   # NSAC Data Processing Scheduler (All Pipelines)
-  nsac-scheduler:
+  data-processor:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: nsac_scheduler
+    container_name: data-processor
     env_file:
       - .env
     volumes:
@@ -58,6 +58,5 @@ services:
     command: python -m prisma studio --hostname 0.0.0.0 --port 5555
     profiles:
       - tools
-
 # Local postgres service removed - using external database (Neon, AWS RDS, etc.)
 # Configure DATABASE_URL in .env file to point to your external database
