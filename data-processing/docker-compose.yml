@@ -1,25 +1,6 @@
 version: "3.8"
 
 services:
-  data-pipeline:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: nsac_data_pipeline
-    env_file:
-      - .env
-    volumes:
-      # Mount config files
-      - ./.env:/app/.env:ro
-      # Mount air-quality module
-      - ./air-quality:/app/air-quality
-      # Mount heatwave module
-      - ./heatwave:/app/heatwave
-    # Run pipeline on demand (not as a service)
-    profiles:
-      - tools
-    command: python air-quality/forecast/main.py --sample-rate 5
-
   # NSAC Data Processing Scheduler (All Pipelines)
   data-processor:
     build:
