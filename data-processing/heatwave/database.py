@@ -186,9 +186,9 @@ class SimplifiedHeatwaveDatabase:
                         await self.prisma.execute_raw(
                             """
                             INSERT INTO heatwave_alerts 
-                            (latitude, longitude, alert_date, forecast_init_time, max_temperature, min_temperature, max_heat_index, alert_level, alert_message, source)
+                            (latitude, longitude, "alertDate", "forecastInitTime", "maxTemperature", "minTemperature", "maxHeatIndex", "alertLevel", "alertMessage", source)
                             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-                            ON CONFLICT (latitude, longitude, alert_date, forecast_init_time) DO NOTHING
+                            ON CONFLICT (latitude, longitude, "alertDate", "forecastInitTime") DO NOTHING
                             """,
                             alert_data['latitude'],
                             alert_data['longitude'],
