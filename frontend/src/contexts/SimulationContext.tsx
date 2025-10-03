@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, type ReactNode } from 'react';
 
 interface SimulationState {
   isActive: boolean;
@@ -14,7 +14,7 @@ interface SimulationState {
   };
   alerts: Array<{
     id: string;
-    type: 'warning' | 'danger' | 'critical';
+    type: 'warning' | 'danger' | 'critical' | 'info';
     message: string;
     timestamp: Date;
   }>;

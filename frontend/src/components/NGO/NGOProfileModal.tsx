@@ -29,10 +29,10 @@ interface NGOProfile {
 }
 
 interface NGOProfileModalProps {
-  ngo: NGOProfile;
+  ngo?: NGOProfile;
   isOpen: boolean;
   onClose: () => void;
-  onUpdate: (updatedNgo: NGOProfile) => void;
+  onUpdate?: (updatedNgo: NGOProfile) => void;
 }
 
 const NGOProfileModal: React.FC<NGOProfileModalProps> = ({
@@ -42,13 +42,13 @@ const NGOProfileModal: React.FC<NGOProfileModalProps> = ({
   onUpdate
 }) => {
   const [formData, setFormData] = useState({
-    name: ngo.name,
-    description: ngo.description || '',
-    website: ngo.website || '',
-    address: ngo.address || '',
-    contactPhone: ngo.contactPhone || '',
-    emergencyPhone: ngo.emergencyPhone || '',
-    operatingHours: ngo.operatingHours || ''
+    name: ngo?.name || '',
+    description: ngo?.description || '',
+    website: ngo?.website || '',
+    address: ngo?.address || '',
+    contactPhone: ngo?.contactPhone || '',
+    emergencyPhone: ngo?.emergencyPhone || '',
+    operatingHours: ngo?.operatingHours || ''
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -66,7 +66,7 @@ const NGOProfileModal: React.FC<NGOProfileModalProps> = ({
 
     try {
       const response = await axios.put('http://localhost:3000/api/ngo/profile', {
-        ngoId: ngo.id,
+        ngoId: ngo?.id,
         name: formData.name,
         description: formData.description,
         website: formData.website,
@@ -81,7 +81,7 @@ const NGOProfileModal: React.FC<NGOProfileModalProps> = ({
         // Update with the returned data from backend
         const updatedNgo = response.data.data;
         setTimeout(() => {
-          onUpdate(updatedNgo);
+          onUpdate?.(updatedNgo);
           onClose();
         }, 1000);
       }
