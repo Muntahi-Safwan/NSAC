@@ -86,6 +86,11 @@ const Signup = () => {
     e.preventDefault();
     setError('');
 
+    if(formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -348,7 +353,7 @@ const Signup = () => {
           </form>
 
           {/* Divider */}
-          <div className="my-6">
+          {/* <div className="my-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-white/[0.1]" />
@@ -357,17 +362,17 @@ const Signup = () => {
                 <span className="px-4 bg-slate-950/80 text-white/60">Or continue with</span>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Google Signup */}
-          <button
+          {/* <button
             type="button"
             onClick={handleGoogleSignup}
             className="w-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] hover:border-white/[0.2] text-white font-medium py-3 rounded-xl transition-all duration-300 hover:scale-105 flex items-center justify-center space-x-3"
           >
             <Chrome className="w-5 h-5" />
             <span>Continue with Google</span>
-          </button>
+          </button> */}
 
           {/* Login Link */}
           <div className="mt-6 text-center">

@@ -53,18 +53,6 @@ export const mockPollutants: EnhancedPollutantData[] = [
     healthEffect: 'Respiratory and cardiovascular problems'
   },
   {
-    name: 'PM10',
-    value: 120.6,
-    unit: 'µg/m³',
-    limit: 150,
-    level: 'unhealthy',
-    description: 'Coarse Particulate Matter - Respiratory Impact',
-    trend: 'stable',
-    change: 2.1,
-    source: 'Dust, pollen, construction activities',
-    healthEffect: 'Respiratory irritation, reduced lung function'
-  },
-  {
     name: 'NO₂',
     value: 52.3,
     unit: 'µg/m³',
@@ -112,30 +100,7 @@ export const mockPollutants: EnhancedPollutantData[] = [
     source: 'Secondary pollutant from NOx and VOCs',
     healthEffect: 'Respiratory inflammation, reduced lung function'
   },
-  {
-    name: 'NH₃',
-    value: 32.4,
-    unit: 'µg/m³',
-    limit: 100,
-    level: 'moderate',
-    description: 'Ammonia - Agricultural & Industrial Emissions',
-    trend: 'down',
-    change: -3.8,
-    source: 'Agriculture, livestock, industrial processes',
-    healthEffect: 'Eye and respiratory irritation'
-  },
-  {
-    name: 'HCHO',
-    value: 18.7,
-    unit: 'µg/m³',
-    limit: 30,
-    level: 'moderate',
-    description: 'Formaldehyde - Industrial & Vehicle Emissions',
-    trend: 'up',
-    change: 6.4,
-    source: 'Industrial emissions, vehicle exhaust, building materials',
-    healthEffect: 'Eye irritation, respiratory problems, potential carcinogen'
-  }
+  
 ];
 
 // Mock trend data for charts
