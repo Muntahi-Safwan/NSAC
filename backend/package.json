@@ -17,6 +17,7 @@
   "dependencies": {
     "@google/genai": "^1.21.0",
     "@prisma/client": "^6.16.2",
+    "axios": "^1.7.9",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
