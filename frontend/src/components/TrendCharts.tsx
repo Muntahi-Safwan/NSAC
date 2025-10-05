@@ -31,8 +31,23 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
+interface PastTrendDataPoint {
+  hour: number;
+  time: string;
+  actual: number;
+  predicted?: number;
+  timestamp?: string;
+}
+
+interface FutureTrendDataPoint {
+  hour: number;
+  time: string;
+  predicted: number;
+  timestamp?: string;
+}
+
 const PastTrendChart: React.FC<TrendChartProps> = ({ location }) => {
-  const [chartData, setChartData] = useState(mockPastTrendData);
+  const [chartData, setChartData] = useState<PastTrendDataPoint[]>(mockPastTrendData);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -153,7 +168,7 @@ const PastTrendChart: React.FC<TrendChartProps> = ({ location }) => {
 };
 
 const FutureTrendChart: React.FC<TrendChartProps> = ({ location }) => {
-  const [chartData, setChartData] = useState(mockFutureTrendData);
+  const [chartData, setChartData] = useState<FutureTrendDataPoint[]>(mockFutureTrendData);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
