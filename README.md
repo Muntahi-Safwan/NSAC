@@ -140,6 +140,9 @@ The **Central System** serves as the backbone of AiroWatch, coordinating data in
 - **High Availability**: Designed for redundancy, automated backups, and fault-tolerant operation.
 
 ## 🖥️ Edge Servers Architecture
+<div align="center">
+  <img src="architecture.png" alt="AiroWatch Architecture" width="100%" />
+</div>
 
 Our system includes three types of **Edge Servers**, each designed to operate autonomously, process data locally, and deliver AI-powered alerts through different channels.
 

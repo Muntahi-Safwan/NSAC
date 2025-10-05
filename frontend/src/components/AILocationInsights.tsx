@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { MapPin, Brain, TrendingUp, Wind } from 'lucide-react';
 
 interface AILocationInsightsProps {
@@ -27,7 +27,7 @@ const AILocationInsights: React.FC<AILocationInsightsProps> = ({
   const fetchLocationInsights = async () => {
     setLoading(true);
     try {
-      const response = await axios.post('https://nsac-mu.vercel.app/api/chatbot/location-insights', {
+      const response = await api.post('/api/chatbot/location-insights', {
         location,
         aqi,
         pm25,

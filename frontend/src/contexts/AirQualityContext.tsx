@@ -123,38 +123,15 @@ export const AirQualityProvider = ({ children, autoRefreshInterval = 5 * 60 * 10
     refreshMapData();
   }, [refreshMapData]);
 
-  // Try to get user's geolocation on mount
+  // Always use North America location since database only has North America data
   useEffect(() => {
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const userLocation: Location = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            name: 'Your Location',
-          };
-          setLocation(userLocation);
-        },
-        (err) => {
-          console.log('Geolocation not available:', err.message);
-          // Set a default location (e.g., New York City)
-          const defaultLocation: Location = {
-            latitude: 40.7128,
-            longitude: -74.006,
-            name: 'New York City',
-          };
-          setLocation(defaultLocation);
-        }
-      );
-    } else {
-      // Geolocation not supported, use default
-      const defaultLocation: Location = {
-        latitude: 40.7128,
-        longitude: -74.006,
-        name: 'New York City',
-      };
-      setLocation(defaultLocation);
-    }
+    // Default location that matches database coordinates (40, -75)
+    const defaultLocation: Location = {
+      latitude: 40,
+      longitude: -75,
+      name: 'New York',
+    };
+    setLocation(defaultLocation);
   }, [setLocation]);
 
   const value: AirQualityContextType = {

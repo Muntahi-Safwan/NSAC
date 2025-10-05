@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { mockPastTrendData, mockFutureTrendData } from '../data/mockData';
 import { BarChart3, TrendingUp } from 'lucide-react';
+import airQualityDataService from '../services/airQualityData.service';
+
+interface TrendChartProps {
+  location?: { lat: number; lng: number };
+}
 
 // Custom Tooltip Component
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -26,7 +31,38 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-const PastTrendChart: React.FC = () => {
+const PastTrendChart: React.FC<TrendChartProps> = ({ location }) => {
+  const [chartData, setChartData] = useState(mockPastTrendData);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchTrendData = async () => {
+      if (!location) {
+        setChartData(mockPastTrendData);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const data = await airQualityDataService.getTrendsData(location, 24);
+
+        if (data && data.past && data.past.length > 0) {
+          setChartData(data.past);
+        } else {
+          // Fallback to mock data if no data from API
+          setChartData(mockPastTrendData);
+        }
+      } catch (error) {
+        console.error('Error fetching past trend data:', error);
+        setChartData(mockPastTrendData);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTrendData();
+  }, [location]);
+
   return (
     <div className="bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl sm:rounded-3xl p-4 sm:p-5 md:p-6 lg:p-8 h-full flex flex-col">
       {/* Header */}
@@ -42,64 +78,70 @@ const PastTrendChart: React.FC = () => {
 
       {/* Chart Container */}
       <div className="flex-1 min-h-[250px] sm:min-h-[280px] md:min-h-[300px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={mockPastTrendData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-          >
-            <defs>
-              <linearGradient id="predictedGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-              </linearGradient>
-              <linearGradient id="actualGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#06d6a0" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#06d6a0" stopOpacity={0}/>
-              </linearGradient>
-            </defs>
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-white/60">Loading trend data...</div>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={chartData}
+              margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+            >
+              <defs>
+                <linearGradient id="predictedGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="actualGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#06d6a0" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#06d6a0" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
 
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="rgba(255,255,255,0.1)"
-              vertical={false}
-            />
-            <XAxis
-              dataKey="time"
-              stroke="rgba(255,255,255,0.6)"
-              fontSize={12}
-              interval={3}
-            />
-            <YAxis
-              stroke="rgba(255,255,255,0.6)"
-              fontSize={12}
-              domain={['dataMin - 10', 'dataMax + 10']}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend
-              wrapperStyle={{ color: 'rgba(255,255,255,0.8)' }}
-              iconType="line"
-            />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="rgba(255,255,255,0.1)"
+                vertical={false}
+              />
+              <XAxis
+                dataKey="time"
+                stroke="rgba(255,255,255,0.6)"
+                fontSize={12}
+                interval={3}
+              />
+              <YAxis
+                stroke="rgba(255,255,255,0.6)"
+                fontSize={12}
+                domain={['dataMin - 10', 'dataMax + 10']}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend
+                wrapperStyle={{ color: 'rgba(255,255,255,0.8)' }}
+                iconType="line"
+              />
 
-            <Line
-              type="monotone"
-              dataKey="predicted"
-              stroke="#3b82f6"
-              strokeWidth={3}
-              dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6, stroke: '#3b82f6', strokeWidth: 2 }}
-              name="Predicted"
-            />
-            <Line
-              type="monotone"
-              dataKey="actual"
-              stroke="#06d6a0"
-              strokeWidth={3}
-              dot={{ fill: '#06d6a0', strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6, stroke: '#06d6a0', strokeWidth: 2 }}
-              name="Actual"
-            />
-          </LineChart>
-        </ResponsiveContainer>
+              <Line
+                type="monotone"
+                dataKey="predicted"
+                stroke="#3b82f6"
+                strokeWidth={3}
+                dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
+                activeDot={{ r: 6, stroke: '#3b82f6', strokeWidth: 2 }}
+                name="Predicted"
+              />
+              <Line
+                type="monotone"
+                dataKey="actual"
+                stroke="#06d6a0"
+                strokeWidth={3}
+                dot={{ fill: '#06d6a0', strokeWidth: 2, r: 4 }}
+                activeDot={{ r: 6, stroke: '#06d6a0', strokeWidth: 2 }}
+                name="Actual"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        )}
       </div>
 
       {/* Footer */}
@@ -110,7 +152,38 @@ const PastTrendChart: React.FC = () => {
   );
 };
 
-const FutureTrendChart: React.FC = () => {
+const FutureTrendChart: React.FC<TrendChartProps> = ({ location }) => {
+  const [chartData, setChartData] = useState(mockFutureTrendData);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchTrendData = async () => {
+      if (!location) {
+        setChartData(mockFutureTrendData);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const data = await airQualityDataService.getTrendsData(location, 24);
+
+        if (data && data.future && data.future.length > 0) {
+          setChartData(data.future);
+        } else {
+          // Fallback to mock data if no data from API
+          setChartData(mockFutureTrendData);
+        }
+      } catch (error) {
+        console.error('Error fetching future trend data:', error);
+        setChartData(mockFutureTrendData);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTrendData();
+  }, [location]);
+
   return (
     <div className="bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl sm:rounded-3xl p-4 sm:p-5 md:p-6 lg:p-8 h-full flex flex-col">
       {/* Header */}
@@ -126,52 +199,58 @@ const FutureTrendChart: React.FC = () => {
 
       {/* Chart Container */}
       <div className="flex-1 min-h-[250px] sm:min-h-[280px] md:min-h-[300px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={mockFutureTrendData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-          >
-            <defs>
-              <linearGradient id="futureGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-              </linearGradient>
-            </defs>
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-white/60">Loading prediction data...</div>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={chartData}
+              margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+            >
+              <defs>
+                <linearGradient id="futureGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
 
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="rgba(255,255,255,0.1)"
-              vertical={false}
-            />
-            <XAxis
-              dataKey="time"
-              stroke="rgba(255,255,255,0.6)"
-              fontSize={12}
-              interval={3}
-            />
-            <YAxis
-              stroke="rgba(255,255,255,0.6)"
-              fontSize={12}
-              domain={['dataMin - 10', 'dataMax + 10']}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend
-              wrapperStyle={{ color: 'rgba(255,255,255,0.8)' }}
-              iconType="line"
-            />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="rgba(255,255,255,0.1)"
+                vertical={false}
+              />
+              <XAxis
+                dataKey="time"
+                stroke="rgba(255,255,255,0.6)"
+                fontSize={12}
+                interval={3}
+              />
+              <YAxis
+                stroke="rgba(255,255,255,0.6)"
+                fontSize={12}
+                domain={['dataMin - 10', 'dataMax + 10']}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend
+                wrapperStyle={{ color: 'rgba(255,255,255,0.8)' }}
+                iconType="line"
+              />
 
-            <Line
-              type="monotone"
-              dataKey="predicted"
-              stroke="#10b981"
-              strokeWidth={3}
-              strokeDasharray="5 5"
-              dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6, stroke: '#10b981', strokeWidth: 2 }}
-              name="Predicted AQI"
-            />
-          </LineChart>
-        </ResponsiveContainer>
+              <Line
+                type="monotone"
+                dataKey="predicted"
+                stroke="#10b981"
+                strokeWidth={3}
+                strokeDasharray="5 5"
+                dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
+                activeDot={{ r: 6, stroke: '#10b981', strokeWidth: 2 }}
+                name="Predicted AQI"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        )}
       </div>
 
       {/* Prediction Confidence */}

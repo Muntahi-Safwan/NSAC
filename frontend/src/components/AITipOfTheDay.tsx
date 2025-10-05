@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { Lightbulb, Sparkles, RefreshCw } from 'lucide-react';
 
 const AITipOfTheDay: React.FC = () => {
@@ -14,7 +14,7 @@ const AITipOfTheDay: React.FC = () => {
   const fetchDailyTip = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('https://nsac-mu.vercel.app/api/chatbot/daily-tip');
+      const response = await api.get('/api/chatbot/daily-tip');
       if (response.data.success) {
         setTip(response.data.data.tip);
         setDate(response.data.data.date);

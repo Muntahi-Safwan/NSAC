@@ -1,5 +1,6 @@
 import { ArrowDown, Satellite, BarChart3, Shield, ChevronRight, MapPin, Map, Zap, Globe, Users, Brain, TrendingUp, CheckCircle, Star, Award, Target, Building2, Thermometer, Flame } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import AQISpeedometer from '../../components/AQISpeedometer';
 import PollutantDetails from '../../components/PollutantDetails';
 import { PastTrendChart, FutureTrendChart } from '../../components/TrendCharts';
@@ -7,8 +8,42 @@ import AIChatbot from '../../components/AIChatbot';
 import AITipOfTheDay from '../../components/AITipOfTheDay';
 import AILocationInsights from '../../components/AILocationInsights';
 import { mockAQIData, mockPollutants, northAmericaLocation } from '../../data/mockData';
+import type { AQIData, PollutantData } from '../../data/mockData';
+import airQualityDataService from '../../services/airQualityData.service';
 
 const Home = () => {
+  const [aqiData, setAqiData] = useState<AQIData>(mockAQIData);
+  const [pollutants, setPollutants] = useState<PollutantData[]>(mockPollutants);
+  const [isLoading, setIsLoading] = useState(true);
+  const [location, setLocation] = useState(northAmericaLocation);
+
+  useEffect(() => {
+    const fetchAirQualityData = async () => {
+      setIsLoading(true);
+
+      // ALWAYS use North America location since database only has North America data
+      console.log('Fetching air quality data for North America location:', northAmericaLocation);
+
+      try {
+        const data = await airQualityDataService.getAirQualityData(northAmericaLocation);
+
+        if (data.aqi && data.pollutants) {
+          setAqiData(data.aqi);
+          setPollutants(data.pollutants);
+          setLocation(northAmericaLocation);
+        } else {
+          console.warn('No data returned from API, using mock data');
+        }
+      } catch (error) {
+        console.error('Error fetching air quality data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAirQualityData();
+  }, []);
+
   return (
     <>
 
@@ -48,14 +83,26 @@ const Home = () => {
 
               {/* AQI Speedometer */}
               <div className="w-full">
-                <AQISpeedometer data={mockAQIData} location={northAmericaLocation} />
+                {isLoading ? (
+                  <div className="relative bg-white/[0.03] backdrop-blur-3xl border border-white/[0.08] rounded-3xl p-4 flex items-center justify-center h-[400px]">
+                    <div className="text-white/60">Loading air quality data...</div>
+                  </div>
+                ) : (
+                  <AQISpeedometer data={aqiData} location={location} />
+                )}
               </div>
 
             </div>
 
             {/* Right Section - Pollutant Details */}
             <div className="flex-1 w-full">
-              <PollutantDetails pollutants={mockPollutants} />
+              {isLoading ? (
+                <div className="relative bg-white/[0.03] backdrop-blur-3xl border border-white/[0.08] rounded-3xl p-4 flex items-center justify-center h-[400px]">
+                  <div className="text-white/60">Loading pollutant data...</div>
+                </div>
+              ) : (
+                <PollutantDetails pollutants={pollutants} />
+              )}
             </div>
 
           </div>
@@ -77,13 +124,15 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
             <AITipOfTheDay />
-            <AILocationInsights
-              location={northAmericaLocation.name}
-              aqi={mockAQIData.aqi}
-              pm25={mockPollutants.find(p => p.name === 'PM2.5')?.value}
-              no2={mockPollutants.find(p => p.name === 'NO₂')?.value}
-              o3={mockPollutants.find(p => p.name === 'O₃')?.value}
-            />
+            {!isLoading && (
+              <AILocationInsights
+                location={location.name}
+                aqi={aqiData.aqi}
+                pm25={pollutants.find(p => p.name === 'PM2.5')?.value}
+                no2={pollutants.find(p => p.name === 'NO₂')?.value}
+                o3={pollutants.find(p => p.name === 'O₃')?.value}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -109,12 +158,12 @@ const Home = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 mb-12 sm:mb-16">
             <div className="group">
               <div className="h-[350px] sm:h-[400px] md:h-[450px] lg:h-[500px] rounded-2xl sm:rounded-3xl overflow-hidden border border-white/[0.1] hover:border-white/[0.2] transition-all duration-500 hover:scale-[1.01] sm:hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/10">
-                <PastTrendChart />
+                <PastTrendChart location={!isLoading ? location : undefined} />
               </div>
             </div>
             <div className="group">
               <div className="h-[350px] sm:h-[400px] md:h-[450px] lg:h-[500px] rounded-2xl sm:rounded-3xl overflow-hidden border border-white/[0.1] hover:border-white/[0.2] transition-all duration-500 hover:scale-[1.01] sm:hover:scale-[1.02] hover:shadow-2xl hover:shadow-emerald-500/10">
-                <FutureTrendChart />
+                <FutureTrendChart location={!isLoading ? location : undefined} />
               </div>
             </div>
           </div>

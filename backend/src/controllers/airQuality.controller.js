@@ -451,58 +451,64 @@ exports.getPollutantDetails = async (req, res) => {
 
     const aqiValues = AQICalculator.calculateAllAQI(pollutants);
 
-    // Create detailed breakdown
+    // Helper function to map AQI category to level
+    const getLevelFromCategory = (category) => {
+      const categoryLower = category.toLowerCase();
+      if (categoryLower === 'good') return 'good';
+      if (categoryLower === 'moderate') return 'moderate';
+      if (categoryLower.includes('unhealthy') || categoryLower.includes('sensitive')) return 'unhealthy';
+      if (categoryLower === 'hazardous') return 'hazardous';
+      return 'moderate';
+    };
+
+    // Create detailed breakdown with descriptions
     const pollutantDetails = [];
 
     if (data.pm25 != null) {
       const aqiInfo = AQICalculator.getAQIInfo(aqiValues.pm25);
       pollutantDetails.push({
         name: 'PM2.5',
-        value: data.pm25,
+        value: parseFloat(data.pm25.toFixed(1)),
         unit: 'μg/m³',
         aqi: aqiValues.pm25,
-        category: aqiInfo.category,
-        color: aqiInfo.color,
-        description: 'Particulate Matter < 2.5μm',
+        level: getLevelFromCategory(aqiInfo.category),
+        description: 'Fine Particulate Matter - Deep Lung Penetration',
       });
     }
 
     if (data.no2 != null) {
       const aqiInfo = AQICalculator.getAQIInfo(aqiValues.no2);
       pollutantDetails.push({
-        name: 'NO2',
-        value: data.no2,
+        name: 'NO₂',
+        value: parseFloat(data.no2.toFixed(1)),
         unit: 'μg/m³',
         aqi: aqiValues.no2,
-        category: aqiInfo.category,
-        color: aqiInfo.color,
-        description: 'Nitrogen Dioxide',
+        level: getLevelFromCategory(aqiInfo.category),
+        description: 'Nitrogen Dioxide - Traffic & Industrial Pollution',
       });
     }
 
     if (data.o3 != null) {
       const aqiInfo = AQICalculator.getAQIInfo(aqiValues.o3);
       pollutantDetails.push({
-        name: 'O3',
-        value: data.o3,
+        name: 'O₃',
+        value: parseFloat(data.o3.toFixed(1)),
         unit: 'μg/m³',
         aqi: aqiValues.o3,
-        category: aqiInfo.category,
-        color: aqiInfo.color,
-        description: 'Ozone',
+        level: getLevelFromCategory(aqiInfo.category),
+        description: 'Ozone - Photochemical Smog Formation',
       });
     }
 
     if (data.so2 != null) {
       const aqiInfo = AQICalculator.getAQIInfo(aqiValues.so2);
       pollutantDetails.push({
-        name: 'SO2',
-        value: data.so2,
+        name: 'SO₂',
+        value: parseFloat(data.so2.toFixed(1)),
         unit: 'μg/m³',
         aqi: aqiValues.so2,
-        category: aqiInfo.category,
-        color: aqiInfo.color,
-        description: 'Sulfur Dioxide',
+        level: getLevelFromCategory(aqiInfo.category),
+        description: 'Sulfur Dioxide - Industrial & Power Generation',
       });
     }
 
@@ -510,12 +516,21 @@ exports.getPollutantDetails = async (req, res) => {
       const aqiInfo = AQICalculator.getAQIInfo(aqiValues.co);
       pollutantDetails.push({
         name: 'CO',
-        value: data.co,
+        value: parseFloat(data.co.toFixed(1)),
         unit: 'μg/m³',
         aqi: aqiValues.co,
-        category: aqiInfo.category,
-        color: aqiInfo.color,
-        description: 'Carbon Monoxide',
+        level: getLevelFromCategory(aqiInfo.category),
+        description: 'Carbon Monoxide - Incomplete Combustion',
+      });
+    }
+
+    if (data.hcho != null) {
+      pollutantDetails.push({
+        name: 'HCHO',
+        value: parseFloat(data.hcho.toFixed(1)),
+        unit: 'μg/m³',
+        level: data.hcho < 30 ? 'good' : data.hcho < 60 ? 'moderate' : 'unhealthy',
+        description: 'Formaldehyde - Indoor & Outdoor Air Pollutant',
       });
     }
 
@@ -545,6 +560,275 @@ exports.getPollutantDetails = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error fetching pollutant details',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+    });
+  }
+};
+
+/**
+ * GET /api/air-quality/aqi
+ * Get AQI data for AQI Speedometer component
+ * Query params: lat, lon, tolerance (optional)
+ */
+exports.getAQIData = async (req, res) => {
+  try {
+    const { lat, lon, tolerance = 0.5 } = req.query;
+
+    if (!lat || !lon) {
+      return res.status(400).json({
+        success: false,
+        message: 'Latitude and longitude are required',
+      });
+    }
+
+    const latitude = parseFloat(lat);
+    const longitude = parseFloat(lon);
+    const toleranceVal = parseFloat(tolerance);
+
+    // Get most recent data
+    const dataPoints = await prisma.airQualityForecast.findMany({
+      where: {
+        latitude: {
+          gte: latitude - toleranceVal,
+          lte: latitude + toleranceVal,
+        },
+        longitude: {
+          gte: longitude - toleranceVal,
+          lte: longitude + toleranceVal,
+        },
+      },
+      orderBy: {
+        timestamp: 'desc',
+      },
+      take: 1,
+    });
+
+    if (!dataPoints || dataPoints.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No AQI data found for this location',
+      });
+    }
+
+    const data = dataPoints[0];
+
+    // Calculate AQI if not present
+    let aqi = data.aqi;
+    if (!aqi) {
+      const pollutants = {
+        pm25: data.pm25,
+        no2: data.no2,
+        o3: data.o3,
+        so2: data.so2,
+        co: data.co,
+      };
+      const aqiValues = AQICalculator.calculateAllAQI(pollutants);
+      const result = AQICalculator.getOverallAQI(aqiValues);
+      aqi = result.aqi;
+    }
+
+    const aqiInfo = AQICalculator.getAQIInfo(aqi);
+
+    // Map category to level
+    const getLevelFromCategory = (category) => {
+      const categoryLower = category.toLowerCase();
+      if (categoryLower === 'good') return 'good';
+      if (categoryLower === 'moderate') return 'moderate';
+      if (categoryLower.includes('unhealthy') && categoryLower.includes('sensitive')) return 'unhealthy';
+      if (categoryLower.includes('unhealthy') && !categoryLower.includes('very')) return 'unhealthy';
+      if (categoryLower.includes('very') && categoryLower.includes('unhealthy')) return 'very_unhealthy';
+      if (categoryLower === 'hazardous') return 'hazardous';
+      return 'moderate';
+    };
+
+    res.json({
+      success: true,
+      data: {
+        value: Math.round(aqi),
+        level: getLevelFromCategory(aqiInfo.category),
+        description: aqiInfo.description,
+        color: aqiInfo.color,
+        aqi: Math.round(aqi),
+        timestamp: data.timestamp,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching AQI data:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching AQI data',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+    });
+  }
+};
+
+/**
+ * GET /api/air-quality/trends-data
+ * Get past and future trend data for charts
+ * Query params: lat, lon, tolerance (optional), hours (optional)
+ */
+exports.getTrendsData = async (req, res) => {
+  try {
+    const { lat, lon, tolerance = 0.5, hours = 24 } = req.query;
+
+    if (!lat || !lon) {
+      return res.status(400).json({
+        success: false,
+        message: 'Latitude and longitude are required',
+      });
+    }
+
+    const latitude = parseFloat(lat);
+    const longitude = parseFloat(lon);
+    const toleranceVal = parseFloat(tolerance);
+    const hoursNum = parseInt(hours);
+
+    const now = new Date();
+    const pastTime = new Date(now.getTime() - hoursNum * 60 * 60 * 1000);
+    const futureTime = new Date(now.getTime() + hoursNum * 60 * 60 * 1000);
+
+    // Get past data from realtime table
+    const pastData = await prisma.airQualityRealtime.findMany({
+      where: {
+        latitude: {
+          gte: latitude - toleranceVal,
+          lte: latitude + toleranceVal,
+        },
+        longitude: {
+          gte: longitude - toleranceVal,
+          lte: longitude + toleranceVal,
+        },
+        timestamp: {
+          gte: pastTime,
+          lte: now,
+        },
+      },
+      orderBy: {
+        timestamp: 'asc',
+      },
+      select: {
+        timestamp: true,
+        aqi: true,
+        pm25: true,
+        no2: true,
+        o3: true,
+        so2: true,
+        co: true,
+      },
+    });
+
+    // Get forecast data
+    const forecastData = await prisma.airQualityForecast.findMany({
+      where: {
+        latitude: {
+          gte: latitude - toleranceVal,
+          lte: latitude + toleranceVal,
+        },
+        longitude: {
+          gte: longitude - toleranceVal,
+          lte: longitude + toleranceVal,
+        },
+        timestamp: {
+          gte: now,
+          lte: futureTime,
+        },
+      },
+      orderBy: {
+        timestamp: 'asc',
+      },
+      select: {
+        timestamp: true,
+        aqi: true,
+        pm25: true,
+        no2: true,
+        o3: true,
+        so2: true,
+        co: true,
+      },
+    });
+
+    // Get forecast for past period (for comparison)
+    const pastForecastData = await prisma.airQualityForecast.findMany({
+      where: {
+        latitude: {
+          gte: latitude - toleranceVal,
+          lte: latitude + toleranceVal,
+        },
+        longitude: {
+          gte: longitude - toleranceVal,
+          lte: longitude + toleranceVal,
+        },
+        timestamp: {
+          gte: pastTime,
+          lte: now,
+        },
+      },
+      orderBy: {
+        timestamp: 'asc',
+      },
+      select: {
+        timestamp: true,
+        aqi: true,
+      },
+    });
+
+    // Format past trend data (actual vs predicted)
+    const pastTrend = pastData.map((actual, index) => {
+      const predicted = pastForecastData.find(
+        (f) => Math.abs(new Date(f.timestamp).getTime() - new Date(actual.timestamp).getTime()) < 3600000
+      );
+
+      const pollutants = {
+        pm25: actual.pm25,
+        no2: actual.no2,
+        o3: actual.o3,
+        so2: actual.so2,
+        co: actual.co,
+      };
+      const aqiValues = AQICalculator.calculateAllAQI(pollutants);
+      const { aqi } = AQICalculator.getOverallAQI(aqiValues);
+
+      return {
+        hour: index,
+        time: new Date(actual.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+        actual: Math.round(actual.aqi || aqi),
+        predicted: predicted ? Math.round(predicted.aqi) : null,
+        timestamp: actual.timestamp,
+      };
+    });
+
+    // Format future trend data (predicted only)
+    const futureTrend = forecastData.map((forecast, index) => {
+      const pollutants = {
+        pm25: forecast.pm25,
+        no2: forecast.no2,
+        o3: forecast.o3,
+        so2: forecast.so2,
+        co: forecast.co,
+      };
+      const aqiValues = AQICalculator.calculateAllAQI(pollutants);
+      const { aqi } = AQICalculator.getOverallAQI(aqiValues);
+
+      return {
+        hour: index + pastTrend.length,
+        time: new Date(forecast.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+        predicted: Math.round(forecast.aqi || aqi),
+        timestamp: forecast.timestamp,
+      };
+    });
+
+    res.json({
+      success: true,
+      data: {
+        past: pastTrend,
+        future: futureTrend,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching trends data:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching trends data',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }

@@ -1,7 +1,8 @@
 // Mock data for North America location and air quality data
+// Using coordinates that match database grid (40, -75 is closest to NYC in our dataset)
 export const northAmericaLocation = {
-  lat: 40.7128,
-  lng: -74.0060,
+  lat: 40,
+  lng: -75,
   city: "New York",
   country: "United States",
   name: "New York, United States"

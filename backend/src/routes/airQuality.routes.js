@@ -85,6 +85,29 @@ router.get(
 router.get('/pollutants', coordinateValidation, airQualityController.getPollutantDetails);
 
 /**
+ * @route   GET /api/air-quality/aqi
+ * @desc    Get AQI data for a location
+ * @access  Public
+ * @params  lat, lon, tolerance (optional)
+ */
+router.get('/aqi', coordinateValidation, airQualityController.getAQIData);
+
+/**
+ * @route   GET /api/air-quality/trends-data
+ * @desc    Get past and future trend data for charts
+ * @access  Public
+ * @params  lat, lon, tolerance (optional), hours (optional)
+ */
+router.get(
+  '/trends-data',
+  [
+    ...coordinateValidation,
+    query('hours').optional().isInt({ min: 1, max: 168 }).withMessage('Hours must be between 1 and 168'),
+  ],
+  airQualityController.getTrendsData
+);
+
+/**
  * @route   GET /api/air-quality/statistics
  * @desc    Get database statistics
  * @access  Public
