@@ -53,7 +53,7 @@ AiroWatch goes beyond warnings. By simplifying science into actionable guidance,
 
 ### 🤖 AI Integration
 
-- Context-aware chatbot powered by GROQ AI
+- Context-aware chatbot powered by Gemini
 - Personalized tips & actionable insights
 - AI-generated quizzes and interactive feedback
 - Multi-format responses: text, audio, visuals
@@ -140,6 +140,7 @@ The **Central System** serves as the backbone of AiroWatch, coordinating data in
 - **High Availability**: Designed for redundancy, automated backups, and fault-tolerant operation.
 
 ## 🖥️ Edge Servers Architecture
+
 <div align="center">
   <img src="architecture.png" alt="AiroWatch Architecture" width="100%" />
 </div>
@@ -217,7 +218,7 @@ Our system includes three types of **Edge Servers**, each designed to operate au
 
 - **bcryptjs 3.0.2** – Password hashing and salting
 
-- **GROQ AI API** – External AI services for insights and chatbot
+- **Gemini API** – External AI services for insights and chatbot
 
 - **Express Validator 7.2.1** – Input validation middleware
 
@@ -285,7 +286,7 @@ Our system includes three types of **Edge Servers**, each designed to operate au
 #### API Keys (Required)
 
 - **NASA API Key** - Get from [NASA API Portal](https://api.nasa.gov/)
-- **GROQ AI API Key** - Get from [GROQ Console](https://console.groq.com/)
+- **Gemini API Key** - Get from [Google AI Studio](https://aistudio.google.com/app/api-keys)
 
 ### Installation
 
@@ -334,7 +335,7 @@ npm install
 # Create .env file with required variables:
 # DATABASE_URL=postgresql://user:password@localhost:5432/airquality
 # JWT_SECRET=your-secret-key
-# GROQ_API_KEY=your-groq-api-key
+# GEMINI_API_KEY=your-gemini-api-key
 # NASA_API_KEY=your-nasa-api-key
 
 # Generate Prisma client
@@ -613,7 +614,7 @@ This project is developed for the **NASA Space Apps Challenge 2025**.
 
 - **NASA** - For providing free access to Earth observation data and APIs
 - **Space Apps Challenge** - For the opportunity to create innovative solutions
-- **GROQ AI** - For providing AI API access for intelligent features
+- **Google** - For providing AI API access for intelligent features
 
 ### Open Source Projects
 
