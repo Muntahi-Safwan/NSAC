@@ -307,7 +307,6 @@ class MeteorologicalProcessor:
             # Ensure timestamp is a datetime object
             timestamp = hourly_points[0].timestamp
             if isinstance(timestamp, str):
-                from datetime import datetime
                 timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
             
             # Create daily assessment

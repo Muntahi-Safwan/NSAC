@@ -142,7 +142,6 @@ class HeatwaveCalculator:
         # Ensure forecastHour is a datetime object
         forecast_hour = first_record['forecastHour']
         if isinstance(forecast_hour, str):
-            from datetime import datetime
             forecast_hour = datetime.fromisoformat(forecast_hour.replace('Z', '+00:00'))
         
         analysis_date = forecast_hour.date()

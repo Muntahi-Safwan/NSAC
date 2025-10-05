@@ -449,7 +449,6 @@ class HeatwavePredictionPipeline:
                 # Ensure timestamp is a datetime object
                 timestamp = data.timestamp
                 if isinstance(timestamp, str):
-                    from datetime import datetime
                     timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
                 processed_dates.add(timestamp.date())
             
