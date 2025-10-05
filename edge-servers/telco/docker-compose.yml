@@ -1,48 +1,25 @@
-version: "3.8"
-
 services:
-  telco-edge-server:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: nsac_telco_edge_server
-    env_file:
-      - .env
-    volumes:
-      # Mount config files
-      - ./.env:/app/.env:ro
-      # Mount independent data processing modules
-      - ./data-processing:/app/data-processing
-      # Persist logs
-      - ./logs:/app/logs
-    ports:
-      - "8001:8000"
-    networks:
-      - telco_network
-    depends_on:
-      telco_postgres:
-        condition: service_healthy
-    restart: unless-stopped
-
-  # Independent PostgreSQL database for telco edge server
-  telco_postgres:
-    image: timescale/timescaledb-ha:pg16
-    container_name: nsac_telco_postgres
+  # ============================================
+  # DATABASE SERVICE
+  # ============================================
+  telco-database:
+    image: postgres:16
+    container_name: nsac_telco_database
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-nsac}
+      POSTGRES_DB: ${POSTGRES_DB:-telco-database}
     ports:
       - "${POSTGRES_PORT:-5433}:5432"
     volumes:
-      - telco_postgres_data:/var/lib/postgresql/data
+      - telco_database_data:/var/lib/postgresql/data
       - ./database/init-scripts:/docker-entrypoint-initdb.d
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-nsac}",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-telco-database}",
         ]
       interval: 10s
       timeout: 5s
@@ -50,27 +27,68 @@ services:
     networks:
       - telco_network
 
-  # Data Collection Scheduler
-  telco-scheduler:
-    build: .
-    container_name: telco-scheduler
+  # ============================================
+  # DATA PROCESSOR SERVICE
+  # ============================================
+  telco_data_processor:
+    build:
+      context: ./data-processing
+      dockerfile: Dockerfile
+    container_name: nsac_telco_data_processor
     env_file:
       - .env
     volumes:
-      # Mount config files
-      - ./.env:/app/.env:ro
-      # Mount independent data processing modules
-      - ./data-processing:/app/data-processing
-      # Persist logs
-      - ./logs:/app/logs
-    command: python data-processing/scripts/run_hourly_collection.py --sample-rate 1
+      - ./data-processing:/app:ro # Read-only mount
+      - telco_data_logs:/app/logs
+      - telco_data_downloads:/app/downloads
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@telco-database:5432/${POSTGRES_DB:-telco-database}?schema=public
     networks:
       - telco_network
     depends_on:
-      telco_postgres:
+      telco-database:
         condition: service_healthy
+    restart: unless-stopped
+    profiles:
+      - data-processing
 
-  # Prisma Studio for telco database management
+  # ============================================
+  # TELCO EDGE SERVER
+  # ============================================
+  telco_edge_server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nsac_telco_edge_server
+    env_file:
+      - .env
+    volumes:
+      - ./.env:/app/.env:ro
+      - telco_server_logs:/app/logs
+      - ./alert-engine:/app/alert-engine:ro
+    ports:
+      - "8001:8000"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@telco-database:5432/${POSTGRES_DB:-telco-database}?schema=public
+      - TELCO_SERVER_PORT=8000
+      - TELCO_SERVER_HOST=0.0.0.0
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - COVERAGE_AREA_NORTH=${COVERAGE_AREA_NORTH:-60.0}
+      - COVERAGE_AREA_SOUTH=${COVERAGE_AREA_SOUTH:-15.0}
+      - COVERAGE_AREA_EAST=${COVERAGE_AREA_EAST:--60.0}
+      - COVERAGE_AREA_WEST=${COVERAGE_AREA_WEST:--130.0}
+    networks:
+      - telco_network
+    depends_on:
+      telco-database:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ============================================
+  # DEVELOPMENT TOOLS
+  # ============================================
+
+  # Prisma Studio for database management
   telco_prisma_studio:
     build:
       context: .
@@ -82,16 +100,50 @@ services:
       - "5556:5555"
     volumes:
       - ./.env:/app/.env:ro
+      - ./schema.prisma:/app/schema.prisma:ro
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@telco-database:5432/${POSTGRES_DB:-telco-database}?schema=public
     networks:
       - telco_network
     command: python -m prisma studio --hostname 0.0.0.0 --port 5555
     profiles:
       - tools
 
-volumes:
-  telco_postgres_data:
-    name: nsac_telco_postgres_data
+  # Database migration service
+  telco_db_migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nsac_telco_db_migrate
+    env_file:
+      - .env
+    volumes:
+      - ./.env:/app/.env:ro
+      - ./schema.prisma:/app/schema.prisma:ro
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@telco-database:5432/${POSTGRES_DB:-telco-database}?schema=public
+    networks:
+      - telco_network
+    command: python -m prisma db push
+    profiles:
+      - tools
 
+# ============================================
+# VOLUMES
+# ============================================
+volumes:
+  telco_database_data:
+    name: nsac_telco_database_data
+  telco_data_logs:
+    name: nsac_telco_data_logs
+  telco_data_downloads:
+    name: nsac_telco_data_downloads
+  telco_server_logs:
+    name: nsac_telco_server_logs
+
+# ============================================
+# NETWORKS
+# ============================================
 networks:
   telco_network:
     name: nsac_telco_network

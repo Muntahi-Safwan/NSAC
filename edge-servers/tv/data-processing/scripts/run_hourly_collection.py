@@ -38,13 +38,6 @@ heatwave_main = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(heatwave_main)
 HeatwavePredictionPipeline = heatwave_main.HeatwavePredictionPipeline
 
-# Import Gemini video service
-video_path = Path(__file__).parent.parent / "gemini_video_service.py"
-spec = importlib.util.spec_from_file_location("gemini_video", video_path)
-gemini_video = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(gemini_video)
-GeminiVideoService = gemini_video.GeminiVideoService
-
 
 def setup_logging():
     """Setup logging for the hourly collection scheduler"""
@@ -74,22 +67,22 @@ def setup_logging():
     return logger
 
 
-async def run_hourly_collection(air_quality_system, fire_system, video_service):
+async def run_hourly_collection(air_quality_system, fire_system):
     """Run hourly data collection for air quality and wildfire systems"""
     logger = logging.getLogger("NSACScheduler")
-
+    
     logger.info("🕐 Starting hourly NSAC data collection")
     logger.info(f"⏰ Collection time: {datetime.now().isoformat()}")
-
+    
     results = {}
     overall_success = True
-
+    
     # 1. Air Quality Collection
     logger.info("🌬️ Starting Air Quality collection...")
     try:
         air_result = await air_quality_system.run_hourly_collection()
         results['air_quality'] = air_result
-
+        
         if air_result.get("success"):
             total_points = air_result.get("total_data_points", 0)
             forecast_points = air_result.get("forecast", {}).get("data_points", 0)
@@ -100,19 +93,19 @@ async def run_hourly_collection(air_quality_system, fire_system, video_service):
         else:
             logger.error(f"❌ Air Quality failed: {air_result.get('message', 'Unknown error')}")
             overall_success = False
-
+            
     except Exception as e:
         logger.error(f"💥 Air Quality error: {e}")
         logger.exception("Full traceback:")
         results['air_quality'] = {"success": False, "error": str(e)}
         overall_success = False
-
+    
     # 2. Wildfire Collection
     logger.info("🔥 Starting Wildfire collection...")
     try:
         wildfire_result = await fire_system.run_hourly_cycle()
         results['wildfire'] = wildfire_result
-
+        
         if wildfire_result.get("status") == "success":
             fires_detected = wildfire_result.get("fires_detected", 0)
             fires_stored = wildfire_result.get("fires_stored", 0)
@@ -122,55 +115,19 @@ async def run_hourly_collection(air_quality_system, fire_system, video_service):
         else:
             logger.error(f"❌ Wildfire failed: {wildfire_result.get('message', 'Unknown error')}")
             overall_success = False
-
+            
     except Exception as e:
         logger.error(f"💥 Wildfire error: {e}")
         logger.exception("Full traceback:")
         results['wildfire'] = {"status": "error", "error": str(e)}
         overall_success = False
-
-    # 3. TV Emergency Video Generation (Only when hazards detected)
-    logger.info("📺 Checking for hazards to generate emergency TV broadcast...")
-    try:
-        video_result = await video_service.generate_video_content()
-        results['video'] = video_result
-
-        if video_result is None:
-            logger.info("✅ No hazards detected - normal TV programming continues")
-            logger.info("   🎬 No emergency video generated")
-        else:
-            severity = video_result.get('severity', 'UNKNOWN')
-            hazards = video_result.get('hazards', [])
-            video_file = video_result.get('video_file', 'unknown')
-            script = video_result.get('script', '')
-
-            logger.info(f"🚨 HAZARDS DETECTED - Emergency video generated!")
-            logger.info(f"   🚦 Severity: {severity}")
-            logger.info(f"   ⚠️  Hazards: {', '.join(hazards)}")
-            logger.info(f"   📁 Video File: {video_file}")
-
-            # Display the video script in console
-            logger.info("\n" + "=" * 80)
-            logger.info("📺 EMERGENCY TV BROADCAST VIDEO SCRIPT:")
-            logger.info("=" * 80)
-            logger.info(script)
-            logger.info("=" * 80 + "\n")
-
-            logger.info(f"💾 Video metadata saved to: {video_service.video_output_dir / video_file}")
-            logger.info("🎬 Video ready for TV broadcast distribution")
-
-    except Exception as e:
-        logger.error(f"💥 Video generation error: {e}")
-        logger.exception("Full traceback:")
-        results['video'] = {"error": str(e)}
-        # Don't mark as failure since video is informational
-
+    
     # Summary
     if overall_success:
         logger.info("🏁 Hourly collections completed successfully")
     else:
         logger.warning("⚠️ Some hourly collections failed, but continuing...")
-
+    
     return overall_success, results
 
 
@@ -221,32 +178,26 @@ async def run_daily_heatwave():
 async def scheduler_loop(sample_rate: int = 1):
     """Main scheduler loop that runs collections hourly and heatwave daily"""
     logger = setup_logging()
-
+    
     logger.info("🚀 NSAC Data Collection Scheduler Starting")
     logger.info("⏰ Will run Air Quality and Wildfire collections every hour")
     logger.info("🌡️ Will run Heatwave processing daily at midnight")
-    logger.info("📺 Will generate emergency TV videos when hazards detected")
     logger.info(f"📊 Air Quality sample rate: 1/{sample_rate} ({100/sample_rate:.1f}% of data points)")
-
+    
     # Initialize the systems once
     air_quality_system = AirQualityMainSystem(sample_rate=sample_rate)
     await air_quality_system.initialize_components()
-
+    
     fire_system = FireSystem()
     logger.info("🔥 Fire system initialized")
-
-    # Initialize video service
-    video_service = GeminiVideoService()
-    await video_service.connect()
-    logger.info("📺 TV video generation service initialized")
-
+    
     # Track last heatwave run date
     last_heatwave_date = None
-
+    
     try:
         # Run immediately on startup
         logger.info("🚀 Running initial data collection immediately...")
-        success, results = await run_hourly_collection(air_quality_system, fire_system, video_service)
+        success, results = await run_hourly_collection(air_quality_system, fire_system)
         
         if not success:
             logger.warning("⚠️ Initial collection had some failures, but continuing...")
@@ -293,11 +244,11 @@ async def scheduler_loop(sample_rate: int = 1):
                     logger.warning("⚠️ Daily heatwave processing failed, will retry next day")
             
             # Run hourly collection
-            success, results = await run_hourly_collection(air_quality_system, fire_system, video_service)
-
+            success, results = await run_hourly_collection(air_quality_system, fire_system)
+            
             if not success:
                 logger.warning("⚠️ Some collections failed, will retry next hour")
-
+            
     except KeyboardInterrupt:
         logger.info("🛑 Scheduler stopped by user")
     except Exception as e:
@@ -306,7 +257,6 @@ async def scheduler_loop(sample_rate: int = 1):
     finally:
         # Cleanup
         await air_quality_system.cleanup()
-        await video_service.disconnect()
         logger.info("🧹 Scheduler cleanup completed")
 
 

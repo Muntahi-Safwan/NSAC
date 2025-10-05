@@ -17,9 +17,8 @@ import json
 # Add data-processing to path
 sys.path.append('/app/data-processing')
 
-# Import independent data processing modules
-from data_processing.wildfire.main import FireSystem
-from data_processing.air_quality.main import AirQualityMainSystem
+# Import alert engine
+from alert_engine.alert_engine import AlertEngine
 
 # Setup logging
 logging.basicConfig(
@@ -53,25 +52,20 @@ class AlertResponse(BaseModel):
     delivery_count: int = 0
 
 # Global services
-fire_system = None
-air_quality_system = None
+alert_engine = None
 
 @app.on_event("startup")
 async def startup_event():
     """Initialize services on startup"""
-    global fire_system, air_quality_system
+    global alert_engine
     
     logger.info("🚀 Starting Telco Edge Server")
     
     try:
-        # Initialize fire system
-        fire_system = FireSystem()
-        logger.info("✅ Fire system initialized")
-        
-        # Initialize air quality system
-        air_quality_system = AirQualityMainSystem()
-        await air_quality_system.initialize_components()
-        logger.info("✅ Air quality system initialized")
+        # Initialize alert engine
+        alert_engine = AlertEngine()
+        await alert_engine.connect()
+        logger.info("✅ Alert engine initialized")
         
     except Exception as e:
         logger.error(f"❌ Failed to initialize services: {e}")
@@ -92,8 +86,7 @@ async def get_status():
     return {
         "service": "telco-edge-server",
         "status": "running",
-        "fire_system": "initialized" if fire_system else "not_initialized",
-        "air_quality_system": "initialized" if air_quality_system else "not_initialized",
+        "alert_engine": "initialized" if alert_engine else "not_initialized",
         "timestamp": datetime.now().isoformat()
     }
 
@@ -197,6 +190,59 @@ async def test_voice(phone_number: str, message: str):
         
     except Exception as e:
         logger.error(f"❌ Voice call test failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/alerts/analyze")
+async def analyze_hazards():
+    """Run alert engine analysis and return alerts"""
+    try:
+        if not alert_engine:
+            raise HTTPException(status_code=503, detail="Alert engine not initialized")
+        
+        logger.info("🔍 Running alert engine analysis...")
+        
+        # Run alert analysis
+        vulnerable_alerts, general_alerts = await alert_engine.run_alert_analysis()
+        
+        # Convert alerts to dictionaries for JSON response
+        vulnerable_alerts_dict = []
+        for alert in vulnerable_alerts:
+            vulnerable_alerts_dict.append({
+                "user_id": alert.user_id,
+                "phone_number": alert.phone_number,
+                "user_name": alert.user_name,
+                "alert_type": alert.alert_type,
+                "hazard_type": alert.hazard_type,
+                "severity": alert.severity,
+                "message": alert.message,
+                "location": alert.location,
+                "timestamp": alert.timestamp.isoformat()
+            })
+        
+        general_alerts_dict = []
+        for alert in general_alerts:
+            general_alerts_dict.append({
+                "alert_type": alert.alert_type,
+                "hazard_type": alert.hazard_type,
+                "severity": alert.severity,
+                "message": alert.message,
+                "location": alert.location,
+                "timestamp": alert.timestamp.isoformat()
+            })
+        
+        # Also display in terminal
+        alert_engine.display_alerts(vulnerable_alerts, general_alerts)
+        
+        return {
+            "status": "success",
+            "vulnerable_alerts": vulnerable_alerts_dict,
+            "general_alerts": general_alerts_dict,
+            "total_alerts": len(vulnerable_alerts) + len(general_alerts),
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Error running alert analysis: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 def main():

@@ -112,7 +112,7 @@ model Subscriber {
   lastActiveAt      DateTime? @map("last_active_at")
   
   // Relations
-  deliveryLogs      DeliveryLog[]
+  // deliveryLogs      DeliveryLog[]  // Removed - no direct relation needed
   
   @@map("subscribers")
 }
