@@ -9,6 +9,7 @@ import logging
 from datetime import datetime, date, timedelta
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass
+from math import sqrt
 import math
 
 import sys
@@ -63,6 +64,7 @@ class HeatwaveCalculator:
     def calculate_heat_index(self, temp_c: float, humidity: float) -> float:
         """
         Calculate heat index (apparent temperature) in Celsius
+        Using the official National Weather Service Rothfusz equation
         
         Args:
             temp_c: Temperature in Celsius
@@ -71,16 +73,17 @@ class HeatwaveCalculator:
         Returns:
             Heat index in Celsius
         """
-        # Convert to Fahrenheit for calculation
+        # Convert to Fahrenheit for calculation (NWS uses Fahrenheit)
         temp_f = (temp_c * 9/5) + 32
         
-        # Heat index formula (Rothfusz equation)
+        # Heat index is only calculated for temperatures >= 80°F (26.7°C)
         if temp_f < 80:
-            return temp_c  # No heat index adjustment needed
+            return temp_c  # Return actual temperature if too cool for heat index
         
-        rh = humidity
+        # Clamp humidity to valid range
+        rh = max(0, min(100, humidity))
         
-        # Coefficients for heat index calculation
+        # Official NWS Rothfusz equation coefficients
         c1 = -42.379
         c2 = 2.04901523
         c3 = 10.14333127
@@ -91,11 +94,17 @@ class HeatwaveCalculator:
         c8 = 8.5282e-4
         c9 = -1.99e-6
         
-        # Calculate heat index in Fahrenheit
+        # Calculate heat index in Fahrenheit using Rothfusz equation
         hi_f = (c1 + (c2 * temp_f) + (c3 * rh) + (c4 * temp_f * rh) + 
                 (c5 * temp_f * temp_f) + (c6 * rh * rh) + 
                 (c7 * temp_f * temp_f * rh) + (c8 * temp_f * rh * rh) + 
                 (c9 * temp_f * temp_f * rh * rh))
+        
+        # Apply NWS adjustment factors for extreme conditions
+        if rh < 13 and temp_f >= 80 and temp_f <= 112:
+            hi_f = hi_f - ((13 - rh) / 4) * sqrt((17 - abs(temp_f - 95)) / 17)
+        elif rh > 85 and temp_f >= 80 and temp_f <= 87:
+            hi_f = hi_f + ((rh - 85) / 10) * ((87 - temp_f) / 5)
         
         # Convert back to Celsius
         return (hi_f - 32) * 5/9
@@ -111,13 +120,25 @@ class HeatwaveCalculator:
         Returns:
             Dictionary with watch, warning, emergency thresholds
         """
-        # Simple regional classification for North America
-        if latitude < 35 and longitude < -100:  # Southwest US
+        # More accurate regional classification for North America
+        
+        # Coastal regions (lower thresholds due to ocean influence)
+        if longitude < -115:  # West Coast (California, Oregon, Washington)
+            return self.regional_thresholds['default']  # Use default thresholds (32/38/43)
+        
+        # Desert Southwest (high thresholds)
+        elif latitude < 35 and longitude < -100:  # Southwest US interior
             return self.regional_thresholds['southwest']
+        
+        # Southeast US (humid, moderate thresholds)
         elif latitude < 35 and longitude > -90:  # Southeast US
             return self.regional_thresholds['southeast']
+        
+        # Northern regions (lower thresholds)
         elif latitude > 45:  # Northern regions
             return self.regional_thresholds['northwest']
+        
+        # Default for central regions
         else:
             return self.regional_thresholds['default']
     

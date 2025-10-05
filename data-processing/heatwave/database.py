@@ -34,6 +34,21 @@ class HeatwaveAlert:
     alert_message: str = ""    # Human-readable message
     
     source: str = "GEOS-CF"
+    
+    def to_dict(self) -> dict:
+        """Convert to dictionary for database insertion"""
+        return {
+            'latitude': self.latitude,
+            'longitude': self.longitude,
+            'alertDate': self.alert_date.isoformat(),  # Convert date to ISO string
+            'forecastInitTime': self.forecast_init_time.isoformat(),
+            'maxTemperature': self.max_temperature,
+            'minTemperature': self.min_temperature,
+            'maxHeatIndex': self.max_heat_index,
+            'alertLevel': self.alert_level,
+            'alertMessage': self.alert_message,
+            'source': self.source
+        }
 
 
 @dataclass
@@ -167,8 +182,8 @@ class SimplifiedHeatwaveDatabase:
                     batch_data.append({
                         'latitude': alert.latitude,
                         'longitude': alert.longitude,
-                        'alertDate': alert.alert_date,
-                        'forecastInitTime': alert.forecast_init_time,
+                        'alertDate': alert.alert_date.isoformat(),  # Convert date to ISO string
+                        'forecastInitTime': alert.forecast_init_time.isoformat(),
                         'maxTemperature': alert.max_temperature,
                         'minTemperature': alert.min_temperature,
                         'maxHeatIndex': alert.max_heat_index,
