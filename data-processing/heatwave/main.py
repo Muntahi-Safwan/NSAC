@@ -446,7 +446,12 @@ class HeatwavePredictionPipeline:
             # Get unique forecast dates from processed data (should be 5 days)
             processed_dates = set()
             for data in all_hourly_data:
-                processed_dates.add(data.timestamp.date())
+                # Ensure timestamp is a datetime object
+                timestamp = data.timestamp
+                if isinstance(timestamp, str):
+                    from datetime import datetime
+                    timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                processed_dates.add(timestamp.date())
             
             print(f"   Processed dates: {sorted(processed_dates)}")
             

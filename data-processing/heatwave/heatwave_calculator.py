@@ -138,7 +138,14 @@ class HeatwaveCalculator:
         first_record = hourly_data[0]
         latitude = first_record['latitude']
         longitude = first_record['longitude']
-        analysis_date = first_record['forecastHour'].date()
+        
+        # Ensure forecastHour is a datetime object
+        forecast_hour = first_record['forecastHour']
+        if isinstance(forecast_hour, str):
+            from datetime import datetime
+            forecast_hour = datetime.fromisoformat(forecast_hour.replace('Z', '+00:00'))
+        
+        analysis_date = forecast_hour.date()
         
         # Get regional thresholds
         thresholds = self.get_regional_thresholds(latitude, longitude)

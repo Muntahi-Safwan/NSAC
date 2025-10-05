@@ -304,9 +304,15 @@ class MeteorologicalProcessor:
                 avg_humidity=avg_humidity
             )
             
+            # Ensure timestamp is a datetime object
+            timestamp = hourly_points[0].timestamp
+            if isinstance(timestamp, str):
+                from datetime import datetime
+                timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+            
             # Create daily assessment
             daily_data = DailyHeatwaveData(
-                date=hourly_points[0].timestamp.date(),
+                date=timestamp.date(),
                 forecast_init_time=hourly_points[0].forecast_init_time,
                 latitude=lat,
                 longitude=lon,
